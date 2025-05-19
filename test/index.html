@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
+  <script src="js/loadCalendarEvents.js"></script>
+  <style>
+    .cal3w {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cal3w th, .cal3w td {
+      border: 1px solid #ccc;
+      vertical-align: top;
+      width: 14.28%;
+      padding: 6px;
+    }
+    .event_date {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .event {
+      font-size: 0.85em;
+      margin-top: 2px;
+    }
+    .event-time{
+      margin-right: 4px;
+    }
+    .pur{
+      color: brown;
+      margin-right: 2px;
+    }
+    .pic {
+      margin-left: 4px;
+      background-color: #555;
+      color: #fff;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 0.8em;
+    }
+    
+    
+    .today {
+      background-color: #fff9d1;
+    }
+    .pastday {
+      background-color: #f3f3f3;
+      color: #888;
+    }
+    .pastday .pic {
+      background-color: #999;
+    }
+  
+    </style>
+    
+  <title>Document</title>
+</head>
+<body>
+  <div id="enevt_cal"></div>
+</body>
+</html>

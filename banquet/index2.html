@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="300">
+  <!-- reset.css ress -->
+  <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/getSignageData.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+  <script src="js/particles.js"></script>
+  <title>会議・宴会予定</title>
+</head>
+<body>
+  <div id="wrapper">
+  <header>
+      <div class="headbox">
+        <div class="headbox_left">
+        <h1>Today's Schedule</h1>
+        <h2 id="schedate"></h2>
+        </div>
+        <div class="headbox_right">
+          <div class="headbox_logo">
+            <img src="images/NCH_symbol.png" alt="Nagoya Crown Hotel">
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div id="events"></div>
+    </main>
+    <footer id="footer">
+      <div class="footer_logo"><img src="images/NCH_enmusubi_logo.png" alt="CROWNえんむすび"></div>
+    </footer>
+  </div>
+  
+  <!--<div id="snow_particlesjs"></div>-->
+</body>
+</html>
