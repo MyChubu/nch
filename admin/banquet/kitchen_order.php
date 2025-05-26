@@ -144,5 +144,46 @@ if ($count == 0) {
   }
 
 }
-var_dump($results);
+
 ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>厨房発注（<?=$date ?>）</title>
+  <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
+  <!--<script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>-->
+  <!--<script src="js/admin_banquet.js"></script>-->
+</head>
+<body>
+<?php include("header.php"); ?>
+<main>
+<div class="wrapper">
+  <div id="controller">
+    <div id="controller_left">
+      <form  enctype="multipart/form-data" id="schedate_change">
+        <input type="date" name="event_date" id="event_date" value="<?= $date ?>">
+        <button type="submit">日付変更</button>
+      </form>
+
+    </div>
+    <div id="controller_right">
+
+    </div>
+    
+  </div>
+  <?php var_dump($results); ?>
+  
+  
+  
+  
+</div>
+<?php include("aside.php"); ?>
+</main>
+<?php include("footer.php"); ?>
+
+</body>
+</html>
