@@ -165,7 +165,8 @@ if ($count == 0) {
   <div id="controller">
     <div id="controller_left">
       <form  enctype="multipart/form-data" id="schedate_change">
-        <input type="date" name="event_date" id="event_date" value="<?= $date ?>">
+        <select name="start_date" id="start_date">
+        </select>
         <button type="submit">日付変更</button>
       </form>
 
