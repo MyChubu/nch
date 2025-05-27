@@ -5,12 +5,35 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
 $ex_rate = 1.21; // 税率
 $ex_pice = 160; //コロナ対策費
 
-$start_date = '2025-05-26';
+$mdate = new DateTime('+7 days');
+$mdate->modify('next monday'); // 必ず14日より後の月曜になる
+$mdate->format('Y-m-d');
+
+$today = new DateTime();
+
+// 今日を含む週の月曜日を基準に
+$baseMonday = clone $today;
+$baseMonday->modify('monday this week');
+
+$mondays = [];
+
+for ($i = -1; $i <= 4; $i++) {
+  $monday = clone $baseMonday;
+  $monday->modify("$i week");
+  $mondays[] = $monday->format('Y-m-d');
+}
+if( isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
+  $s_date = new DateTime($_REQUEST['startdate']);
+  
+} else {
+  $s_date = $mdate;
+}
+$start_date = $s_date->format('Y-m-d');
 $end_date = date('Y-m-d', strtotime($start_date . ' + 6 days'));
 
 $results = array();
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN( 1,2)  order by start ASC, branch ASC';
+$sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN( 1,2,3)  order by start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
 $stmt->execute([$start_date, $end_date]);
 $count = $stmt->rowCount();
@@ -25,6 +48,8 @@ if ($count == 0) {
     $reservation_id = $row['reservation_id'];
     $branch = $row['branch'];
     $reservation_name = $row['reservation_name'];
+    $pic = mb_convert_kana($row['pic'], "KVas");
+    $pic= explode(' ', $pic);
     $event_name = $row['event_name'];
     $start = $row['start'];
     $end = $row['end'];
@@ -59,7 +84,10 @@ if ($count == 0) {
         'unit_price' => 1100,
         'net_unit_price' => 1000,
         'qty' => $row['people'],
-        'amount_gross' => 1100 * $row['people']
+        'amount_gross' => 1100 * $row['people'],
+        'item_group_id' => '',
+        'item_id' => '',
+        'item_gene_id' => '',
       );
     }
 
@@ -73,7 +101,7 @@ if ($count == 0) {
       foreach ($rows5 as $row5) {
         $package_name = mb_convert_kana($row5['NameShort'], "KVas");
         $unit_price = intval($row5['UnitP']);
-        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate;
+        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate ;
         $qty = intval($row5['Qty']);
         $amount_gross = intval($row5['Gross']);
         $amount_net = $row5['Net'];
@@ -82,6 +110,9 @@ if ($count == 0) {
         $discount_name = '';
         $discount_rate = 0;
         $discount_amount = $row5['Discount'];
+        $item_group_id = $row5['package_category'];
+        $item_id = $row5['package_id'];
+        $item_gene_id = $row5['banquet_pack_id'];
         $meal[] =array(
           'name' => $package_name,
           'short_name' => $package_name,
@@ -89,6 +120,9 @@ if ($count == 0) {
           'net_unit_price' => $net_unit_price,
           'qty' => $qty,
           'amount_gross' => $amount_gross,
+          'item_group_id' => $item_group_id,
+          'item_id' => $item_id,
+          'item_gene_id' => $item_gene_id,
         );
       }
     }
@@ -102,8 +136,18 @@ if ($count == 0) {
         foreach ($rows6 as $row6) {
           $item_name = mb_convert_kana($row6['item_name'], "KVas");
           $short_name = mb_convert_kana($row6['name_short'], "KVas");
+          $item_group_id = $row6['item_group_id'];
+          $item_id = $row6['item_id'];
+          $item_gene_id = $row6['item_gene_id'];
           $unit_price = $row6['unit_price'];
-          $net_unit_price = $unit_price/$ex_rate;
+          if($item_gene_id == 'F17-0001'){
+            $net_unit_price = $unit_price/$ex_rate;
+          }elseif($item_gene_id == 'F03-0022'){
+            $net_unit_price = ($unit_price - $ex_pice)/$ex_rate;
+          }else{
+            $net_unit_price = $unit_price/$ex_rate; 
+          }
+          
           $qty = $row6['qty'];
           $amount_gross = $row6['amount_gross'];
           $amount_net = $row6['amount_net'];
@@ -114,6 +158,9 @@ if ($count == 0) {
             'net_unit_price' => $net_unit_price,
             'qty' => $qty,
             'amount_gross' => $amount_gross,
+            'item_group_id' => $item_group_id,
+            'item_id' => $item_id,
+            'item_gene_id' => $item_gene_id,
           );
         }
       }
@@ -126,6 +173,7 @@ if ($count == 0) {
         'branch' => $branch,
         'reservation_name' => $reservation_name,
         'event_name' => $event_name,
+        'pic' => $pic[0],
         'people' => $people,
         'start' => $start,
         'end' => $end,
@@ -145,15 +193,20 @@ if ($count == 0) {
 
 }
 
+
+// 結果表示
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>厨房発注（<?=$date ?>）</title>
+  <title>厨房発注（<?=$start_date ?>の週）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/kitchen_order.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
   <!--<script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>-->
   <!--<script src="js/admin_banquet.js"></script>-->
@@ -165,8 +218,11 @@ if ($count == 0) {
   <div id="controller">
     <div id="controller_left">
       <form  enctype="multipart/form-data" id="schedate_change">
-        <select name="start_date" id="start_date">
-        </select>
+        <select name="startdate" id="startdate">
+        <?php foreach ($mondays as $monday): ?>
+          <option value="<?= $monday ?>" <?= ($start_date == $monday) ? 'selected' : '' ?>><?= date('Y年n月j日', strtotime($monday)) ?> (<?=$week[date('w', strtotime($monday))] ?>)</option>
+        <?php endforeach; ?>
+        </select>の週
         <button type="submit">日付変更</button>
       </form>
 
@@ -176,7 +232,96 @@ if ($count == 0) {
     </div>
     
   </div>
-  <?php var_dump($results); ?>
+  <?php for($i = 0; $i < 7; $i++): ?>
+    <div class="day">
+      <h2><?= date('Y年n月j日', strtotime($start_date . " +$i days")) ?> (<?=$week[date('w', strtotime($start_date . " +$i days"))] ?>)</h2>
+      <?php
+      $count = 0;
+      foreach ($results as $result){
+        if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))){
+          $count++;
+        }
+      }
+      ?>
+      <?php if($count == 0): ?>
+        <p>予約はありません。</p>
+      <?php else: ?>
+      
+      <table class="order_table">
+        <thead>
+          <tr>
+            <th class="kind">種類</th>
+            <th class="event_name">宴席名</th>
+            <th class="pic">担当</th>
+            <th class="room">会場</th>
+            <th class="time">開始時間</th>
+            <th class="meal">料理</th>
+            <th class="item_code">item ID</th>
+            <th class="unit_price">単価</th>
+            <th class="people">人数</th>
+            <th class="">卓数</th>
+            <th class="">備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($results as $result): ?>
+            <?php if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))): ?>
+              <tr<?=$result['banquet_category_id']==1 ? ' class="redrow"':'' ?>>
+                <td class="kind">
+                  <?= $result['category_name'] ?>
+                  <!--<p><?=$result['banquet_category_id'] ?></p>-->
+                </td>
+                <td class="event_name">
+                  <p class="rsv_id"><?= $result['reservation_id']."-".$result['branch'] ?></p>
+                  <!--<p><?= $result['reservation_name'] ?></p>-->
+                  <p class="title"><?= $result['event_name'] ?></p>
+                </td>
+                <td class="pic"><?=$result['pic'] ?></td>
+                <td class="room">
+                  <p class="room_id"><?= $result['room_id'] ?></p>
+                  <p class="room_name"><?= $result['room_name'] ?></p>
+                </td>
+                <td class="time"><?= date('H:i',strtotime($result['start'])) ?></td>
+                <td class="meal">
+                  <?php foreach ($result['meal'] as $meal): ?>
+                    <?php if($meal['item_gene_id'] == 'F17-0001' || $meal['item_gene_id'] == 'F17-0004' || $meal['item_gene_id'] == 'F17-0012'): ?>
+                      <p class="red_bold">
+                    <?php else: ?>
+                    <p>
+                    <?php endif; ?><?= $meal['short_name'] ?></p>
+                  <?php endforeach; ?>
+                </td>
+                <td class="item_code">
+                  <?php foreach ($result['meal'] as $meal): ?>
+                    <p><?= $meal['item_gene_id'] ?></p>
+                  <?php endforeach; ?>
+                </td>
+                <td class="unit_price">
+                  <?php foreach ($result['meal'] as $meal): ?>
+                    <p><?= number_format($meal['net_unit_price']) ?></p>
+                  <?php endforeach; ?>
+                </td>
+                
+                <td class="people">
+                  <?php foreach ($result['meal'] as $meal): ?>
+                    <p><?= number_format($meal['qty']) ?></p>
+                  <?php endforeach; ?>
+                </td>
+                <td> </td>
+                <td> </td>
+              </tr>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+      <?php endif; ?>
+        
+        
+
+    </div>
+  <?php endfor; ?>
+
+  <?php #var_dump($results); ?>
   
   
   

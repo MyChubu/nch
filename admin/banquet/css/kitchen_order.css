@@ -1,0 +1,87 @@
+table {
+  border-collapse: collapse;
+  border: 1px solid #000;
+  font-size: 12px;
+  background-color: #eee;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 1200px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+th, td {
+
+  border-right: 1px solid #999;
+  border-bottom: 1px dotted #999;
+  padding: 3px;
+  text-align: center;
+}
+
+
+th {
+  background-color: #ddd;
+}
+
+
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+.order_table .kind{
+  width: 5%;
+}
+.order_table .event_name{
+  width: 30%;
+}
+.order_table .event_name .rsv_id{
+  font-size: 0.8em;
+  color: #999;
+}
+.order_table .event_name .title{
+  font-weight: bold;
+  font-size: 1.2em;
+ 
+}
+.order_table .pic{
+  width: 5%;
+}
+.order_table .room{
+  width: 8%;
+}
+.order_table .room .room_name{
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.order_table .room .room_id{
+  font-size: 0.8em;
+  color: #999;
+}
+.order_table .time{
+  width: 7%;
+}
+.order_table .meal{
+  width: 15%;
+}
+.order_table .item_code{
+  width: 5%;
+  font-size: 0.8em;
+  color: #999;
+}
+.order_table .item_code p{
+  line-height: 1.8em;
+}
+.order_table .unit_price{
+  width: 7%;
+}
+.order_table .people{
+  width: 5%;
+}
+.order_table tr.redrow{
+  background-color:#ffb6c1;
+}
+.order_table p.red_bold{
+  font-weight: bold;
+  color: red;
+}
