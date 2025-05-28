@@ -25,7 +25,7 @@ if($count > 0){
     // **ファイルを読み込む**
     $file = file(CSV_DATA_PATH.$filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $i=0;
-
+    $start_time = date('Y-m-d H:i:s');
     foreach($file as $line){
       if($i > 0){
         
@@ -229,6 +229,12 @@ if($count > 0){
               WHERE reservation_id = ? AND date = ? AND detail_number NOT IN ($placeholders)";
       $params = array_merge([$reservation_id, $date], $detail_numbers);
 
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($params);
+
+      $sql = "DELETE FROM banquet_charges 
+              WHERE reservation_id = ? AND date = ? AND modified < ?";
+      $params = [$reservation_id, $date, $start_time];
       $stmt = $dbh->prepare($sql);
       $stmt->execute($params);
     }
