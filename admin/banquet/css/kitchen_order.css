@@ -85,3 +85,10 @@ tr:nth-child(even) {
   font-weight: bold;
   color: red;
 }
+
+.status_2{
+  color: red;
+}
+.status_3{
+  color: blue;
+}

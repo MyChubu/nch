@@ -47,6 +47,7 @@ if ($count == 0) {
     $w = date('w', strtotime($date));
     $reservation_id = $row['reservation_id'];
     $branch = $row['branch'];
+    $status = $row['status'];
     $reservation_name = $row['reservation_name'];
     $pic = mb_convert_kana($row['pic'], "KVas");
     $pic= explode(' ', $pic);
@@ -171,6 +172,7 @@ if ($count == 0) {
         'w' => $week[$w],
         'reservation_id' => $reservation_id,
         'branch' => $branch,
+        'status' => $status,
         'reservation_name' => $reservation_name,
         'event_name' => $event_name,
         'pic' => $pic[0],
@@ -274,7 +276,14 @@ if ($count == 0) {
                 <td class="event_name">
                   <p class="rsv_id"><?= $result['reservation_id']."-".$result['branch'] ?></p>
                   <!--<p><?= $result['reservation_name'] ?></p>-->
-                  <p class="title"><?= $result['event_name'] ?></p>
+                  <p class="title">
+                    <?php if($result['status'] == 2): ?>
+                      <span class="status_2">仮）</span>
+                    <?php elseif($result['status'] == 3): ?>
+                      <span class="status_3">営）</span>
+                    <?php endif; ?>
+                    <?= $result['event_name'] ?>
+                  </p>
                 </td>
                 <td class="pic"><?=$result['pic'] ?></td>
                 <td class="room">
