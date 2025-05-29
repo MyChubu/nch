@@ -247,9 +247,25 @@ if($dcount > 0){
             $meal_count++;
           }
           $sheet->setCellValue('F' . $rowIndex, $meal_name);
+          $sheet->getStyle('F' . $rowIndex)->getAlignment()->setWrapText(true);
           $sheet->setCellValue('G' . $rowIndex, $meal_net_unit_price);
+          $sheet->getStyle('G' . $rowIndex)->getAlignment()->setWrapText(true);
           $sheet->setCellValue('H' . $rowIndex, $meal_qty);
+          $sheet->getStyle('H' . $rowIndex)->getAlignment()->setWrapText(true);
 
+          $memo ='';
+          if($result['status'] == 2){
+            $memo .= '仮予約'.'\n';
+          }elseif($result['status'] == 3){
+            $memo .= '営業押さえ'.'\n';
+          }
+          if($result['banquet_category_id'] == 1){
+            $memo .= '会議で問題ないでしょうか？'.'\n';
+          }
+          if($memo != ''){
+            $sheet->setCellValue('J' . $rowIndex, $memo);
+            $sheet->getStyle('J' . $rowIndex)->getAlignment()->setWrapText(true);
+          }
           $rowIndex++;
         }
       }

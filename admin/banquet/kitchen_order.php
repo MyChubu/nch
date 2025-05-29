@@ -31,6 +31,9 @@ if( isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
 $start_date = $s_date->format('Y-m-d');
 $end_date = date('Y-m-d', strtotime($start_date . ' + 6 days'));
 
+$week_before = date('Y-m-d', strtotime($start_date . ' - 7 days'));
+$week_after = date('Y-m-d', strtotime($start_date . ' + 7 days'));
+
 $results = array();
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN( 1,2,3)  order by start ASC, branch ASC';
@@ -227,7 +230,11 @@ if ($count == 0) {
         </select>の週
         <button type="submit">日付変更</button>
       </form>
-
+      <div id="controller_date">
+        <div id="week_before"><a href="?startdate=<?= $week_before ?>" title="前週：<?= $week_before ?>"><i class="fa-solid fa-arrow-left"></i><i class="fa-solid fa-arrow-left"></i>前週</a></div>
+        <div id="week_after"><a href="?startdate=<?= $week_after ?>" title="翌週：<?= $week_after ?>">翌週<i class="fa-solid fa-arrow-right"></i><i class="fa-solid fa-arrow-right"></i></a></div>
+        <div id="download"><a href="output/kitchen_order_export.php?startdate=<?=$start_date ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>EXCEL</a></div>
+      </div>
     </div>
     <div id="controller_right">
 
