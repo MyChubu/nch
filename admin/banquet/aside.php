@@ -24,7 +24,10 @@
     <li><i class="fa-solid fa-calendar-days"></i><a href="../banquet/salescal.php" target="_blank">日別・部屋別Cal</a></li>
 
   </ul>
-
+  <h3>発注</h3>
+  <ul>
+    <li><i class="fa-solid fa-utensils"></i><a href="../banquet/kitchen_order.php">料理発注確認</a></li>
+  </ul>
   <h3>アップロード</h3>
   <ul>
     <li><i class="fa-solid fa-file-csv"></i><a href="../banquet/csvupload.php">CSVデータアップロード</a></li>
