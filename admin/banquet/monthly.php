@@ -167,6 +167,12 @@ $stmt->closeCursor();
   }
   ?>
 </table>
+<div>
+  <div class="legend">凡例：
+    <span class="event-kari">仮予約</span>
+    <span class="pur"><i class="fa-regular fa-eye"></i>下見</span>
+  </div>
+</div>
 <?php else: ?>
   <div class="no_event">データはありません。</div>
 <?php endif; ?>

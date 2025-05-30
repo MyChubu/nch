@@ -34,7 +34,7 @@ div.event_date {
   font-weight: bold;
   margin-bottom: 5px;
 }
-div.event-kari {
+div.event-kari,span.event-kari {
   color:darkcyan;
 }
 span.pur{

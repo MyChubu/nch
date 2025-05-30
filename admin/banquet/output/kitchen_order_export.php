@@ -255,12 +255,12 @@ if($dcount > 0){
 
           $memo ='';
           if($result['status'] == 2){
-            $memo .= '仮予約'.'\n';
+            $memo .= "仮予約"."\n";
           }elseif($result['status'] == 3){
-            $memo .= '営業押さえ'.'\n';
+            $memo .= "営業押さえ"."\n";
           }
           if($result['banquet_category_id'] == 1){
-            $memo .= '会議で問題ないでしょうか？'.'\n';
+            $memo .= "会議で問題ないでしょうか？"."\n";
           }
           if($memo != ''){
             $sheet->setCellValue('J' . $rowIndex, $memo);
@@ -280,7 +280,7 @@ if($dcount > 0){
 
   // 出力
   header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  header('Content-Disposition: attachment;filename="kitchenOrder-'.$start_date.'の週_'.date("Ymd-His").'.xlsx"');
+  header('Content-Disposition: attachment;filename="kitchenOrder-'.$start_date.'の週_'.date("YmdHis").'.xlsx"');
   header('Cache-Control: max-age=0');
 
   $writer = new Xlsx($objSpreadsheet);
