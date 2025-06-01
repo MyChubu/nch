@@ -38,11 +38,12 @@ $last_charge_update = $row3['last_update'];
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="60">
+  <meta http-equiv="refresh" content="300">
   <meta name="robots" content="noindex, nofollow">
   <title>会議・宴会サマリー</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/index2.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
   <script src="js/admin_banquet.js"></script>
@@ -71,19 +72,23 @@ $last_charge_update = $row3['last_update'];
         <p>システムの性質上、表示されたデータが最新ではない場合あります。最新データはNEHOPSでご確認ください。</p>
       </div>
     </div>
-    <div>
-      <h2><?=$sche_title ?></h2>
-      <div id="banquet-schedule">
-        <div id="schedate"></div>
-        <h2><i class="fa-solid fa-champagne-glasses"></i> 宴会</h2>
-        <div id="eventsEn"></div>
-        <h2><i class="fa-solid fa-users"></i> 会議</h2>
-        <div id="eventsKa"></div>
-        <div id="eventsOther"></div>
+    <div class="top_sche_area">
+      <div class="top_shcedule">
+        <h2><?=$sche_title ?></h2>
+        <div id="banquet-schedule">
+          <div id="schedate"></div>
+          <h2><i class="fa-solid fa-champagne-glasses"></i> 宴会</h2>
+          <div id="eventsEn"></div>
+          <h2><i class="fa-solid fa-users"></i> 会議</h2>
+          <div id="eventsKa"></div>
+          <div id="eventsOther"></div>
+        </div>
+      </div>
+      <div class="top_signage">
 
       </div>
-
     </div>
+    
 
 
   </div>

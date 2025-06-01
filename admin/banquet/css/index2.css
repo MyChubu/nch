@@ -1,0 +1,18 @@
+.top_sche_area {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-self: stretch;
+}
+.top_shcedule{
+  width: 60%;
+}
+.top_signage{
+  width: 40%;
+}
+
+.event_name .agent{
+  text-align: left;
+  font-size: 0.5em;
+  color: cadetblue;
+}

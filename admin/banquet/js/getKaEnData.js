@@ -73,8 +73,7 @@ async function getKaEnData() {
           if(jsonData.events_en[i].meal.length > 0){
             for (let j = 0; j < jsonData.events_en[i].meal.length; j++) {
               htmlEn += "<div>";
-              htmlEn += "<div>" + jsonData.events_en[i].meal[j].short_name + "</div>";
-              htmlEn += "<div class='text-blue'>" + jsonData.events_en[i].meal[j].unit_price.toLocaleString() + "×" + jsonData.events_en[i].meal[j].qty + '</div>';
+              htmlEn += "<div>" + jsonData.events_en[i].meal[j].short_name + " " + jsonData.events_en[i].meal[j].unit_price.toLocaleString() + "×" + jsonData.events_en[i].meal[j].qty + '</div>';
               htmlEn += "</div>";
             }
           }else{
@@ -218,15 +217,6 @@ async function getKaEnData() {
       document.getElementById("eventsOther").innerHTML = htmlOther;
     }
 
-    if (lines >= 12) {
-      document.querySelectorAll('.week2, .week3').forEach(function(elem) {
-        elem.style.display = 'none';
-      });
-    }else if (lines >= 10) {
-      document.querySelectorAll('.week3').forEach(function(elem) {
-        elem.style.display = 'none';
-      });
-    }
   }
   catch (error) {
     console.error('An error occurred:', error);
