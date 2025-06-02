@@ -1,10 +1,13 @@
 <aside class="sidebar">
   <h2>メニュー</h2>
+  <ul>
+    <li><i class="fa-solid fa-house"></i><a href="../banquet/">宴会・会議トップ</a></li>
+  </ul>
   <h3>デジサイ</h3>
   <ul>
-    <li><i class="fa-solid fa-display"></i><a href="./">デジサイ表示</a></li>
+    <li><i class="fa-solid fa-display"></i><a href="../banquet/signage.php">デジサイ表示</a></li>
     <li>日付を指定
-      <form action="../banquet/" enctype="multipart/form-data">
+      <form action="../banquet/signage.php" enctype="multipart/form-data">
         <input type="date" name="event_date" id="" value="<?= $date ?>">
         <button type="submit">確認</button>
       </form>
