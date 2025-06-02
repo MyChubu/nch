@@ -5,6 +5,7 @@ $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $week = array('日', '月', '火', '水', '木', '金', '土');
 $today=date('Y-m-d');
 $now = date('Y-m-d H:i:s');
+
 $w = date('w');
 $wd= $week[$w];
 $time= date('H:i');
@@ -36,15 +37,28 @@ $time= date('H:i');
     <div>
       <h2>お知らせ登録</h2>
       <div>
-        <form action="info_entry.php" method="post">
+        <form action="info_entry.php" method="post" enctype="multipart/form-data">
+          <label for="level">レベル:</label>
+          <select name="level" id="level" required>
+            <option value="5">5-超重要</option>
+            <option value="4">4-重要</option>
+            <option value="2">2-優先</option>
+            <option value="1" selected>1-通常</option>
+          </select>
           <label for="title">タイトル:</label>
           <input type="text" name="title" id="title" required>
           <label for="content">内容:</label>
           <textarea name="content" id="content" rows="4" required></textarea>
           <label for="start">開始日時:</label>
-          <input type="datetime-local" name="start" id="start" value="<?= $now ?>">
+          <input type="datetime-local" name="start" id="start" value="<?= $today ?>T00:00">
           <label for="end">終了日時:</label>
           <input type="datetime-local" name="end" id="end" value="<?= $today ?>T23:59">
+          <label for="status">ステータス:</label>
+          <select name="status" id="status">
+            <option value="1" selected>表示</option>
+            <option value="0">非表示</option>
+            <option value="2">終了</option>
+          </select>
           <button type="submit">登録</button>
         </form>
       </div>
