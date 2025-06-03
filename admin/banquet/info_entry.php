@@ -121,10 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-left"><label for="level">レベル</label></div>
             <div class="form-right">
               <select name="level" id="level">
-                <option value="1"<?=$level==1 ? ' selected':'' ?>>1-通常</option>
-                <option value="2"<?=$level==2 ? ' selected':'' ?>>2-重要</option>
-                <option value="3"<?=$level==3 ? ' selected':'' ?>>3-超重要</option>
-                <option value="4"<?=$level==4 ? ' selected':'' ?>>4-非常時</option>
+                <option value="1"<?=$level==1 ? ' selected':'' ?>>★通常</option>
+                <option value="2"<?=$level==2 ? ' selected':'' ?>>★★重要</option>
+                <option value="3"<?=$level==3 ? ' selected':'' ?>>★★★超重要</option>
+                <option value="4"<?=$level==4 ? ' selected':'' ?>>★★★★非常時</option>
               </select>
             </div>
           </div>
@@ -165,7 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
 
-   
+   <!--
+    <i class="fa-regular fa-circle-info"></i> 
+    <i class="fa-regular fa-triangle-exclamation"></i>
+    <i class="fa-regular fa-bell"></i>
+    <i class="fa-regular fa-flag"></i>
+    <i class="fa-regular fa-crown"></i>
+      -->
 
     
 
