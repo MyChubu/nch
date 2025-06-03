@@ -12,6 +12,8 @@ $tax_amount = $array['tax_amount'];
 $discount_amount = $array['discount_amount'];
 $subtotal_amount = $array['subtotal_amount'];
 
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -46,12 +48,14 @@ $subtotal_amount = $array['subtotal_amount'];
       <th><i class="fa-solid fa-gear"></i></th>
     </tr>
     <?php foreach($events as $event): ?>
+      <?php $e_dt = new DateTime($event['event_date']);
+            $event_date = $e_dt->format('Y-m-d'); ?>
     <tr>
       <td><?=$event['reservation_id'] ?></td>
       <td><?=$event['resevation_name'] ?></td>
       <td><?=$event['branch'] ?></td>
       <td><?=$event['event_name'] ?></td>
-      <td><a href="./?event_date=<?=date('Y-m-d',strtotime($event['event_date'])) ?>"><?=$event['date'] ?></a></td>
+      <td><a href="signage.php?event_date=<?=$event_date ?>"><?=$event['date'] ?></a></td>
       <td><?=$event['start'] ?></td>
       <td><?=$event['end'] ?></td>
       <td><?=$event['room_name'] ?></td>
