@@ -15,10 +15,29 @@ $amount_en = $array['amount_en'];
 $amount_ka = $array['amount_ka'];
 
 $today = date('Y-m-d');
-$day_before = date('Y-m-d', strtotime($date . '-1 day'));
-$day_after = date('Y-m-d', strtotime($date . '+1 day'));
-$week_before = date('Y-m-d', strtotime($date . '-7 day'));
-$week_after = date('Y-m-d', strtotime($date . '+7 day'));
+#$day_before = date('Y-m-d', strtotime($date . '-1 day'));
+#$day_after = date('Y-m-d', strtotime($date . '+1 day'));
+#$week_before = date('Y-m-d', strtotime($date . '-7 day'));
+#$week_after = date('Y-m-d', strtotime($date . '+7 day'));
+
+$dt = new DateTime($date);
+$dt->modify('-1 day');
+$day_before = $dt->format('Y-m-d');
+// 1日後
+$dt_day_after = clone $dt;
+$dt_day_after->modify('+1 day');
+$day_after = $dt_day_after->format('Y-m-d');
+
+// 1週間前
+$dt_week_before = clone $dt;
+$dt_week_before->modify('-7 days');
+$week_before = $dt_week_before->format('Y-m-d');
+
+// 1週間後
+$dt_week_after = clone $dt;
+$dt_week_after->modify('+7 days');
+$week_after = $dt_week_after->format('Y-m-d');
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
