@@ -1,0 +1,97 @@
+.form-area{
+  width: 100%;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+.form-item{
+  display: flex;
+  text-align: center;
+  justify-content:bitween;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-item .form-left{
+  width: 30%;
+  font-weight: bold;
+  color: #333;
+  text-align:justify;
+  max-width: 100px;
+}
+
+
+
+.form-item .form-right{
+  width: 70%;
+  text-align: left;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select,
+textarea,
+input[type="date"],
+input[type="datetime-local"]{
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: #FFF;
+}
+select#level{
+  width: 200px;
+}
+
+textarea{
+  width: 100%;
+  resize: vertical;
+}
+
+.form-button-area{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+.form-button-area button{
+  padding: 10px 20px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background-color: #2465aa;
+  color: #FFF;
+  cursor: pointer;
+  font-size: 16px;
+  min-width:100px;
+}
+.form-button-area button:hover{
+  background-color: #1f8bff;
+}
+.form-button-area button.submit-button{
+  background-color: #28a745;
+}
+.form-button-area button.submit-button:hover{
+  background-color: #38df5c;
+}
+.form-button-area button.reset-button{
+  background-color: #eee;
+  color: #000;
+}
+.form-button-area button.reset-button:hover{
+  background-color: #FFF;
+}
+
+select#level option:nth-child(2){
+  background-color: orange;
+
+}
+select#level option:nth-child(3){
+  background-color: red;
+  color: #FFF;
+}
+select#level option:nth-child(4){
+  background-color: purple;
+  color: #FFF;
+}
+

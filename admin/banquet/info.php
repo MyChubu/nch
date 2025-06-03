@@ -112,7 +112,7 @@ if($p_count > 0){
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= $info['start'] ?>～<?=$info['end'] ?></td>
+              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>
@@ -142,7 +142,7 @@ if($p_count > 0){
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= $info['start'] ?>～<?=$info['end'] ?></td>
+              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>
@@ -170,7 +170,7 @@ if($p_count > 0){
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= $info['start'] ?>～<?=$info['end'] ?></td>
+              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>
