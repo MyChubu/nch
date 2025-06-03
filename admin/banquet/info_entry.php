@@ -5,6 +5,7 @@ $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $week = array('日', '月', '火', '水', '木', '金', '土');
 $today=date('Y-m-d');
 $now = date('Y-m-d H:i:s');
+
 $w = date('w');
 $wd= $week[$w];
 $time= date('H:i');

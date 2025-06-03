@@ -66,7 +66,6 @@ if($p_count > 0){
 
 ?>
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -86,6 +85,7 @@ if($p_count > 0){
 <main>
   <div class="wrapper">
     <div id="controller">
+      <a href="info_entry.php" class="button">お知らせ登録</a>
     </div>
     <div>
       <h1>お知らせ一覧</h1>
