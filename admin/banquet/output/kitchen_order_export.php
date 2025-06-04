@@ -1,163 +1,140 @@
 <?php
 
 require_once('../../../common/conf.php');
+
+//エクセル出力のライブラリを読み込む
 require_once ('../../../phpspreadsheet/vendor/autoload.php');
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 $week = ['日','月','火','水','木','金','土'];
-$ex_rate = 1.21; // 税率
-$ex_pice = 160; //コロナ対策費
+$ex_rate = 1.21; //　税・サービス料（1.1の2乗）
+$ex_pice = 160; // コロナ対策費
 
 $mdate = new DateTime('+7 days');
-$mdate->modify('next monday'); // 必ず14日より後の月曜になる
+$mdate->modify('next monday');
 
-if( isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
+if (isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
   $s_date = new DateTime($_REQUEST['startdate']);
 } else {
   $s_date = $mdate;
 }
 
 $start_date = $s_date->format('Y-m-d');
-$end_date = date('Y-m-d', strtotime($start_date . ' + 6 days'));
-
+$endDateObj = clone $s_date;
+$endDateObj->add(new DateInterval('P6D'));// 6日後を追加
+$end_date = $endDateObj->format('Y-m-d');
 
 $results = array();
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN( 1,2,3)  order by start ASC, branch ASC';
+$sql = 'SELECT * FROM banquet_schedules WHERE (date BETWEEN ? AND ?) AND status IN (1,2,3) ORDER BY start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
 $stmt->execute([$start_date, $end_date]);
 $dcount = $stmt->rowCount();
 
-if($dcount > 0){
+if ($dcount > 0) {
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
   foreach ($rows as $row) {
     $date = $row['date'];
-    $w = date('w', strtotime($date));
+    $dateObj = new DateTime($date);
+    $w = (int)$dateObj->format('w');
+
     $reservation_id = $row['reservation_id'];
     $branch = $row['branch'];
     $status = $row['status'];
     $reservation_name = $row['reservation_name'];
     $pic = mb_convert_kana($row['pic'], "KVas");
-    $pic= explode(' ', $pic);
+    $pic = explode(' ', $pic);
     $event_name = $row['event_name'];
     $start = $row['start'];
     $end = $row['end'];
     $people = $row['people'];
     $room_id = $row['room_id'];
-    $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
-    $stmt2 = $dbh->prepare($sql2);
+
+    // room 会場
+    $stmt2 = $dbh->prepare('SELECT * FROM banquet_rooms WHERE banquet_room_id = ?');
     $stmt2->execute([$room_id]);
-    $row2 = $stmt2->fetch(PDO::FETCH_ASSOC);
-    $room_name = $row2['name'];
+    $room_name = $stmt2->fetch(PDO::FETCH_ASSOC)['name'];
+
+    // purpose 目的
     $purpose_id = $row['purpose_id'];
-    $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
-    $stmt3 = $dbh->prepare($sql3);
+    $stmt3 = $dbh->prepare('SELECT * FROM banquet_purposes WHERE banquet_purpose_id = ?');
     $stmt3->execute([$purpose_id]);
     $row3 = $stmt3->fetch(PDO::FETCH_ASSOC);
     $purpose_name = $row3['banquet_purpose_name'];
     $purpose_short = $row3['banquet_purpose_short'];
     $banquet_category_id = $row3['banquet_category_id'];
     $summary_category = $row3['summary_category'];
-    $sql4 = 'select * from banquet_categories where banquet_category_id = ?';
-    $stmt4 = $dbh->prepare($sql4);
-    $stmt4->execute([$banquet_category_id]);
-    $row4 = $stmt4->fetch();
-    $category_name = $row4['banquet_category_name'];
-    $meal = array();
 
-    
-    if($purpose_id == 35 && $reservation_name != '朝食会場'){
-      $meal[] =array(
+    // category カテゴリー
+    $stmt4 = $dbh->prepare('SELECT * FROM banquet_categories WHERE banquet_category_id = ?');
+    $stmt4->execute([$banquet_category_id]);
+    $category_name = $stmt4->fetch(PDO::FETCH_ASSOC)['banquet_category_name'];
+
+    // 料理
+    $meal = [];
+    // 朝食バイキング
+    if ($purpose_id == 35 && $reservation_name != '朝食会場') {
+      $meal[] = [
         'name' => '朝食バイキング',
         'short_name' => '朝バ',
         'unit_price' => 1100,
         'net_unit_price' => 1000,
-        'qty' => $row['people'],
-        'amount_gross' => 1100 * $row['people'],
+        'qty' => $people,
+        'amount_gross' => 1100 * $people,
         'item_group_id' => '',
         'item_id' => '',
         'item_gene_id' => '',
-      );
+      ];
     }
 
-    //パッケージ料理
-    $sql5 = 'select * from `view_package_charges` where `reservation_id` = ? AND `branch`= ? ';
-    $stmt5 = $dbh->prepare($sql5);
+    // パッケージ料理
+    $stmt5 = $dbh->prepare('SELECT * FROM view_package_charges WHERE reservation_id = ? AND branch = ?');
     $stmt5->execute([$reservation_id, $branch]);
-    $mcount = $stmt5->rowCount();
-    if ($mcount > 0) {
-      $rows5 = $stmt5->fetchAll(PDO::FETCH_ASSOC);
-      foreach ($rows5 as $row5) {
-        $package_name = mb_convert_kana($row5['NameShort'], "KVas");
-        $unit_price = intval($row5['UnitP']);
-        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate ;
-        $qty = intval($row5['Qty']);
-        $amount_gross = intval($row5['Gross']);
-        $amount_net = $row5['Net'];
-        $service_fee = $row5['ServiceFee'];
-        $tax = $row5['Tax'];
-        $discount_name = '';
-        $discount_rate = 0;
-        $discount_amount = $row5['Discount'];
-        $item_group_id = $row5['package_category'];
-        $item_id = $row5['package_id'];
-        $item_gene_id = $row5['banquet_pack_id'];
-        $meal[] =array(
-          'name' => $package_name,
-          'short_name' => $package_name,
-          'unit_price' => $unit_price,
-          'net_unit_price' => $net_unit_price,
-          'qty' => $qty,
-          'amount_gross' => $amount_gross,
-          'item_group_id' => $item_group_id,
-          'item_id' => $item_id,
-          'item_gene_id' => $item_gene_id,
-        );
-      }
+    foreach ($stmt5->fetchAll(PDO::FETCH_ASSOC) as $row5) {
+      $unit_price = (int)$row5['UnitP'];
+      $meal[] = [
+        'name' => mb_convert_kana($row5['NameShort'], "KVas"),
+        'short_name' => mb_convert_kana($row5['NameShort'], "KVas"),
+        'unit_price' => $unit_price,
+        'net_unit_price' => ($unit_price - $ex_pice) / $ex_rate,
+        'qty' => (int)$row5['Qty'],
+        'amount_gross' => (int)$row5['Gross'],
+        'item_group_id' => $row5['package_category'],
+        'item_id' => $row5['package_id'],
+        'item_gene_id' => $row5['banquet_pack_id'],
+      ];
     }
 
-    //パッケージ以外
-    $sql6= 'select * from `view_charges` where `reservation_id` = ? AND `branch`= ?  AND `meal` = 1 AND (`package_id` = "" OR `package_id` IS NULL OR `package_id` = " ") AND `item_group_id` LIKE "F%"';
-      $rows6 = $dbh->prepare($sql6);
-      $rows6->execute([$reservation_id, $branch]);
-      $f_count = $rows6->rowCount();
-      if($f_count > 0){
-        foreach ($rows6 as $row6) {
-          $item_name = mb_convert_kana($row6['item_name'], "KVas");
-          $short_name = mb_convert_kana($row6['name_short'], "KVas");
-          $item_group_id = $row6['item_group_id'];
-          $item_id = $row6['item_id'];
-          $item_gene_id = $row6['item_gene_id'];
-          $unit_price = $row6['unit_price'];
-          if($item_gene_id == 'F17-0001'){
-            $net_unit_price = $unit_price/$ex_rate;
-          }elseif($item_gene_id == 'F03-0022'){
-            $net_unit_price = ($unit_price - $ex_pice)/$ex_rate;
-          }else{
-            $net_unit_price = $unit_price/$ex_rate; 
-          }
-          
-          $qty = $row6['qty'];
-          $amount_gross = $row6['amount_gross'];
-          $amount_net = $row6['amount_net'];
-          $meal[] =array(
-            'name' => $item_name,
-            'short_name' => $short_name,
-            'unit_price' => $unit_price,
-            'net_unit_price' => $net_unit_price,
-            'qty' => $qty,
-            'amount_gross' => $amount_gross,
-            'item_group_id' => $item_group_id,
-            'item_id' => $item_id,
-            'item_gene_id' => $item_gene_id,
-          );
-        }
+    // 単品料理など
+    $stmt6 = $dbh->prepare('SELECT * FROM view_charges WHERE reservation_id = ? AND branch = ? AND meal = 1 AND (package_id IS NULL OR package_id = "" OR package_id = " ") AND item_group_id LIKE "F%"');
+    $stmt6->execute([$reservation_id, $branch]);
+    foreach ($stmt6->fetchAll(PDO::FETCH_ASSOC) as $row6) {
+      $item_gene_id = $row6['item_gene_id'];
+      $unit_price = $row6['unit_price'];
+      if ($item_gene_id == 'F17-0001') {
+        $net_unit_price = $unit_price / $ex_rate;
+      } elseif ($item_gene_id == 'F03-0022') {
+        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate;
+      } else {
+        $net_unit_price = $unit_price / $ex_rate;
       }
-
-    if(sizeof($meal) > 0){
-      $results[]=array(
+      $meal[] = [
+        'name' => mb_convert_kana($row6['item_name'], "KVas"),
+        'short_name' => mb_convert_kana($row6['name_short'], "KVas"),
+        'unit_price' => $unit_price,
+        'net_unit_price' => $net_unit_price,
+        'qty' => $row6['qty'],
+        'amount_gross' => $row6['amount_gross'],
+        'item_group_id' => $row6['item_group_id'],
+        'item_id' => $row6['item_id'],
+        'item_gene_id' => $item_gene_id,
+      ];
+    }
+    // 料理がない場合はスキップ
+    if (count($meal) > 0) {
+      $results[] = [
         'date' => $date,
         'w' => $week[$w],
         'reservation_id' => $reservation_id,
@@ -178,13 +155,11 @@ if($dcount > 0){
         'summary_category' => $summary_category,
         'category_name' => $category_name,
         'meal' => $meal,
-      );
+      ];
     }
-    
   }
 
-
-  // 読み込み確認
+  //　excelテンプレートを読み込む
   $templatePath = './templates/kitchen-order-tmp.xlsx';
   if (!file_exists($templatePath)) {
     die('テンプレートファイルが見つかりません');
@@ -192,100 +167,91 @@ if($dcount > 0){
 
   $objSpreadsheet = IOFactory::load($templatePath);
 
-  // 7日分のシートを作成
-  for($i = 0; $i < 7; $i++) {
-    $date = date('Y-m-d', strtotime($start_date . ' + ' . $i . ' days'));
-    $w = date('w', strtotime($date));
-    $sheetTitle = date('Y年m月d日', strtotime($date)) . ' (' . $week[$w] . ')';
+  for ($i = 0; $i < 7; $i++) { // 7日分のシートを作成します
+    // 日付の計算
+    $sheetDate = clone $s_date;
+    $sheetDate->add(new DateInterval("P{$i}D")); 
+    $date = $sheetDate->format('Y-m-d');
+    $w = (int)$sheetDate->format('w');
+    $sheetTitle = $sheetDate->format('Y年m月d日') . ' (' . $week[$w] . ')';
 
     $baseSheet = $objSpreadsheet->getSheetByName('template');
     if (!$baseSheet) {
       die('テンプレートシートが見つかりません');
     }
 
-    $newSheet = clone $baseSheet;
-    $newSheet->setTitle($sheetTitle);
-    $objSpreadsheet->addSheet($newSheet);
+    //シートの追加・記入
+    $newSheet = clone $baseSheet; // テンプレートシートをコピー
+    $newSheet->setTitle($sheetTitle); // シート名を設定
+    $objSpreadsheet->addSheet($newSheet); //コピーしたシートを追加
+    // アクティブシートを新しいシートに設定
     $objSpreadsheet->setActiveSheetIndex($objSpreadsheet->getIndex($newSheet));
     $sheet = $objSpreadsheet->getActiveSheet();
-    $sheet->setCellValue('B1', $sheetTitle);
+    $sheet->setCellValue('B1', $sheetTitle); // シートのタイトルを設定
 
     $count = 0;
-    foreach ($results as $result){
-      if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))){
+    foreach ($results as $result) {
+      if ($result['date'] == $date) {
         $count++;
       }
     }
-    if($count == 0){
+
+    if ($count == 0) {
       $sheet->setCellValue('B3', '予約はありません。');
       continue;
-    }else{
-      $rowIndex = 3; // データの開始行
-      foreach($results as $result){
-        if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))){
-          $sheet->setCellValue('A' . $rowIndex, $result['category_name']);
-          $sheet->setCellValue('B' . $rowIndex, $result['event_name']);
-          $sheet->setCellValue('C' . $rowIndex, $result['pic']);
-          $sheet->setCellValue('D' . $rowIndex, $result['room_name']);
-          $sheet->setCellValue('E' . $rowIndex, date('H:i',strtotime($result['start'])));
-          $meals = $result['meal'];
-          $meal_name = '';
-          $meal_qty = '';
-          $meal_net_unit_price = '';
-          $meal_count=0;
-          foreach ($meals as $meal){
-            if ($meal_count > 0) {
-              $meal_name .= "\n".$meal['name'] ;
-              $meal_qty .= "\n".$meal['qty'];
-              $meal_net_unit_price .= "\n".number_format($meal['net_unit_price']);
-            }else {
-              $meal_name .= $meal['name'];
-              $meal_qty .= $meal['qty'] ;
-              $meal_net_unit_price .= number_format($meal['net_unit_price']);
-            }
-            
-            $meal_count++;
-          }
-          $sheet->setCellValue('F' . $rowIndex, $meal_name);
-          $sheet->getStyle('F' . $rowIndex)->getAlignment()->setWrapText(true);
-          $sheet->setCellValue('G' . $rowIndex, $meal_net_unit_price);
-          $sheet->getStyle('G' . $rowIndex)->getAlignment()->setWrapText(true);
-          $sheet->setCellValue('H' . $rowIndex, $meal_qty);
-          $sheet->getStyle('H' . $rowIndex)->getAlignment()->setWrapText(true);
+    }
 
-          $memo ='';
-          if($result['status'] == 2){
-            $memo .= "仮予約"."\n";
-          }elseif($result['status'] == 3){
-            $memo .= "営業押さえ"."\n";
-          }
-          if($result['banquet_category_id'] == 1){
-            $memo .= "会議で問題ないでしょうか？"."\n";
-          }
-          if($memo != ''){
-            $sheet->setCellValue('J' . $rowIndex, $memo);
-            $sheet->getStyle('J' . $rowIndex)->getAlignment()->setWrapText(true);
-          }
-          $rowIndex++;
+    $rowIndex = 3; // データの書き込み開始行（3行目から）
+    foreach ($results as $result) { // 各予約のデータをループ
+      if ($result['date'] == $date) {
+        $sheet->setCellValue("A$rowIndex", $result['category_name']);
+        $sheet->setCellValue("B$rowIndex", $result['event_name']);
+        $sheet->setCellValue("C$rowIndex", $result['pic']);
+        $sheet->setCellValue("D$rowIndex", $result['room_name']);
+        $timeObj = DateTime::createFromFormat('H:i:s', $result['start']);
+        $sheet->setCellValue("E$rowIndex", $timeObj ? $timeObj->format('H:i') : '');
+
+        $meal_name = '';
+        $meal_qty = '';
+        $meal_net_unit_price = '';
+        foreach ($result['meal'] as $index => $meal) {
+          $sep = $index > 0 ? "\n" : '';
+          $meal_name .= $sep . $meal['name'];
+          $meal_qty .= $sep . $meal['qty'];
+          $meal_net_unit_price .= $sep . number_format($meal['net_unit_price']);
         }
+
+        $sheet->setCellValue("F$rowIndex", $meal_name)->getStyle("F$rowIndex")->getAlignment()->setWrapText(true);
+        $sheet->setCellValue("G$rowIndex", $meal_net_unit_price)->getStyle("G$rowIndex")->getAlignment()->setWrapText(true);
+        $sheet->setCellValue("H$rowIndex", $meal_qty)->getStyle("H$rowIndex")->getAlignment()->setWrapText(true);
+
+        // 備考欄
+        $memo = '';
+        if ($result['status'] == 2) $memo .= "仮予約\n";
+        elseif ($result['status'] == 3) $memo .= "営業押さえ\n";
+        if ($result['banquet_category_id'] == 1) $memo .= "会議で問題ないでしょうか？\n";
+        if ($memo) {
+          $sheet->setCellValue("J$rowIndex", $memo);
+          $sheet->getStyle("J$rowIndex")->getAlignment()->setWrapText(true);
+        }
+
+        $rowIndex++;
       }
     }
   }
-  
-  // テンプレートシートを削除
+
   $templateIndex = $objSpreadsheet->getIndex($objSpreadsheet->getSheetByName('template'));
   $objSpreadsheet->removeSheetByIndex($templateIndex);
 
- 
-
-  // 出力
+  
   header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  header('Content-Disposition: attachment;filename="kitchenOrder-'.$start_date.'の週_'.date("YmdHis").'.xlsx"');
+  header('Content-Disposition: attachment;filename="kitchenOrder-' . $start_date . 'の週_' . date("YmdHis") . '.xlsx"');
   header('Cache-Control: max-age=0');
 
   $writer = new Xlsx($objSpreadsheet);
   $writer->save('php://output');
   exit;
+
 } else {
   echo '指定された期間にデータがありません。';
 }

@@ -9,7 +9,7 @@ $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $last_day = date('t', strtotime($ym));
 $year_month = date('Y年 m月', strtotime($ym));
 
-$sql = "SELECT * FROM `view_daily_subtotal` where `ym` = :ym";
+$sql = "SELECT * FROM `view_daily_subtotal` where `ym` = :ym and `purpose_id` <> 3";
 $stmt = $dbh->prepare($sql); 
 $stmt->bindValue(':ym', $ym, PDO::PARAM_STR);
 $stmt->execute();
@@ -19,6 +19,7 @@ $s_count = count($rows);
 $sales = array();
 if($s_count > 0) {
   foreach($rows as $row) {
+    $status = $row['status_name'];
     $room_id = $row['room_id'];
     $room_name = $row['room_name'];
     $date = $row['date'];
@@ -37,7 +38,7 @@ if($s_count > 0) {
       $ex_ts = 0;
     }
     $sales[] = array(
-      'status'=>'',
+      'status'=>$status,
       'banquet_category_name' => $banquet_category_name,
       'reservation_id' => $reservation_id,
       'branch' => $branch,
@@ -57,13 +58,12 @@ if($s_count > 0) {
 
 try {
   $filename = 'salescal2-'.$ym.'-'.date('YmdHis').'.csv';
-  header('Content-Type: text/csv; charset=UTF-8');
+  header('Content-Type: text/csv; charset=Shift_JIS');
   header('Content-Disposition: attachment; filename="'.$filename.'"');
   $output = fopen('php://output', 'w');
-  // BOMを出力
-  fwrite($output, "\xEF\xBB\xBF");
+ 
   // CSVのヘッダ行
-  fputcsv($output, array(
+  $header = array(
     '予約状態名称',
     '分類',
     '予約番号',
@@ -78,9 +78,15 @@ try {
     '会場コード',
     '分類コード',
     '金額'
-  ));
+  );
+  fputcsv($output, array_map(function($v){ return mb_convert_encoding($v, 'SJIS-win', 'UTF-8'); }, $header));
+
+  // データ行
   foreach($sales as $sale) {
-    fputcsv($output, $sale);
+    $encodedRow = array_map(function($v){
+      return mb_convert_encoding($v, 'SJIS-win', 'UTF-8');
+    }, $sale);
+    fputcsv($output, $encodedRow);
   }
 
 
@@ -122,7 +128,22 @@ function cleanLanternName($name) {
 
   // 和暦年度（例: 令和7年度、平成31年度）の削除
   $name = preg_replace("/(令和|平成|昭和)[0-9０-９一二三四五六七八九十百千万]+年度/u", "", $name);
+  
+  $name = preg_replace("/[0-9０-９]{2}年度/u", "", $name);
 
+  $name = str_replace("小学校", "小", $name);
+  $name = str_replace("中学校", "中", $name);
+  $name = str_replace("高等学校", "高", $name);
+  $name = str_replace("高等専門学校", "高専", $name);
+  $name = str_replace("大学校", "大", $name);
+  $name = str_replace("専門学校", "専", $name);
+  $name = str_replace("短期大学", "短", $name);
+  $name = str_replace("労働組合連合会", "労連", $name);
+  $name = str_replace("労働組合", "労組", $name);
+  $name = str_replace("協同組合", "協組", $name);
+  $name = str_replace("協同組合連合会", "協連", $name);
+  $name = str_replace("連合会", "連", $name);
+  $name = str_replace("倫理法人会", "倫理", $name);
   // 先頭の半角・全角スペースを削除
   $name = preg_replace("/^[ 　]+/u", "", $name);
 
