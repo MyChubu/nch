@@ -54,8 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($err_f == 0) {
     //日時をフォーマット
-    $start = date('Y-m-d H:i:s', strtotime($start));
-    $end = date('Y-m-d H:i:s', strtotime($end));
+    #$start = date('Y-m-d H:i:s', strtotime($start));
+    $start = str_replace('T', ' ', $start) . ':00'; // Tをスペースに置換し、秒を追加
+    #$end = date('Y-m-d H:i:s', strtotime($end));
+    $end = str_replace('T', ' ', $end) . ':00'; // Tをスペースに置換し、秒を追加
     // エラーがない場合、データベースに登録
     $stmt = $dbh->prepare("INSERT INTO banquet_infos (level, title, content, start, end, status, added, modified, modified_by) VALUES (:level, :title, :content, :start, :end, :status, now(), now(), 'admin')");
     $stmt->bindParam(':level', $level, PDO::PARAM_INT);

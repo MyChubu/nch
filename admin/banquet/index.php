@@ -25,13 +25,20 @@ $sql2 = "SELECT MAX(`modified`) as `last_update` FROM `banquet_schedules` WHERE 
 $stmt2 = $dbh->prepare($sql2);
 $stmt2->execute();
 $row2 = $stmt2->fetch(PDO::FETCH_ASSOC);
-$last_sche_update = $row2['last_update'];
+$l_s_update = $row2['last_update'];
+$l_s_u = new DateTime($l_s_update) ;
+$last_sche_update = $l_s_u->format('Y年m月d日 H:i');
+
 
 $sql3 ="SELECT MAX(`modified`) as `last_update` FROM `banquet_charges` WHERE `modified_by`='csvdata'";
 $stmt3 = $dbh->prepare($sql3);
 $stmt3->execute();
 $row3 = $stmt3->fetch(PDO::FETCH_ASSOC);
 $last_charge_update = $row3['last_update'];
+
+$l_c_update = $row3['last_update'];
+$l_c_u = new DateTime($l_c_update) ;
+$last_charge_update = $l_c_u->format('Y年m月d日 H:i');
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -63,8 +70,8 @@ $last_charge_update = $row3['last_update'];
     </div>
     <div>
       <div class="update_info">
-        <p>最終更新日時（スケジュール）: <?= $last_sche_update ? date('Y年m月d日 H:i', strtotime($last_sche_update)) : '未更新' ?></p>
-        <p>最終更新日時（料金）: <?= $last_charge_update ? date('Y年m月d日 H:i', strtotime($last_charge_update)) : '未更新' ?></p>
+        <p>最終更新日時（スケジュール）: <?= $last_sche_update ? $last_sche_update : '未更新' ?></p>
+        <p>最終更新日時（料金）: <?= $last_charge_update ? $last_charge_update : '未更新' ?></p>
       </div>
       <div class="date_info">
         <p>表示可能期間: <?= $min_date ?> 〜 <?= $max_date ?></p>

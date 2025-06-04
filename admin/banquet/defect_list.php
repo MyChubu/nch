@@ -6,10 +6,27 @@ $ym = date('Y-m');
 if(isset($_REQUEST['ym']) && $_REQUEST['ym'] != '') {
   $ym = $_REQUEST['ym'];
 }
-$first_day = $ym . '-01';
-$this_month = date('Y-m');
-$before_month = date('Y-m', strtotime($first_day . '-1 month'));
-$after_month = date('Y-m', strtotime($first_day . '+1 month'));
+
+
+#$first_day = $ym . '-01';
+#$this_month = date('Y-m');
+#$before_month = date('Y-m', strtotime($first_day . '-1 month'));
+#$after_month = date('Y-m', strtotime($first_day . '+1 month'));
+
+$first_day = new DateTime($ym . '-01');
+// 今月（不要であれば省略可）
+$this_month = (new DateTime())->format('Y-m');
+
+// 前月
+$before_month = clone $first_day;
+$before_month->modify('-1 month');
+$before_month = $before_month->format('Y-m');
+
+// 翌月
+$after_month = clone $first_day;
+$after_month->modify('+1 month');
+$after_month = $after_month->format('Y-m');
+
 $defects = getDefectList($ym);
 ?>
 <!DOCTYPE html>

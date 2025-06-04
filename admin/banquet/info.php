@@ -108,11 +108,17 @@ if($p_count > 0){
         </thead>
         <tbody>
           <?php foreach($info_live as $info): ?>
+            <?php
+            $st= new DateTime($info['start']);
+            $startdt= $st->format('Y-m-d H:i');
+            $ed= new DateTime($info['end']);
+            $enddt= $ed->format('Y-m-d H:i');
+            ?>
             <tr>
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
+              <td><?= $startdt ?>～<?= $enddt ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>
@@ -138,11 +144,17 @@ if($p_count > 0){
         </thead>
         <tbody>
           <?php foreach($info_future as $info): ?>
+            <?php
+            $st= new DateTime($info['start']);
+            $startdt= $st->format('Y-m-d H:i');
+            $ed= new DateTime($info['end']);
+            $enddt= $ed->format('Y-m-d H:i');
+            ?>
             <tr>
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
+              <td><?= $startdt ?>～<?= $enddt ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>
@@ -166,11 +178,17 @@ if($p_count > 0){
         </thead>
         <tbody>
           <?php foreach($info_past as $info): ?>
+            <?php
+            $st= new DateTime($info['start']);
+            $startdt= $st->format('Y-m-d H:i');
+            $ed= new DateTime($info['end']);
+            $enddt= $ed->format('Y-m-d H:i');
+            ?>
             <tr>
               <td><?= $info['level'] ?></td>
               <td><a href="info-edit.php?id=<?=$info['banquet_info_id'] ?>"><?= htmlspecialchars($info['title'], ENT_QUOTES, 'UTF-8') ?></a></td>
               <td><?= nl2br(htmlspecialchars($info['content'], ENT_QUOTES, 'UTF-8')) ?></td>
-              <td><?= date('Y/m/d H:i', strtotime($info['start'])) ?>～<?=date('Y/m/d H:i',strtotime($info['end'])) ?></td>
+              <td><?= $startdt ?>～<?= $enddt ?></td>
               <td><?= $info['status'] == 1 ? '有効' : '無効' ?></td>
             </tr>
           <?php endforeach; ?>

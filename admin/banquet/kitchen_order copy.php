@@ -7,6 +7,7 @@ $ex_pice = 160; //コロナ対策費
 
 $mdate = new DateTime('+7 days');
 $mdate->modify('next monday'); // 必ず14日より後の月曜になる
+$mdate->format('Y-m-d');
 
 $today = new DateTime();
 
@@ -15,130 +16,161 @@ $baseMonday = clone $today;
 $baseMonday->modify('monday this week');
 
 $mondays = [];
+
 for ($i = -1; $i <= 4; $i++) {
   $monday = clone $baseMonday;
   $monday->modify("$i week");
   $mondays[] = $monday->format('Y-m-d');
 }
-
-if (isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
+if( isset($_REQUEST['startdate']) && $_REQUEST['startdate'] != '') {
   $s_date = new DateTime($_REQUEST['startdate']);
+  
 } else {
   $s_date = $mdate;
 }
-
 $start_date = $s_date->format('Y-m-d');
+$end_date = date('Y-m-d', strtotime($start_date . ' + 6 days'));
 
-$end_date_obj = clone $s_date;
-$end_date_obj->modify('+6 days');
-$end_date = $end_date_obj->format('Y-m-d');
-
-$week_before_obj = clone $s_date;
-$week_before_obj->modify('-7 days');
-$week_before = $week_before_obj->format('Y-m-d');
-
-$week_after_obj = clone $s_date;
-$week_after_obj->modify('+7 days');
-$week_after = $week_after_obj->format('Y-m-d');
+$week_before = date('Y-m-d', strtotime($start_date . ' - 7 days'));
+$week_after = date('Y-m-d', strtotime($start_date . ' + 7 days'));
 
 $results = array();
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN(1,2,3) order by start ASC, branch ASC';
+$sql = 'select * from banquet_schedules where (date BETWEEN ? AND ?) AND status IN( 1,2,3)  order by start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
 $stmt->execute([$start_date, $end_date]);
 $count = $stmt->rowCount();
-
 if ($count == 0) {
+  
   exit;
-} else {
+}else{
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
   foreach ($rows as $row) {
     $date = $row['date'];
-    $w = (new DateTime($date))->format('w');
+    $w = date('w', strtotime($date));
     $reservation_id = $row['reservation_id'];
     $branch = $row['branch'];
     $status = $row['status'];
     $reservation_name = $row['reservation_name'];
     $pic = mb_convert_kana($row['pic'], "KVas");
-    $pic = explode(' ', $pic);
+    $pic= explode(' ', $pic);
     $event_name = $row['event_name'];
     $start = $row['start'];
     $end = $row['end'];
     $people = $row['people'];
     $room_id = $row['room_id'];
-    $stmt2 = $dbh->prepare('select * from banquet_rooms where banquet_room_id = ?');
+    $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
+    $stmt2 = $dbh->prepare($sql2);
     $stmt2->execute([$room_id]);
-    $room_name = $stmt2->fetch(PDO::FETCH_ASSOC)['name'];
+    $row2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+    $room_name = $row2['name'];
     $purpose_id = $row['purpose_id'];
-    $stmt3 = $dbh->prepare('select * from banquet_purposes where banquet_purpose_id = ?');
+    $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
+    $stmt3 = $dbh->prepare($sql3);
     $stmt3->execute([$purpose_id]);
     $row3 = $stmt3->fetch(PDO::FETCH_ASSOC);
     $purpose_name = $row3['banquet_purpose_name'];
     $purpose_short = $row3['banquet_purpose_short'];
     $banquet_category_id = $row3['banquet_category_id'];
     $summary_category = $row3['summary_category'];
-    $stmt4 = $dbh->prepare('select * from banquet_categories where banquet_category_id = ?');
+    $sql4 = 'select * from banquet_categories where banquet_category_id = ?';
+    $stmt4 = $dbh->prepare($sql4);
     $stmt4->execute([$banquet_category_id]);
-    $category_name = $stmt4->fetch(PDO::FETCH_ASSOC)['banquet_category_name'];
-
+    $row4 = $stmt4->fetch();
+    $category_name = $row4['banquet_category_name'];
     $meal = array();
-    if ($purpose_id == 35 && $reservation_name != '朝食会場') {
-      $meal[] = array(
+
+    
+    if($purpose_id == 35 && $reservation_name != '朝食会場'){
+      $meal[] =array(
         'name' => '朝食バイキング',
         'short_name' => '朝バ',
         'unit_price' => 1100,
         'net_unit_price' => 1000,
-        'qty' => $people,
-        'amount_gross' => 1100 * $people,
+        'qty' => $row['people'],
+        'amount_gross' => 1100 * $row['people'],
         'item_group_id' => '',
         'item_id' => '',
         'item_gene_id' => '',
       );
     }
 
-    $stmt5 = $dbh->prepare('select * from view_package_charges where reservation_id = ? AND branch = ?');
+    //パッケージ料理
+    $sql5 = 'select * from `view_package_charges` where `reservation_id` = ? AND `branch`= ? ';
+    $stmt5 = $dbh->prepare($sql5);
     $stmt5->execute([$reservation_id, $branch]);
-    foreach ($stmt5->fetchAll(PDO::FETCH_ASSOC) as $row5) {
-      $unit_price = intval($row5['UnitP']);
-      $meal[] = array(
-        'name' => mb_convert_kana($row5['NameShort'], "KVas"),
-        'short_name' => mb_convert_kana($row5['NameShort'], "KVas"),
-        'unit_price' => $unit_price,
-        'net_unit_price' => ($unit_price - $ex_pice) / $ex_rate,
-        'qty' => intval($row5['Qty']),
-        'amount_gross' => intval($row5['Gross']),
-        'item_group_id' => $row5['package_category'],
-        'item_id' => $row5['package_id'],
-        'item_gene_id' => $row5['banquet_pack_id'],
-      );
-    }
-
-    $stmt6 = $dbh->prepare('select * from view_charges where reservation_id = ? AND branch = ? AND meal = 1 AND (package_id = "" OR package_id IS NULL OR package_id = " ") AND item_group_id LIKE "F%"');
-    $stmt6->execute([$reservation_id, $branch]);
-    foreach ($stmt6->fetchAll(PDO::FETCH_ASSOC) as $row6) {
-      $unit_price = $row6['unit_price'];
-      if ($row6['item_gene_id'] == 'F17-0001') {
-        $net_unit_price = $unit_price / $ex_rate;
-      } elseif ($row6['item_gene_id'] == 'F03-0022') {
-        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate;
-      } else {
-        $net_unit_price = $unit_price / $ex_rate;
+    $mcount = $stmt5->rowCount();
+    if ($mcount > 0) {
+      $rows5 = $stmt5->fetchAll(PDO::FETCH_ASSOC);
+      foreach ($rows5 as $row5) {
+        $package_name = mb_convert_kana($row5['NameShort'], "KVas");
+        $unit_price = intval($row5['UnitP']);
+        $net_unit_price = ($unit_price - $ex_pice) / $ex_rate ;
+        $qty = intval($row5['Qty']);
+        $amount_gross = intval($row5['Gross']);
+        $amount_net = $row5['Net'];
+        $service_fee = $row5['ServiceFee'];
+        $tax = $row5['Tax'];
+        $discount_name = '';
+        $discount_rate = 0;
+        $discount_amount = $row5['Discount'];
+        $item_group_id = $row5['package_category'];
+        $item_id = $row5['package_id'];
+        $item_gene_id = $row5['banquet_pack_id'];
+        $meal[] =array(
+          'name' => $package_name,
+          'short_name' => $package_name,
+          'unit_price' => $unit_price,
+          'net_unit_price' => $net_unit_price,
+          'qty' => $qty,
+          'amount_gross' => $amount_gross,
+          'item_group_id' => $item_group_id,
+          'item_id' => $item_id,
+          'item_gene_id' => $item_gene_id,
+        );
       }
-      $meal[] = array(
-        'name' => mb_convert_kana($row6['item_name'], "KVas"),
-        'short_name' => mb_convert_kana($row6['name_short'], "KVas"),
-        'unit_price' => $unit_price,
-        'net_unit_price' => $net_unit_price,
-        'qty' => $row6['qty'],
-        'amount_gross' => $row6['amount_gross'],
-        'item_group_id' => $row6['item_group_id'],
-        'item_id' => $row6['item_id'],
-        'item_gene_id' => $row6['item_gene_id'],
-      );
     }
 
-    if (count($meal) > 0) {
-      $results[] = array(
+    //パッケージ以外
+    $sql6= 'select * from `view_charges` where `reservation_id` = ? AND `branch`= ?  AND `meal` = 1 AND (`package_id` = "" OR `package_id` IS NULL OR `package_id` = " ") AND `item_group_id` LIKE "F%"';
+      $rows6 = $dbh->prepare($sql6);
+      $rows6->execute([$reservation_id, $branch]);
+      $f_count = $rows6->rowCount();
+      if($f_count > 0){
+        foreach ($rows6 as $row6) {
+          $item_name = mb_convert_kana($row6['item_name'], "KVas");
+          $short_name = mb_convert_kana($row6['name_short'], "KVas");
+          $item_group_id = $row6['item_group_id'];
+          $item_id = $row6['item_id'];
+          $item_gene_id = $row6['item_gene_id'];
+          $unit_price = $row6['unit_price'];
+          if($item_gene_id == 'F17-0001'){
+            $net_unit_price = $unit_price/$ex_rate;
+          }elseif($item_gene_id == 'F03-0022'){
+            $net_unit_price = ($unit_price - $ex_pice)/$ex_rate;
+          }else{
+            $net_unit_price = $unit_price/$ex_rate; 
+          }
+          
+          $qty = $row6['qty'];
+          $amount_gross = $row6['amount_gross'];
+          $amount_net = $row6['amount_net'];
+          $meal[] =array(
+            'name' => $item_name,
+            'short_name' => $short_name,
+            'unit_price' => $unit_price,
+            'net_unit_price' => $net_unit_price,
+            'qty' => $qty,
+            'amount_gross' => $amount_gross,
+            'item_group_id' => $item_group_id,
+            'item_id' => $item_id,
+            'item_gene_id' => $item_gene_id,
+          );
+        }
+      }
+
+    if(sizeof($meal) > 0){
+      $results[]=array(
         'date' => $date,
         'w' => $week[$w],
         'reservation_id' => $reservation_id,
@@ -161,8 +193,15 @@ if ($count == 0) {
         'meal' => $meal,
       );
     }
+    
   }
+
 }
+
+
+// 結果表示
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -185,14 +224,9 @@ if ($count == 0) {
     <div id="controller_left">
       <form  enctype="multipart/form-data" id="schedate_change">
         <select name="startdate" id="startdate">
-          <?php foreach ($mondays as $monday): ?>
-            <?php
-              $monday_obj = new DateTime($monday);
-            ?>
-            <option value="<?= $monday ?>" <?= ($start_date == $monday) ? 'selected' : '' ?>>
-              <?= $monday_obj->format('Y年n月j日') ?> (<?= $week[$monday_obj->format('w')] ?>)
-            </option>
-          <?php endforeach; ?>
+        <?php foreach ($mondays as $monday): ?>
+          <option value="<?= $monday ?>" <?= ($start_date == $monday) ? 'selected' : '' ?>><?= date('Y年n月j日', strtotime($monday)) ?> (<?=$week[date('w', strtotime($monday))] ?>)</option>
+        <?php endforeach; ?>
         </select>の週
         <button type="submit">日付変更</button>
       </form>
@@ -208,18 +242,12 @@ if ($count == 0) {
     
   </div>
   <?php for($i = 0; $i < 7; $i++): ?>
-    <?php
-      $current_day_obj = clone $s_date;
-      $current_day_obj->add(new DateInterval("P{$i}D"));
-      $current_day = $current_day_obj->format('Y-m-d');
-      $w = $current_day_obj->format('w');
-    ?>
     <div class="day">
-      <h2><?= $current_day_obj->format('Y年n月j日') ?> (<?= $week[$w] ?>)</h2>
+      <h2><?= date('Y年n月j日', strtotime($start_date . " +$i days")) ?> (<?=$week[date('w', strtotime($start_date . " +$i days"))] ?>)</h2>
       <?php
       $count = 0;
       foreach ($results as $result){
-        if ($result['date'] == $current_day){
+        if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))){
           $count++;
         }
       }
@@ -246,7 +274,7 @@ if ($count == 0) {
         </thead>
         <tbody>
           <?php foreach ($results as $result): ?>
-            <?php if ($result['date'] == $current_day): ?>
+            <?php if ($result['date'] == date('Y-m-d', strtotime($start_date . " +$i days"))): ?>
               <tr<?=$result['banquet_category_id']==1 ? ' class="redrow"':'' ?>>
                 <td class="kind">
                   <?= $result['category_name'] ?>
@@ -269,7 +297,7 @@ if ($count == 0) {
                   <p class="room_id"><?= $result['room_id'] ?></p>
                   <p class="room_name"><?= $result['room_name'] ?></p>
                 </td>
-                <td class="time"><?= (new DateTime($result['start']))->format('H:i') ?></td>
+                <td class="time"><?= date('H:i',strtotime($result['start'])) ?></td>
                 <td class="meal">
                   <?php foreach ($result['meal'] as $meal): ?>
                     <?php if($meal['item_gene_id'] == 'F17-0001' || $meal['item_gene_id'] == 'F17-0004' || $meal['item_gene_id'] == 'F17-0012'): ?>
