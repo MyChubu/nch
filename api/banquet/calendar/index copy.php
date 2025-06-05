@@ -1,9 +1,4 @@
 <?php
-// ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once('../../../common/conf.php');
 
 // CORSヘッダーを設定
@@ -19,8 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 $events = array();
 
-// 入力日付の取得（安全に）
-if (isset($_REQUEST['date'])) {
+if($_REQUEST['date']){
   $vdate = $_REQUEST['date'];
 } else {
   $vdate = date('Y-m-d');
@@ -28,21 +22,22 @@ if (isset($_REQUEST['date'])) {
 $weeks = $_REQUEST['weeks'] ?? 3; // デフォルトは3週分
 $add_days = $weeks * 7 -1;
 
-$start_date = new DateTime($vdate);
-$w = (int)$start_date->format('w');
-
-if ($w >= 2 && $w <= 6) {
-    $start_date->modify('-' . ($w - 1) . ' days');
-} elseif ($w === 0) {
-    $start_date->modify('-6 days');
+$start_date =$vdate;
+$w = date('w', strtotime($vdate));
+if($w == 2) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -1 day'));
+} elseif($w == 3) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -2 day'));
+} elseif($w == 4) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -3 day'));
+} elseif($w == 5) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -4 day'));
+} elseif($w == 6) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -5 day'));
+} elseif($w == 0) {
+  $start_date = date('Y-m-d', strtotime($start_date . ' -6 day'));
 }
-
-$end_date = clone $start_date;
-$end_date->modify('+' . $add_days . ' days');
-
-$start_date_str = $start_date->format('Y-m-d');
-$end_date_str = $end_date->format('Y-m-d');
-
+$end_date = date('Y-m-d', strtotime($start_date . ' +'.$add_days.' day'));
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = "SELECT
@@ -62,8 +57,8 @@ $sql = "SELECT
         ORDER BY `date`, `start`, `end`, `reservation_id`";
 
 $stmt = $dbh->prepare($sql);
-$stmt->bindValue(':start_date', $start_date->format('Y-m-d'), PDO::PARAM_STR);
-$stmt->bindValue(':end_date', $end_date->format('Y-m-d'), PDO::PARAM_STR);
+$stmt->bindValue(':start_date', $start_date, PDO::PARAM_STR);
+$stmt->bindValue(':end_date', $end_date, PDO::PARAM_STR); 
 $stmt->execute();
 $values = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();

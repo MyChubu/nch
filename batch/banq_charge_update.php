@@ -246,7 +246,8 @@ if($count > 0){
   }
 }
 // CSVファイルの削除
-$keydate = date("Y-m-d H:i:s", strtotime("-1 day"));  // 1日前の日付を取得
+$keydate = (new DateTime())->modify('-1 day')->format('Y-m-d H:i:s'); // 1日前の日付を取得
+#$keydate = date("Y-m-d H:i:s", strtotime("-1 day"));  // 1日前の日付を取得
 $sql = 'select * from csvs where status = ? and csv_kind = ? and modified < ?';
 $stmt = $dbh->prepare($sql);  // SQL文を実行する準備
 $stmt->execute([0,3,$keydate]);  // SQL文を実行

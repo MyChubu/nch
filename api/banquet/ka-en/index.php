@@ -1,4 +1,9 @@
 <?php
+// ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
+
 require_once('../../../common/conf.php');
 
 // CORSヘッダーを設定
@@ -17,13 +22,14 @@ $hour = date('H');
 
 $date = date('Y-m-d');
 $datetime = date('Y-m-d H:i:s');
-if($hour >= 18){
-  $date = date('Y-m-d', strtotime('+1 day'));
+if ($hour >= 18) {
+  $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
 }
 #$date = '2025-03-15';
-$hizuke =date('Y年m月d日 ', strtotime($date));
+$dateObj = new DateTime($date);
+$hizuke = $dateObj->format('Y年m月d日');
 $week = array('日', '月', '火', '水', '木', '金', '土');
-$hizuke .= '（' . $week[date('w', strtotime($date))] . '）';
+$hizuke .= '（' . $week[(int)$dateObj->format('w')] . '）';
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = 'select * from banquet_schedules where date = ?  order by start ASC, branch ASC';
@@ -42,9 +48,9 @@ if($count >0){
     if($row['status'] != 4 && $row['status'] != 5){
       $reservation_id = $row['reservation_id'];
       $branch = $row['branch'];
-      $event_date = date('Y/m/d ', strtotime($row['date']));
-      $event_start = date('H:i', strtotime($row['start']));
-      $event_end = date('H:i', strtotime($row['end']));
+      $event_date = (new DateTime($row['date']))->format('Y/m/d');
+      $event_start = (new DateTime($row['start']))->format('H:i');
+      $event_end = (new DateTime($row['end']))->format('H:i');
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
       $stmt2->execute([$row['room_id']]);
@@ -73,6 +79,9 @@ if($count >0){
       $pic = explode(' ', $pic);
       $agent_id=intval($row['agent_id']);
       $agent_name=mb_convert_kana($row['agent_name'], "KVas");
+      if($agent_name == " ") {
+        $agent_name = "";
+      }
       $agent_group = '';
       $agent_group_short = '';
       $reserver=mb_convert_kana($row['reserver'], "KVas");
@@ -397,7 +406,7 @@ $data=array(
   'message'=>'OK',
   'date'=>$date,
   'datetime'=>$datetime,
-  'week'=>$week[date('w', strtotime($date))],
+  'week' => $week[(int)$dateObj->format('w')],
   'hizuke'=>$hizuke,
   'events'=>$events,
   'events_ka'=>$events_ka,

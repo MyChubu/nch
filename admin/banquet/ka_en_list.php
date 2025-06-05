@@ -15,14 +15,12 @@ $amount_en = $array['amount_en'];
 $amount_ka = $array['amount_ka'];
 
 $today = date('Y-m-d');
-#$day_before = date('Y-m-d', strtotime($date . '-1 day'));
-#$day_after = date('Y-m-d', strtotime($date . '+1 day'));
-#$week_before = date('Y-m-d', strtotime($date . '-7 day'));
-#$week_after = date('Y-m-d', strtotime($date . '+7 day'));
 
 $dt = new DateTime($date);
-$dt->modify('-1 day');
-$day_before = $dt->format('Y-m-d');
+
+$dt_day_before = clone $dt;
+$dt_day_before->modify('-1 day');
+$day_before = $dt_day_before->format('Y-m-d');
 // 1日後
 $dt_day_after = clone $dt;
 $dt_day_after->modify('+1 day');

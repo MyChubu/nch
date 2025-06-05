@@ -7,13 +7,11 @@ if(isset($_REQUEST['event_date']) && $_REQUEST['event_date'] != '') {
 }
 $events = getBanquetEvents($date);
 
-$today = (new DateTime())->format('Y-m-d');
-$currentDate = new DateTime($date);
-
-$day_before = (clone $currentDate)->modify('-1 day')->format('Y-m-d');
-$day_after = (clone $currentDate)->modify('+1 day')->format('Y-m-d');
-$week_before = (clone $currentDate)->modify('-7 day')->format('Y-m-d');
-$week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
+$today = date('Y-m-d');
+$day_before = date('Y-m-d', strtotime($date . '-1 day'));
+$day_after = date('Y-m-d', strtotime($date . '+1 day'));
+$week_before = date('Y-m-d', strtotime($date . '-7 day'));
+$week_after = date('Y-m-d', strtotime($date . '+7 day'));
 ?>
 <!DOCTYPE html>
 <html lang="ja">

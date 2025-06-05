@@ -105,7 +105,8 @@ if ($count > 0) {
                     }
                     $sales_dept_id = intval($data[24]);
                     $sales_dept_name = mb_convert_kana($data[25], "KVas");
-                    $reservation_date = date("Y-m-d", strtotime($data[26]));
+                    $reservation_date = (new DateTime($data[26]))->format('Y-m-d');
+                    #$reservation_date = date("Y-m-d", strtotime($data[26]));
                     $pic_id = $data[27];
 
                     $check_sql = 'select * from banquet_schedules where reservation_id = ? and branch = ?';

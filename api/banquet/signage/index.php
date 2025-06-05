@@ -16,12 +16,14 @@ $date = date('Y-m-d');
 $now = date('Y-m-d H:i:s');
 $hour = date('H');
 if($hour >= 21){
-  $date = date('Y-m-d', strtotime('+1 day'));
+  $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
 }
 
-$hizuke =date('Y年m月d日 ', strtotime($date));
+$dateObj = new DateTime($date);
+$hizuke = $dateObj->format('Y年m月d日');
 $week = array('日', '月', '火', '水', '木', '金', '土');
-$hizuke .= '(' . $week[date('w', strtotime($date))] . '曜日)';
+$hizuke .= '（' . $week[(int)$dateObj->format('w')] . '曜日）';
+
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = 'select * from banquet_schedules where date = ? and end > ? and enable = ? order by start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
@@ -30,8 +32,8 @@ $count = $stmt->rowCount();
 $events=array();
 if($count > 0){
   foreach ($stmt as $row) {
-    $event_start = date('H:i', strtotime($row['start']));
-    $event_end = date('H:i', strtotime($row['end']));
+    $event_start = (new DateTime($row['start']))->format('H:i');
+    $event_end = (new DateTime($row['end']))->format('H:i');
     $event_name = mb_convert_kana($row['event_name'], 'KVas');
     $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
     $stmt2 = $dbh->prepare($sql2);
@@ -58,7 +60,7 @@ $data=array(
   'status'=>200,
   'message'=>'OK',
   'date'=>$date,
-  'week'=>$week[date('w', strtotime($date))],
+  'week' => $week[(int)$dateObj->format('w')],
   'hizuke'=>$hizuke,
   'events'=>$events
 );

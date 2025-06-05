@@ -1,12 +1,20 @@
 <?php
+// ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once('../../common/conf.php');
 require_once('functions/admin_banquet.php');
 
+// 年月を初期化
 $ym = date('Y-m');
-if(isset($_REQUEST['ym']) && $_REQUEST['ym'] != '') {
+if (isset($_REQUEST['ym']) && $_REQUEST['ym'] != '') {
   $ym = $_REQUEST['ym'];
 }
 $week = array('日', '月', '火', '水', '木', '金', '土');
+
+// データ取得
 $array = getMonthlySales($ym);
 $last_day = $array['last_day'];
 $year_month = $array['year_month'];
@@ -17,17 +25,22 @@ $total_enkai = $array['total_enkai'];
 $total_shokuji = $array['total_shokuji'];
 $total_others = $array['total_others'];
 $total = $array['total'];
-$add_coll=(32 - $last_day);
-$month = date('n', strtotime($ym));
+$add_coll = (32 - $last_day);
 
-$first_day = date('Y-m-01', strtotime($ym));
+// 月の数字を取得（DateTimeを使用）
+$month = (new DateTime($ym))->format('n');
 
+// 月初日を取得
+$first_day = (new DateTime($ym))->format('Y-m-01');
+
+// 今月
 $this_month = date('Y-m');
 
-$before_month = date('Y-m', strtotime($first_day . '-1 month'));
-$after_month = date('Y-m', strtotime($first_day . '+1 month'));
-
+// 前月・翌月をDateTimeで計算
+$before_month = (new DateTime($first_day))->modify('-1 month')->format('Y-m');
+$after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -45,7 +58,7 @@ $after_month = date('Y-m', strtotime($first_day . '+1 month'));
 <?php include("header.php"); ?>
 <main>
   <div>
-    <form  enctype="multipart/form-data" id="schedate_change">
+    <form enctype="multipart/form-data" id="schedate_change">
       <input type="month" name="ym" id="ym" value="<?= $ym ?>">
       <button type="submit">月変更</button>
     </form>
@@ -55,224 +68,187 @@ $after_month = date('Y-m', strtotime($first_day . '+1 month'));
       <div id="after_month"><a href="?ym=<?= $after_month ?>">翌月<i class="fa-solid fa-arrow-right"></i></a></div>
       <div id="download"><a href="output/salescal-csv.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-download"></i>CSV</a></div>
       <div id="download"><a href="output/salescal-csv2.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-download"></i>CSV2</a></div>
-    
     </div>
   </div>
   <div><?=$year_month ?></div>
-  <div class="block">
-    <table>
-      <tr>
-        <th class="floor bb1">階</th><th class="room bb1">会場名</th><th class="item bb1">項目</th>
-          <?php
-          for($i=1; $i<=16; $i++) {
-            $date = $ym . '-' . sprintf('%02d', $i);
-            $w = date('w', strtotime($date));
-            $wd = $week[$w];
-            if($i == 1) {
-              echo "<th class='bb1'>$month/$i<br>$wd</th>";
-            } else{
-              echo "<th class='bb1'>$i<br>$wd</th>";
-            }
-          }
-        ?>
-      </tr>
-      <?php
-        foreach($rooms as $room):
-        $room_id = $room['room_id'];
-      ?>
-        <tr>
-          <td rowspan="3" class="floor bb1"><?=$room['floor'] ?></td>
-          <td rowspan="3" class="room bb1"><?=$room['room_name'] ?></td>
-          <td class="item">名称</td>
-          <?php
-          for($i=1; $i<=16; $i++) {
-            $bc="";
-            $date = $ym . '-' . sprintf('%02d', $i);
-            $reservation_name = "&nbsp;";
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $reservation_name = $sale['reservation_name'];
-                $bc=$sale['banquet_category_id'];
-                break;
-              } 
-            }
-            echo "<td class='bc".$bc."'>".$reservation_name."</td>";
-          }
-          ?>
-        </tr>
-        <tr>
-          <td class="item">時間（人数）</td>
-          <?php
-          for($i=1; $i<=16; $i++) {
-            $bc="";
-            $value="&nbsp;";
-            $date = $ym . '-' . sprintf('%02d', $i);
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $start = date("H:i",strtotime($sale['start']));
-                $end = date("H:i",strtotime($sale['end']));
-                $people = $sale['people'];
-                $value = $start . "-" . $end . " (" . $people . ")";
-                $bc=$sale['banquet_category_id'];
-                break;
-              } 
-            }
-            echo "<td class='bc".$bc."'>".$value."</td>";
-          }
-          ?>
-        </tr>
-        <tr>
-          <td class="item bb1">金額</td>
-          <?php
-          for($i=1; $i<=16; $i++) {
-            $bc="";
-            $ex_ts = "";
-            $date = $ym . '-' . sprintf('%02d', $i);
-          
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $ex_ts = $sale['ex_ts'];
-                $ex_ts =number_format($ex_ts);
-                $bc=$sale['banquet_category_id'];
-                break;
-              }
-            }
-            
-            echo "<td class='bc".$bc." bb1'>".$ex_ts."</td>";
-          }
-          ?>
-        </tr>
-      <?php endforeach; ?>
-    </table>
 
-  </div>
+  <!-- 前半（1〜16日） -->
   <div class="block">
     <table>
       <tr>
         <th class="floor bb1">階</th><th class="room bb1">会場名</th><th class="item bb1">項目</th>
-          <?php
-          for($i=17; $i<=$last_day; $i++) {
-            $date = $ym . '-' . sprintf('%02d', $i);
-            $w = date('w', strtotime($date));
-            $wd = $week[$w];
-            if($i == 17) {
-              echo "<th class='bb1'>$month/$i<br>$wd</th>";
-            } else{
-              echo "<th class='bb1'>$i<br>$wd</th>";
-            }
-          }
-          for($i=1; $i<=$add_coll; $i++) {
-            echo "<th class='bc0 bb1'>&nbsp;</th>";
-          }
+        <?php
+        for($i=1; $i<=16; $i++) {
+          $date = $ym . '-' . sprintf('%02d', $i);
+          $w = (new DateTime($date))->format('w'); // 曜日取得
+          $wd = $week[$w];
+          echo "<th class='bb1'>" . ($i == 1 ? "$month/$i" : "$i") . "<br>$wd</th>";
+        }
         ?>
       </tr>
-      <?php
-        foreach($rooms as $room):
-        $room_id = $room['room_id'];
-      ?>
+      <?php foreach($rooms as $room): ?>
+        <?php $room_id = $room['room_id']; ?>
         <tr>
           <td rowspan="3" class="floor bb1"><?=$room['floor'] ?></td>
           <td rowspan="3" class="room bb1"><?=$room['room_name'] ?></td>
           <td class="item">名称</td>
-          <?php
-          for($i=17; $i<=$last_day; $i++) {
-            $bc="";
-            $date = $ym . '-' . sprintf('%02d', $i);
-            $reservation_name = "&nbsp;";
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $reservation_name = $sale['reservation_name'];
-                $bc=$sale['banquet_category_id'];
-                break;
-              } 
-            }
-            echo "<td class='bc".$bc."'>".$reservation_name."</td>";
-          }
-          for($i=1; $i<=$add_coll; $i++) {
-            echo "<td class='bc0'>&nbsp;</td>";
-          }
-          ?>
+          <?php for($i=1; $i<=16; $i++): ?>
+            <?php
+              $bc = "";
+              $reservation_name = "&nbsp;";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $reservation_name = $sale['reservation_name'];
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
+              }
+              echo "<td class='bc$bc'>$reservation_name</td>";
+            ?>
+          <?php endfor; ?>
         </tr>
         <tr>
           <td class="item">時間（人数）</td>
-          <?php
-          for($i=17; $i<=$last_day; $i++) {
-            $bc="";
-            $value="&nbsp;";
-            $date = $ym . '-' . sprintf('%02d', $i);
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $start = date("H:i",strtotime($sale['start']));
-                $end = date("H:i",strtotime($sale['end']));
-                $people = $sale['people'];
-                $value = $start . "-" . $end . " (" . $people . ")";
-                $bc=$sale['banquet_category_id'];
-                break;
-              } 
-            }
-            echo "<td class='bc".$bc."'>".$value."</td>";
-          }
-          for($i=1; $i<=$add_coll; $i++) {
-            echo "<td class='bc0'>&nbsp;</td>";
-          }
-          ?>
+          <?php for($i=1; $i<=16; $i++): ?>
+            <?php
+              $bc = "";
+              $value = "&nbsp;";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $start = (new DateTime($sale['start']))->format('H:i');
+                  $end = (new DateTime($sale['end']))->format('H:i');
+                  $people = $sale['people'];
+                  $value = "$start-$end ($people)";
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
+              }
+              echo "<td class='bc$bc'>$value</td>";
+            ?>
+          <?php endfor; ?>
         </tr>
         <tr>
           <td class="item bb1">金額</td>
-          <?php
-          for($i=17; $i<=$last_day; $i++) {
-            $bc="";
-            $ex_ts = "";
-            $date = $ym . '-' . sprintf('%02d', $i);
-          
-            foreach($sales as $sale) {
-              if($sale['room_id'] == $room_id && $sale['date'] == $date) {
-                $ex_ts = $sale['ex_ts'];
-                $ex_ts =number_format($ex_ts);
-                $bc=$sale['banquet_category_id'];
-                break;
+          <?php for($i=1; $i<=16; $i++): ?>
+            <?php
+              $bc = "";
+              $ex_ts = "";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $ex_ts = number_format($sale['ex_ts'] ?? 0);
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
               }
-            }
-            
-            echo "<td class='bc".$bc." bb1'>".$ex_ts."</td>";
-          }
-          for($i=1; $i<=$add_coll; $i++) {
-            echo "<td class='bc0'>&nbsp;</td>";
-          }
-          ?>
+              echo "<td class='bc$bc bb1'>$ex_ts</td>";
+            ?>
+          <?php endfor; ?>
         </tr>
       <?php endforeach; ?>
     </table>
   </div>
+
+  <!-- 後半（17日〜末日） -->
+  <div class="block">
+    <table>
+      <tr>
+        <th class="floor bb1">階</th><th class="room bb1">会場名</th><th class="item bb1">項目</th>
+        <?php
+        for($i=17; $i<=$last_day; $i++) {
+          $date = $ym . '-' . sprintf('%02d', $i);
+          $w = (new DateTime($date))->format('w');
+          $wd = $week[$w];
+          echo "<th class='bb1'>" . ($i == 17 ? "$month/$i" : "$i") . "<br>$wd</th>";
+        }
+        for($i=1; $i<=$add_coll; $i++) {
+          echo "<th class='bc0 bb1'>&nbsp;</th>";
+        }
+        ?>
+      </tr>
+      <?php foreach($rooms as $room): ?>
+        <?php $room_id = $room['room_id']; ?>
+        <tr>
+          <td rowspan="3" class="floor bb1"><?=$room['floor'] ?></td>
+          <td rowspan="3" class="room bb1"><?=$room['room_name'] ?></td>
+          <td class="item">名称</td>
+          <?php for($i=17; $i<=$last_day; $i++): ?>
+            <?php
+              $bc = "";
+              $reservation_name = "&nbsp;";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $reservation_name = $sale['reservation_name'];
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
+              }
+              echo "<td class='bc$bc'>$reservation_name</td>";
+            ?>
+          <?php endfor; ?>
+          <?php for($i=1; $i<=$add_coll; $i++) echo "<td class='bc0'>&nbsp;</td>"; ?>
+        </tr>
+        <tr>
+          <td class="item">時間（人数）</td>
+          <?php for($i=17; $i<=$last_day; $i++): ?>
+            <?php
+              $bc = "";
+              $value = "&nbsp;";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $start = (new DateTime($sale['start']))->format('H:i');
+                  $end = (new DateTime($sale['end']))->format('H:i');
+                  $people = $sale['people'];
+                  $value = "$start-$end ($people)";
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
+              }
+              echo "<td class='bc$bc'>$value</td>";
+            ?>
+          <?php endfor; ?>
+          <?php for($i=1; $i<=$add_coll; $i++) echo "<td class='bc0'>&nbsp;</td>"; ?>
+        </tr>
+        <tr>
+          <td class="item bb1">金額</td>
+          <?php for($i=17; $i<=$last_day; $i++): ?>
+            <?php
+              $bc = "";
+              $ex_ts = "";
+              $date = $ym . '-' . sprintf('%02d', $i);
+              foreach($sales as $sale) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                  $ex_ts = number_format($sale['ex_ts'] ?? 0);
+                  $bc = $sale['banquet_category_id'];
+                  break;
+                }
+              }
+              echo "<td class='bc$bc bb1'>$ex_ts</td>";
+            ?>
+          <?php endfor; ?>
+          <?php for($i=1; $i<=$add_coll; $i++) echo "<td class='bc0'>&nbsp;</td>"; ?>
+        </tr>
+      <?php endforeach; ?>
+    </table>
+  </div>
+
+  <!-- 合計表 -->
   <div class="block">
     <table>
       <tr>
         <th class="item">項目</th>
         <th class="item">金額</th>
       </tr>
-      <tr>
-        <td class="bc1">会議</td>
-        <td class="bc1"><?=number_format($total_kaigi) ?></td>
-      </tr>
-      <tr>
-        <td class="bc2">宴会</td>
-        <td class="bc2"><?=number_format($total_enkai) ?></td>
-      </tr>
-      <tr>
-        <td class="bc3">食事</td>
-        <td class="bc3"><?=number_format($total_shokuji) ?></td>
-      </tr>
-      <tr>
-        <td class="bc9">その他</td>
-        <td class="bc9"><?=number_format($total_others) ?></td>
-      </tr>
-      <tr style="background-color:#ddd;">
-        <td>合計</td>
-        <td><?=number_format($total) ?></td>
-      </tr>
-
+      <tr><td class="bc1">会議</td><td class="bc1"><?=number_format($total_kaigi) ?></td></tr>
+      <tr><td class="bc2">宴会</td><td class="bc2"><?=number_format($total_enkai) ?></td></tr>
+      <tr><td class="bc3">食事</td><td class="bc3"><?=number_format($total_shokuji) ?></td></tr>
+      <tr><td class="bc9">その他</td><td class="bc9"><?=number_format($total_others) ?></td></tr>
+      <tr style="background-color:#ddd;"><td>合計</td><td><?=number_format($total) ?></td></tr>
     </table>
-
   </div>
 </main>
 <?php include("footer.php"); ?>
