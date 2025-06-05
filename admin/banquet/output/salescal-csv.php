@@ -5,10 +5,14 @@ $ym = date('Y-m');
 if(isset($_REQUEST['ym']) && $_REQUEST['ym'] != '') {
   $ym = $_REQUEST['ym'];
 }
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
-$last_day = date('t', strtotime($ym));
-$year_month = date('Y年 m月', strtotime($ym));
 
+$dt = new DateTime($ym . '-01');  // 「年月」だけではエラーになる可能性があるため、日を付ける
+$last_day = $dt->format('t');
+$year_month = $dt->format('Y年 m月');
+#$last_day = date('t', strtotime($ym));
+#$year_month = date('Y年 m月', strtotime($ym));
+
+$dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = "SELECT * FROM `view_daily_subtotal` where `ym` = :ym and `purpose_id` <> 3";
 $stmt = $dbh->prepare($sql); 
 $stmt->bindValue(':ym', $ym, PDO::PARAM_STR);
