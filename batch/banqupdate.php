@@ -313,7 +313,8 @@ if ($count > 0) {
 
 
 // **古い CSV ファイルの削除処理**
-$keydate = date("Y-m-d H:i:s", strtotime("-1 day"));
+$keydate = (new DateTime())->modify('-1 day')->format('Y-m-d H:i:s'); // 1日前の日付を取得
+#$keydate = date("Y-m-d H:i:s", strtotime("-1 day"));
 $sql = 'SELECT * FROM csvs WHERE status = ? AND csv_kind = ? AND modified < ?';
 $stmt = $dbh->prepare($sql);
 $stmt->execute([0, 2, $keydate]);
