@@ -22,6 +22,9 @@ if($count > 0){
     }elseif($status == 80){
       $status_name = 'ファイル削除済';
       $status_icon = '<i class="fa-regular fa-circle-check"></i>';
+    }elseif($status == 90){
+      $status_name = 'エラー';
+      $status_icon = '<i class="fa-regular fa-face-dizzy"></i>';
     }elseif($status == 99){
       $status_name = '除外';
       $status_icon = '<i class="fa-solid fa-xmark"></i>';
@@ -93,6 +96,7 @@ if($count > 0){
           <i class="fa-solid fa-circle-check"></i>：処理済、
           <i class="fa-regular fa-hourglass-half"></i>：処理中、
           <i class="fa-regular fa-circle-check"></i>：ファイル削除済、
+          <i class="fa-regular fa-face-dizzy"></i>：エラー、
           <i class="fa-solid fa-xmark"></i>：除外
           
         </div>

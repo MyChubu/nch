@@ -1,10 +1,7 @@
 <?php
 require_once('../common/conf.php');
 
-
 if(defined('CSV_DATA_PATH') == false) {
-  #define('CSV_DATA_PATH', DATA_DIR . 'csv/');
-  #define('CSV_DATA_PATH', '/home/LA06926062/nch.netmedia.works/data/csv/');
   define('CSV_DATA_PATH', '../data/csv/');
 }
 if(isset($dbh) == false){
@@ -29,6 +26,33 @@ if ($count > 0) {
         // **fopen() を使用してファイルを開く**
         $file_path = CSV_DATA_PATH . $filename;
         if (($handle = fopen($file_path, "r")) !== false) {
+
+          //ファイルパターンをチェック
+          $expected_header = [
+            '予約番号','予約人数','予約件数','予約宴会名称','会場枝番','会場名称','会場使用日','宴会開始時間','宴会終了時間',
+            '行灯名称','会場予約人数','営業担当名称','予約状態ｺｰﾄﾞ','予約状態名称','会場ｺｰﾄﾞ','会場使用目的ｺｰﾄﾞ',
+            '会場使用目的名称','会場形式ｺｰﾄﾞ','会場形式名称','ｴｰｼﾞｪﾝﾄｺｰﾄﾞ','エージェン 名称','申込会社 名称','ｴｰｼﾞｪﾝﾄ名称',
+            '予約状態備考','売上部門ｺｰﾄﾞ','売上部門名称','実施日','営業担当ｺｰﾄﾞ'
+          ];
+          $first_line = fgets($handle);
+          $first_line = mb_convert_encoding($first_line, 'UTF-8', 'SJIS-win');
+          $first_line = str_replace(["\r\n", "\r"], "\n", $first_line);
+          $header = str_getcsv(trim($first_line), ",");
+
+          if ($header !== $expected_header) {
+
+            // ファイルを閉じて次のファイルへスキップ
+            fclose($handle);
+
+            // ステータスをエラー(例: 99)に更新
+            $sql = 'UPDATE csvs SET status = ?, modified = NOW() WHERE csv_id = ?';
+            $stmt = $dbh->prepare($sql);
+            $stmt->execute([90, $csv_id]);
+
+            continue;
+          }
+
+
             $i = 0;
             $banq_min_date ="";
             $banq_max_date ="";

@@ -2,8 +2,6 @@
 require_once('../common/conf.php');
 
 if(defined('CSV_DATA_PATH') == false) {
-  #define('CSV_DATA_PATH', DATA_DIR . 'csv/');
-  #define('CSV_DATA_PATH', '/home/LA06926062/nch.netmedia.works/data/csv/');
   define('CSV_DATA_PATH', '../data/csv/');
 }
 if(isset($dbh) == false){
@@ -26,6 +24,29 @@ if($count > 0){
     $file = file(CSV_DATA_PATH.$filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $i=0;
     $start_time = date('Y-m-d H:i:s');
+
+    //ヘッダーでパターンチェック
+    // ヘッダー行を取り出す（1行目）
+    $header_line = mb_convert_encoding($file[0], 'UTF-8', 'SJIS-win');
+    $actual_headers = str_getcsv($header_line, ",", '"');
+
+    // 想定と比較
+    $expected_headers = [
+      '予約番号', '実施日', '提供会場枝番', '明細枝番', '予約宴会名称',
+      '主会場ｺｰﾄﾞ', 'ﾊﾟｯｹｰｼﾞ科目ｺｰﾄﾞ', 'ﾊﾟｯｹｰｼﾞ科目名称', 'ﾊﾟｯｹｰｼﾞ商品ｺｰﾄﾞ', 'ﾊﾟｯｹｰｼﾞ商品名称',
+      '科目ｺｰﾄﾞ', '科目名称', '商品ｺｰﾄﾞ', '商品名称', '単価', '数量',
+      '請求金額(GROSS)', '請求金額(NET)', '請求金額(ｻｰﾋﾞｽ料)', '請求金額(消費税)',
+      '割引名称', '割引率', '割引金額'
+    ];
+
+    if ($actual_headers !== $expected_headers) {
+      // このファイルは処理せず、statusをエラーに更新
+      $sql = 'update csvs set status = 90, modified = now() where csv_id = ?';
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute([$csv_id]);
+      continue; // 次のCSVへ
+    }
+
     foreach($file as $line){
       if($i > 0){
         
