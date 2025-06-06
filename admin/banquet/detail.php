@@ -47,9 +47,11 @@ $tax_amount = $array['tax_amount'];
           <?php
             $ed = new DateTime($value);
             $edate = $ed->format('Y-m-d');
+            $ew = $ed->format('w');
+            $ewd = $week[$ew];
 
                  ?>
-                    <a href="./?event_date=<?= $ed->format('Y-m-d') ?>"><?= $ed->format('Y-m-d ddd') ?></a>
+                    <a href="./signage.php?event_date=<?= $ed->format('Y-m-d') ?>"><?= $ed->format('Y-m-d') ?>(<?=$ewd ?>)</a>
         <?php else: ?> 
           <?= $value ?>
         <?php endif; ?>

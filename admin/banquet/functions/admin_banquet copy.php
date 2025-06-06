@@ -1,36 +1,22 @@
 <?php
 function getBanquetEvents($date) {
-  // データベース接続
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
-
-  // 曜日配列（0=日〜6=土）
   $week = array('日', '月', '火', '水', '木', '金', '土');
-
-  // 指定日付の宴会スケジュールを取得（開始時刻と支店順にソート）
-  $sql = 'select * from banquet_schedules where date = ? order by start ASC, branch ASC';
+  $sql = 'select * from banquet_schedules where date = ?  order by start ASC, branch ASC';
   $stmt = $dbh->prepare($sql);
   $stmt->execute([$date]);
   $count = $stmt->rowCount();
-
-  $events = array();
-
-  if ($count > 0) {
+  $events=array();
+  if($count >0){
     foreach ($stmt as $row) {
-      // 各日時を DateTime オブジェクトとして処理
-      $dateObj = new DateTime($row['date']);
-      $startObj = new DateTime($row['start']);
-      $endObj = new DateTime($row['end']);
-      $addedObj = new DateTime($row['added']);
-      $modifiedObj = new DateTime($row['modified']);
-
-      // 会場（部屋）の情報を取得
+      $event_date = date('Y/m/d ', strtotime($row['date']));
+      $event_start = date('H:i', strtotime($row['start']));
+      $event_end = date('H:i', strtotime($row['end']));
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
       $stmt2->execute([$row['room_id']]);
       $room = $stmt2->fetch();
-      $floor = $room['floor']; // 階数
-
-      // 使用目的の情報を取得
+      $floor = $room['floor'];
       $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
       $stmt3 = $dbh->prepare($sql3);
       $stmt3->execute([$row['purpose_id']]);
@@ -38,81 +24,63 @@ function getBanquetEvents($date) {
       $purpose_name = $purpose['banquet_purpose_name'];
       $purpose_short = $purpose['banquet_purpose_short'];
       $banquet_category_id = $purpose['banquet_category_id'];
-
-      // カテゴリー情報を取得
       $sql4 = 'select * from banquet_categories where banquet_category_id = ?';
       $stmt4 = $dbh->prepare($sql4);
       $stmt4->execute([$banquet_category_id]);
       $category = $stmt4->fetch();
       $category_name = $category['banquet_category_name'];
 
-      // イベント情報を配列にまとめる
       $events[] = array(
-        'reservation_id' => $row['reservation_id'],                       // 予約ID
-        'banquet_schedule_id' => $row['banquet_schedule_id'],           // スケジュールID
-        'event_name' => $row['event_name'],                             // イベント名
-        'date' => $dateObj->format('Y/m/d') . '(' . $week[(int)$dateObj->format('w')] . ')', // 日付 + 曜日
-        'start' => $startObj->format('H:i'),                            // 開始時間
-        'end' => $endObj->format('H:i'),                                // 終了時間
-        'room_name' => $row['room_name'],                               // 部屋名
-        'floor' => $floor,                                              // 階数
-        'status' => $row['status'],                                     // ステータスコード
-        'status_name' => $row['status_name'],                           // ステータス名
-        'purpose_id' => $row['purpose_id'],                             // 使用目的ID
-        'purpose_name' => $purpose_name,                                // 使用目的名
-        'purpose_short' => $purpose_short,                              // 使用目的略称
-        'category_id' => $banquet_category_id,                          // カテゴリーID
-        'category_name' => $category_name,                              // カテゴリー名
-        'enable' => $row['enable'],                                     // 有効フラグ
-        'added' => $addedObj->format('Y/m/d'),                          // 登録日
-        'modified' => $modifiedObj->format('Y/m/d'),                    // 最終更新日
-        'modified_by' => $row['modified_by']                            // 更新者
+        'reservation_id' => $row['reservation_id'],
+        'banquet_schedule_id' => $row['banquet_schedule_id'],
+        'event_name' => $row['event_name'],
+        'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
+        'start' => $event_start,
+        'end' => $event_end,
+        'room_name' => $row['room_name'],
+        'floor' => $floor,
+        'status' => $row['status'],
+        'status_name' => $row['status_name'],
+        'purpose_id' => $row['purpose_id'],
+        'purpose_name' => $purpose_name,
+        'purpose_short' => $purpose_short,
+        'category_id' => $banquet_category_id,
+        'category_name' => $category_name,
+        'enable' => $row['enable'],
+        'added' => date('Y/m/d ', strtotime($row['added'])),
+        'modified' => date('Y/m/d ', strtotime($row['modified'])),
+        'modified_by' => $row['modified_by']
       );
     }
   }
-
-  // イベント情報を返す
   return $events;
 }
 
 function getKaEnList($date){
-  $dbh = new PDO(DSN, DB_USER, DB_PASS); // DB接続
-  $week = array('日', '月', '火', '水', '木', '金', '土'); // 曜日配列
-
-  // 指定日の宴会スケジュールを取得
-  $sql = 'select * from banquet_schedules where date = ? order by start ASC, branch ASC';
+  $dbh = new PDO(DSN, DB_USER, DB_PASS);
+  $week = array('日', '月', '火', '水', '木', '金', '土');
+  $sql = 'select * from banquet_schedules where date = ?  order by start ASC, branch ASC';
   $stmt = $dbh->prepare($sql);
   $stmt->execute([$date]);
   $count = $stmt->rowCount();
-
-  // 各イベント用配列
-  $events = array();
-  $events_en = array();     // 宴会カテゴリ（演）
-  $events_ka = array();     // 宴会カテゴリ（会）
-  $events_other = array();  // その他カテゴリ
-  $amount_en = 0;           // 金額（演）
-  $amount_ka = 0;           // 金額（会）
-
-  if ($count > 0) {
+  $events=array();
+  $events_en=array();
+  $events_ka=array();
+  $events_other=array();
+  $amount_en = 0;
+  $amount_ka = 0;
+  if($count >0){
     foreach ($stmt as $row) {
       $reservation_id = $row['reservation_id'];
       $branch = $row['branch'];
-
-      // 日付・時間をDateTimeで処理
-      $dateObj = new DateTime($row['date']);
-      $startObj = new DateTime($row['start']);
-      $endObj = new DateTime($row['end']);
-      $addedObj = new DateTime($row['added']);
-      $modifiedObj = new DateTime($row['modified']);
-
-      // 部屋情報の取得
+      $event_date = date('Y/m/d ', strtotime($row['date']));
+      $event_start = date('H:i', strtotime($row['start']));
+      $event_end = date('H:i', strtotime($row['end']));
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
       $stmt2->execute([$row['room_id']]);
       $room = $stmt2->fetch();
       $floor = $room['floor'];
-
-      // 使用目的の取得
       $purpose_id = $row['purpose_id'];
       $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
       $stmt3 = $dbh->prepare($sql3);
@@ -121,23 +89,21 @@ function getKaEnList($date){
       $purpose_name = $purpose['banquet_purpose_name'];
       $purpose_short = $purpose['banquet_purpose_short'];
       $banquet_category_id = $purpose['banquet_category_id'];
-      $summary_category = $purpose['summary_category']; // 1:会, 2:演
-
-      // カテゴリーの取得
+      $summary_category = $purpose['summary_category'];
       $sql4 = 'select * from banquet_categories where banquet_category_id = ?';
       $stmt4 = $dbh->prepare($sql4);
       $stmt4->execute([$banquet_category_id]);
       $category = $stmt4->fetch();
       $category_name = $category['banquet_category_name'];
-
-      // 代理店情報の初期値
       $agent_id = $row['agent_id'];
-      $agent_name = trim($row['agent_name']);
+      $agent_name = $row['agent_name'];
+      if($agent_name == " ") {
+        $agent_name = "";
+      }
       $agent_group = $row['agent_group'];
       $agent_group_short = $row['agent_group_short'];
-
-      // 代理店IDがある場合、DBから代理店情報を取得
-      if ($agent_id > 0) {
+      $reserver = $row['reserver'];
+      if($agent_id > 0){
         $sql6 = 'select * from banquet_agents where agent_id = ?';
         $stmt6 = $dbh->prepare($sql6);
         $stmt6->execute([$agent_id]);
@@ -146,14 +112,16 @@ function getKaEnList($date){
         $agent_group_short = $agent['agent_group_short'];
       }
 
-      // 料理・飲料情報の初期化
-      $meal = array();
-      $drink1 = array();
-      $drink2 = array();
+      //料金取得
+      //宴会料理
+      $meal=array();
+      $drink1=array();
+      $drink2=array();
+      $ammounts=array();
+      $rc=array();
 
-      // 朝食バイキング（目的ID=35）の処理
-      if ($purpose_id == 35) {
-        $meal[] = array(
+      if($purpose_id == 35){
+        $meal[] =array(
           'name' => '朝食バイキング',
           'short_name' => '朝バ',
           'unit_price' => 1100,
@@ -161,44 +129,63 @@ function getKaEnList($date){
           'amount_gross' => 1100 * $row['people']
         );
       }
-
-      // パッケージ料理の取得
-      $sql7 = 'select * from `view_package_charges` where `reservation_id` = ? AND `branch`= ?';
+      $sql7= 'select * from `view_package_charges` where `reservation_id` = ? AND `branch`= ?';
       $stmt7 = $dbh->prepare($sql7);
       $stmt7->execute([$reservation_id, $branch]);
-      foreach ($stmt7 as $row7) {
-        $meal[] = array(
-          'name' => mb_convert_kana($row7['NameShort'], "KVas"),
-          'short_name' => mb_convert_kana($row7['NameShort'], "KVas"),
-          'unit_price' => intval($row7['UnitP']),
-          'qty' => intval($row7['Qty']),
-          'amount_gross' => intval($row7['Gross'])
-        );
+      $f_count = $stmt7->rowCount();
+      if($f_count > 0){
+        foreach ($stmt7 as $row7) {
+          $package_name = mb_convert_kana($row7['NameShort'], "KVas");
+          $unit_price = intval($row7['UnitP']);
+          $qty = intval($row7['Qty']);
+          $amount_gross = intval($row7['Gross']);
+          $amount_net = $row7['Net'];
+          $service_fee = $row7['ServiceFee'];
+          $tax = $row7['Tax'];
+          $discount_name = '';
+          $discount_rate = 0;
+          $discount_amount = $row7['Discount'];
+          $meal[] =array(
+            'name' => $package_name,
+            'short_name' => $package_name,
+            'unit_price' => $unit_price,
+            'qty' => $qty,
+            'amount_gross' => $amount_gross,
+          );
+        }
       }
 
-      // 単品料理の取得
-      $sql8 = 'select * from `view_charges` where `reservation_id` = ? AND `branch`= ? AND `meal` = 1 AND (`package_id` = "" OR `package_id` IS NULL OR `package_id` = " ") ORDER BY `detail_number` ASC';
+      //パッケージ以外の料理
+      $sql8= 'select * from `view_charges` where `reservation_id` = ? AND `branch`= ?  AND `meal` = 1 AND (`package_id` = "" OR `package_id` IS NULL OR `package_id` = " ") ORDER BY `detail_number` ASC';
       $stmt8 = $dbh->prepare($sql8);
       $stmt8->execute([$reservation_id, $branch]);
-      foreach ($stmt8 as $row8) {
-        $meal[] = array(
-          'name' => mb_convert_kana($row8['item_name'], "KVas"),
-          'short_name' => mb_convert_kana($row8['name_short'], "KVas"),
-          'unit_price' => $row8['unit_price'],
-          'qty' => $row8['qty'],
-          'amount_gross' => $row8['amount_gross']
-        );
+      $f_count = $stmt8->rowCount();
+      if($f_count > 0){
+        foreach ($stmt8 as $row8) {
+          $item_name = mb_convert_kana($row8['item_name'], "KVas");
+          $short_name = mb_convert_kana($row8['name_short'], "KVas");
+          $unit_price = $row8['unit_price'];
+          $qty = $row8['qty'];
+          $amount_gross = $row8['amount_gross'];
+          $amount_net = $row8['amount_net'];
+          $meal[] =array(
+            'name' => $item_name,
+            'short_name' => $short_name,
+            'unit_price' => $unit_price,
+            'qty' => $qty,
+            'amount_gross' => $amount_gross,
+          );
+        }
       }
 
-      // イベントデータ（共通部分）を配列に格納
-      $event_common = array(
+      $events[] = array(
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'banquet_schedule_id' => $row['banquet_schedule_id'],
         'event_name' => $row['event_name'],
-        'date' => $dateObj->format('Y/m/d') . '(' . $week[(int)$dateObj->format('w')] . ')',
-        'start' => $startObj->format('H:i'),
-        'end' => $endObj->format('H:i'),
+        'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
+        'start' => $event_start,
+        'end' => $event_end,
         'people' => $row['people'],
         'room_name' => $row['room_name'],
         'floor' => $floor,
@@ -215,44 +202,139 @@ function getKaEnList($date){
         'agent_name' => $agent_name,
         'agent_group' => $agent_group,
         'agent_group_short' => $agent_group_short,
-        'reserver' => $row['reserver'],
+        'reserver' => $reserver,
         'enable' => $row['enable'],
-        'added' => $addedObj->format('Y/m/d'),
-        'modified' => $modifiedObj->format('Y/m/d'),
+        'added' => date('Y/m/d ', strtotime($row['added'])),
+        'modified' => date('Y/m/d ', strtotime($row['modified'])),
         'modified_by' => $row['modified_by'],
         'meal' => $meal,
         'drink1' => $drink1,
-        'drink2' => $drink2
+        'drink2' => $drink2,
       );
+      if($summary_category == 1){
+        if($purpose_id !=0 && $purpose_id !=88 && $purpose_id !=94){
+          $events_ka[] = array(
+            'reservation_id' => $reservation_id,
+            'branch' => $branch,
+            'banquet_schedule_id' => $row['banquet_schedule_id'],
+            'event_name' => $row['event_name'],
+            'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
+            'start' => $event_start,
+            'end' => $event_end,
+            'people' => $row['people'],
+            'room_name' => $row['room_name'],
+            'floor' => $floor,
+            'status' => $row['status'],
+            'status_name' => $row['status_name'],
+            'purpose_id' => $purpose_id,
+            'purpose_name' => $purpose_name,
+            'purpose_short' => $purpose_short,
+            'category_id' => $banquet_category_id,
+            'category_name' => $category_name,
+            'summary_category' => $summary_category,
+            'pic' => mb_convert_kana($row['pic'], 'KVas'),
+            'agent_id' => $agent_id,
+            'agent_name' => $agent_name,
+            'agent_group' => $agent_group,
+            'agent_group_short' => $agent_group_short,
+            'reserver' => $reserver,
+            'enable' => $row['enable'],
+            'added' => date('Y/m/d ', strtotime($row['added'])),
+            'modified' => date('Y/m/d ', strtotime($row['modified'])),
+            'modified_by' => $row['modified_by'],
+            'meal' => $meal,
+            'drink1' => $drink1,
+            'drink2' => $drink2,
+          );
+        }else{
+          $events_other[] = array(
+            'reservation_id' => $reservation_id,
+            'branch' => $branch,
+            'banquet_schedule_id' => $row['banquet_schedule_id'],
+            'event_name' => $row['event_name'],
+            'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
+            'start' => $event_start,
+            'end' => $event_end,
+            'people' => $row['people'],
+            'room_name' => $row['room_name'],
+            'floor' => $floor,
+            'status' => $row['status'],
+            'status_name' => $row['status_name'],
+            'purpose_id' => $purpose_id,
+            'purpose_name' => $purpose_name,
+            'purpose_short' => $purpose_short,
+            'category_id' => $banquet_category_id,
+            'category_name' => $category_name,
+            'summary_category' => $summary_category,
+            'pic' => mb_convert_kana($row['pic'], 'KVas'),
+            'agent_id' => $agent_id,
+            'agent_name' => $agent_name,
+            'agent_group' => $agent_group,
+            'agent_group_short' => $agent_group_short,
+            'reserver' => $reserver,
+            'enable' => $row['enable'],
+            'added' => date('Y/m/d ', strtotime($row['added'])),
+            'modified' => date('Y/m/d ', strtotime($row['modified'])),
+            'modified_by' => $row['modified_by'],
+            'meal' => $meal,
+            'drink1' => $drink1,
+            'drink2' => $drink2,
+          );
 
-      // カテゴリごとに分類
-      $events[] = $event_common;
-      if ($summary_category == 1) {
-        if (!in_array($purpose_id, [0, 88, 94])) {
-          $events_ka[] = $event_common;
-        } else {
-          $events_other[] = $event_common;
         }
-      } elseif ($summary_category == 2) {
-        $events_en[] = $event_common;
+      }elseif($summary_category == 2 ){
+        $events_en[] = array(
+          'reservation_id' => $reservation_id,
+          'branch' => $branch,
+          'banquet_schedule_id' => $row['banquet_schedule_id'],
+          'event_name' => $row['event_name'],
+          'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
+          'start' => $event_start,
+          'end' => $event_end,
+          'people' => $row['people'],
+          'room_name' => $row['room_name'],
+          'floor' => $floor,
+          'status' => $row['status'],
+          'status_name' => $row['status_name'],
+          'purpose_id' => $purpose_id,
+          'purpose_name' => $purpose_name,
+          'purpose_short' => $purpose_short,
+          'category_id' => $banquet_category_id,
+          'category_name' => $category_name,
+          'summary_category' => $summary_category,
+          'pic' => mb_convert_kana($row['pic'], 'KVas'),
+          'agent_id' => $agent_id,
+          'agent_name' => $agent_name,
+          'agent_group' => $agent_group,
+          'agent_group_short' => $agent_group_short,
+          'reserver' => $reserver,
+          'enable' => $row['enable'],
+          'added' => date('Y/m/d ', strtotime($row['added'])),
+          'modified' => date('Y/m/d ', strtotime($row['modified'])),
+          'modified_by' => $row['modified_by'],
+          'meal' => $meal,
+          'drink1' => $drink1,
+          'drink2' => $drink2,
+        );
       }
     }
-
-    // 日別売上集計（summary_category ごと）
-    $sql9 = 'select `summary_category`, sum(`amount_gross`) as `gross` from `view_purpose_charges` where `date` = ? group by `summary_category` order by `summary_category` ASC';
+    $sql9 = 'select `summary_category`, sum(`amount_gross`) as `gross` from `view_purpose_charges` where `date` = ?  group by `summary_category` order by `summary_category` ASC';
     $stmt9 = $dbh->prepare($sql9);
     $stmt9->execute([$date]);
-    foreach ($stmt9 as $row9) {
-      if ($row9['summary_category'] == 1) {
-        $amount_ka += intval($row9['gross']);
-      } elseif ($row9['summary_category'] == 2) {
-        $amount_en += intval($row9['gross']);
+    $f_count = $stmt9->rowCount();
+    if($f_count > 0){
+      foreach ($stmt9 as $row9) {
+        $summary_category = $row9['summary_category'];
+        $gross = $row9['gross'];
+        if($summary_category == 1){
+          $amount_ka += intval($gross);
+        }elseif($summary_category == 2){
+          $amount_en += intval($gross);
+        }
       }
     }
   }
-
-  // 最終的にまとめて返す
-  return array(
+  $array=array(
     'events' => $events,
     'events_en' => $events_en,
     'events_ka' => $events_ka,
@@ -260,59 +342,44 @@ function getKaEnList($date){
     'amount_en' => $amount_en,
     'amount_ka' => $amount_ka
   );
+  return $array;
 }
 
 function getConnectionList($reservation_id){
-  $week = array('日', '月', '火', '水', '木', '金', '土'); // 曜日配列
-
-  // データベース接続
+  $week = array('日', '月', '火', '水', '木', '金', '土');
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
-
-  // 宴会スケジュールを取得
   $sql = 'select * from banquet_schedules where reservation_id = ? order by start ASC, branch ASC';
   $stmt = $dbh->prepare($sql);
   $stmt->execute([$reservation_id]);
   $count = $stmt->rowCount();
-
-  // 初期化
-  $events = array();
+  $events=array();
   $charges = array();
   $total_amount = 0;
   $service_amount = 0;
   $tax_amount = 0;
   $discount_amount = 0;
   $subtotal_amount = 0;
-
-  if($count > 0){
+  if($count >0){
     foreach ($stmt as $row) {
-      $sche_id = $row['banquet_schedule_id'];
+      $sche_id= $row['banquet_schedule_id'];
       $branch = $row['branch'];
-      $pic = mb_convert_kana($row['pic'], 'KVas'); // 担当者名を全角変換
-
-      // 日付・時間をDateTimeで処理
-      $dateObj = new DateTime($row['date']);
-      $startObj = new DateTime($row['start']);
-      $endObj = new DateTime($row['end']);
-      $event_date = $dateObj->format('Y/m/d');
-      $event_start = $startObj->format('H:i');
-      $event_end = $endObj->format('H:i');
-
-      // 会場（部屋）情報の取得
+      $pic = mb_convert_kana($row['pic'], 'KVas');
+      $event_date = date('Y/m/d ', strtotime($row['date']));
+      $event_start = date('H:i', strtotime($row['start']));
+      $event_end = date('H:i', strtotime($row['end']));
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
       $stmt2->execute([$row['room_id']]);
       $room = $stmt2->fetch();
       $floor = $room['floor'];
-
-      // イベント情報を配列に追加
       $events[] = array(
         'banquet_schedule_id' => $sche_id,
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'resevation_name' => mb_convert_kana($row['reservation_name'], 'KVas'),
-        'event_name' => mb_convert_kana($row['event_name'], 'KVas'),
+        'event_name' => mb_convert_kana($row['event_name'],'KVas'),
         'event_date' => $event_date,
-        'date' => $event_date . '(' . $week[(int)$dateObj->format('w')] . ')',
+        'date' => $event_date . '(' . $week[date('w', strtotime($row['date']))] . ')',
         'start' => $event_start,
         'end' => $event_end,
         'room_name' => $row['room_name'],
@@ -322,99 +389,102 @@ function getConnectionList($reservation_id){
         'pic' => $pic,
       );
 
-      // ====================
-      // パッケージ料金の取得
-      // ====================
+      // 料金取得
+      //パック料金
+      
       $sql4 = 'select * from view_package_charges where reservation_id = ? and branch = ?';
       $stmt4 = $dbh->prepare($sql4);
       $stmt4->execute([$reservation_id, $branch]);
+      $p_count = $stmt4->rowCount();
 
-      foreach ($stmt4 as $row4) {
-        $unit_price = intval($row4['UnitP']);
-        $qty = intval($row4['Qty']);
-        $subtotal = $unit_price * $qty;
-        $gross = intval($row4['Gross']);
-        $service_fee = intval($row4['ServiceFee']);
-        $tax = intval($row4['Tax']);
-        $discount = intval($row4['Discount']);
-
-        // 金額集計
-        $total_amount += $gross;
-        $service_amount += $service_fee;
-        $tax_amount += $tax;
-        $discount_amount += $discount;
-        $subtotal_amount += $subtotal;
-
-        // パッケージ料金を追加
-        $charges[] = array(
-          'reservation_id' => $reservation_id,
-          'branch' => $branch,
-          'date' => $event_date,
-          'item_group_id' => $row4['package_category'],
-          'item_group_name' => mb_convert_kana($row4['PackageName2'], 'KVas'),
-          'item_id' => $row4['package_id'],
-          'item_name' => mb_convert_kana($row4['NameShort'], 'KVas'),
-          'name_short' => mb_convert_kana($row4['NameShort'], 'KVas'),
-          'unit_price' => $unit_price,
-          'qty' => $qty,
-          'subtotal' => $subtotal,
-          'discount' => $discount,
-          'service_fee' => $service_fee,
-          'tax' => $tax,
-          'gross' => $gross
-        );
+      if($p_count > 0){
+        foreach ($stmt4 as $row4) {
+          $package_category = $row4['package_category'];
+          $package_name_short = mb_convert_kana($row4['NameShort'], "KVas");
+          $package_name = mb_convert_kana($row4['PackageName2'], "KVas");
+          $package_id = $row4['package_id'];
+          $unit_price = intval($row4['UnitP']);
+          $qty = intval($row4['Qty']);
+          $subtotal = intval($unit_price) * intval($qty);
+          $service_fee = $row4['ServiceFee'];
+          $tax = $row4['Tax'];
+          $discount = $row4['Discount'];
+          $gross = $row4['Gross'];
+          $total_amount += intval($gross);
+          $service_amount += intval($service_fee);
+          $tax_amount += intval($tax);
+          $discount_amount += intval($discount);
+          $subtotal_amount += $subtotal;
+          $charges[] = array(
+            'reservation_id' => $reservation_id,
+            'branch' => $branch,
+            'date' => $event_date,
+            'item_group_id' => $package_category,
+            'item_group_name' => $package_name,
+            'item_id' => $package_id,
+            'item_name' => $package_name_short,
+            'name_short' => $package_name_short,
+            'unit_price' => $unit_price,
+            'qty' => $qty,
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'service_fee' => $service_fee,
+            'tax' => $tax,
+            'gross' => $gross
+          );
+        }
       }
 
-      // ========================
-      // 単品（非パッケージ）料金
-      // ========================
+      //パック料金以外
       $sql3 = "select * from view_charges
-        where reservation_id = ? and branch = ?
+        where reservation_id = ?
+        and branch = ?
         and item_group_id NOT LIKE 'X%' 
         and package_category NOT LIKE 'F%'";
       $stmt3 = $dbh->prepare($sql3);
       $stmt3->execute([$reservation_id, $branch]);
-
-      foreach ($stmt3 as $row2) {
-        $unit_price = intval($row2['unit_price']);
-        $qty = intval($row2['qty']);
-        $subtotal = $unit_price * $qty;
-        $gross = intval($row2['amount_gross']);
-        $service_fee = intval($row2['service_fee']);
-        $tax = intval($row2['tax']);
-        $discount = intval($row2['discount_amount']);
-
-        // 金額集計
-        $total_amount += $gross;
-        $service_amount += $service_fee;
-        $tax_amount += $tax;
-        $discount_amount += $discount;
-        $subtotal_amount += $subtotal;
-
-        // 単品料金を追加
-        $charges[] = array(
-          'reservation_id' => $reservation_id,
-          'branch' => $branch,
-          'date' => $event_date,
-          'item_group_id' => $row2['item_group_id'],
-          'item_group_name' => mb_convert_kana($row2['item_group_name'], 'KVas'),
-          'item_id' => $row2['item_id'],
-          'item_name' => mb_convert_kana($row2['item_name'], 'KVas'),
-          'name_short' => mb_convert_kana($row2['name_short'], 'KVas'),
-          'unit_price' => $unit_price,
-          'qty' => $qty,
-          'subtotal' => $subtotal,
-          'service_fee' => $service_fee,
-          'tax' => $tax,
-          'discount' => $discount,
-          'gross' => $gross,
-        );
+      $count2 = $stmt3->rowCount();
+      if($count2 > 0){
+        foreach ($stmt3 as $row2) {
+          $item_group_id = $row2['item_group_id'];
+          $item_group_name = $row2['item_group_name'];
+          $item_id = $row2['item_id'];
+          $item_name = $row2['item_name'];
+          $name_short = $row2['name_short'];
+          $unit_price = $row2['unit_price'];
+          $qty= $row2['qty'];
+          $subtotal = intval($unit_price) * intval($qty);
+          $service_fee = $row2['service_fee'];
+          $tax = $row2['tax'];
+          $discount = $row2['discount_amount'];
+          $gross = $row2['amount_gross'];
+          $total_amount += intval($gross);
+          $service_amount += intval($service_fee);
+          $tax_amount += intval($tax);
+          $discount_amount += intval($discount);
+          $subtotal_amount += $subtotal;
+          $charges[] = array(
+            'reservation_id' => $reservation_id,
+            'branch' => $branch,
+            'date' => $event_date,
+            'item_group_id' => $item_group_id,
+            'item_group_name' => mb_convert_kana($item_group_name, 'KVas'),
+            'item_id' => $item_id,
+            'item_name' => mb_convert_kana($item_name, 'KVas'),
+            'name_short' => mb_convert_kana($name_short, 'KVas'),
+            'unit_price' => $unit_price,
+            'qty' => $qty,
+            'subtotal' => $subtotal,
+            'service_fee' => $service_fee,
+            'tax' => $tax,
+            'discount' => $discount,
+            'gross' => $gross,
+          );
+        }
       }
     }
   }
-
-  // 結果配列を返却
-  return array(
+  $array=array(
     'events' => $events,
     'charges' => $charges,
     'total_amount' => $total_amount,
@@ -423,62 +493,42 @@ function getConnectionList($reservation_id){
     'discount_amount' => $discount_amount,
     'subtotal_amount' => $subtotal_amount
   );
+  return $array;
 }
 
-function getDetail($scheid) {
-  // 曜日配列（0〜6: 日〜土）
+function getDetail($scheid){
   $week = array('日', '月', '火', '水', '木', '金', '土');
-
-  // DB接続
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
-
-  // 宴会スケジュールの取得
   $sql = 'select * from banquet_schedules where banquet_schedule_id = ?';
   $stmt = $dbh->prepare($sql);
   $stmt->execute([$scheid]);
   $data = $stmt->fetch();
-
-  // 各種基本情報の取得
   $reservation_id = $data['reservation_id'];
   $reservation_name = mb_convert_kana($data['reservation_name'], 'KVas');
   $branch = $data['branch'];
   $event_name = mb_convert_kana($data['event_name'], 'KVas');
+  $date=$data['date'];
 
-  // 日付・時間を DateTime で処理
-  $dateObj = new DateTime($data['date']);
-  $startObj = new DateTime($data['start']);
-  $endObj = new DateTime($data['end']);
-
-  $event_date = $dateObj->format('Y/m/d') . '(' . $week[(int)$dateObj->format('w')] . ')';
-  $start = $startObj->format('H:i');
-  $end = $endObj->format('H:i');
-
+  $event_date = date('Y/m/d ', strtotime($data['date'])) . '(' . $week[date('w', strtotime($data['date']))] . ')';
+  $start = date('H:i', strtotime($data['start']));
+  $end = date('H:i', strtotime($data['end']));
   $room_id = $data['room_id'];
   $room_name = $data['room_name'];
-
-  // 会場情報取得
   $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
   $stmt2 = $dbh->prepare($sql2);
   $stmt2->execute([$room_id]);
   $room = $stmt2->fetch();
   $floor = $room['floor'];
-
-  // 担当者・その他情報
   $pic = mb_convert_kana($data['pic'], 'KVas');
   $enable = $data['enable'];
   $people = $data['people'];
   $status = mb_convert_kana($data['status_name'], 'KVas');
-
-  // 使用目的の取得
   $purpose_id = $data['purpose_id'];
   $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
   $stmt3 = $dbh->prepare($sql3);
   $stmt3->execute([$purpose_id]);
   $purpose = $stmt3->fetch();
   $purpose_name = $purpose['banquet_purpose_name'];
-  $banquet_category_id = $purpose['banquet_category_id'];
-
-  // レイアウト情報
   $layout_id = $data['layout_id'];
   $sql5 = 'select * from banquet_layouts where layout_id = ?';
   $stmt5 = $dbh->prepare($sql5);
@@ -486,20 +536,17 @@ function getDetail($scheid) {
   $layout = $stmt5->fetch();
   $layout_name = $layout['layout_name'];
   $layout_name2 = $data['layout_name'];
-
-  // カテゴリ情報
+  $banquet_category_id = $purpose['banquet_category_id'];
   $sql4 = 'select * from banquet_categories where banquet_category_id = ?';
   $stmt4 = $dbh->prepare($sql4);
   $stmt4->execute([$banquet_category_id]);
   $category = $stmt4->fetch();
   $category_name = $category['banquet_category_name'];
-
-  // エージェント情報
   $agent_id = $data['agent_id'];
   $agent_name = $data['agent_name'];
   $agent_group = '';
   $agent_group_short = '';
-  if ($agent_id > 0) {
+  if($agent_id > 0){
     $sql6 = 'select * from banquet_agents where agent_id = ?';
     $stmt6 = $dbh->prepare($sql6);
     $stmt6->execute([$agent_id]);
@@ -507,17 +554,15 @@ function getDetail($scheid) {
     $agent_group = $agent['agent_group'];
     $agent_group_short = $agent['agent_group_short'];
   }
-
   $reserver = mb_convert_kana($data['reserver'], 'KVas');
 
-  // 詳細データ作成
   $detail = array(
     '管理ID' => $scheid,
     'NEHOPS予約ID' => $reservation_id,
     '予約名' => $reservation_name,
     '明細枝番' => $branch,
     '行灯名称' => $event_name,
-    '利用日' => $dateObj->format('Y-m-d'),
+    '利用日' => $date,
     '開始時間' => $start,
     '終了時間' => $end,
     '人数' => $people,
@@ -539,75 +584,84 @@ function getDetail($scheid) {
     'デジサイ表示' => $enable
   );
 
-  // ====================
-  // 料金情報の取得処理
-  // ====================
+  // 料金情報
   $charge = array();
   $total_amount = 0;
   $service_amount = 0;
   $tax_amount = 0;
   $discount_amount = 0;
   $subtotal_amount = 0;
-
-  // パッケージ料金
+  // パック料金
   $sql6 = 'select * from view_package_charges where reservation_id = ? and branch = ?';
   $stmt6 = $dbh->prepare($sql6);
   $stmt6->execute([$reservation_id, $branch]);
-  foreach ($stmt6 as $row6) {
-    $unit_price = intval($row6['UnitP']);
-    $qty = intval($row6['Qty']);
-    $subtotal = $unit_price * $qty;
-    $service_fee = intval($row6['ServiceFee']);
-    $tax = intval($row6['Tax']);
-    $discount = intval($row6['Discount']);
-    $gross = intval($row6['Gross']);
-
-    $charge[] = array(
-      'reservation_id' => $reservation_id,
-      'branch' => $branch,
-      'item_group_id' => $row6['package_id'],
-      'item_group_name' => mb_convert_kana($row6['PackageName2'], "KVas"),
-      'item_id' => $row6['package_id'],
-      'item_name' => mb_convert_kana($row6['NameShort'], "KVas"),
-      'unit_price' => number_format($unit_price),
-      'qty' => number_format($qty),
-      'subtotal' => number_format($subtotal),
-      'discount' => number_format($discount),
-      'service_fee' => number_format($service_fee),
-      'tex' => number_format($tax),
-      'gross' => number_format($gross)
-    );
-
-    // 合計金額の加算
-    $total_amount += $gross;
-    $service_amount += $service_fee;
-    $tax_amount += $tax;
-    $discount_amount += $discount;
-    $subtotal_amount += $subtotal;
+  $f_count = $stmt6->rowCount();
+  if($f_count > 0){
+    foreach ($stmt6 as $row6) {
+      $package_category = $row6['package_category'];
+      $package_name_short = mb_convert_kana($row6['NameShort'], "KVas");
+      $package_name = mb_convert_kana($row6['PackageName2'], "KVas");
+      $package_id = $row6['package_id'];
+      $unit_price = intval($row6['UnitP']);
+      $qty = intval($row6['Qty']);
+      $subtotal = intval($unit_price) * intval($qty);
+      $service_fee = $row6['ServiceFee'];
+      $tax = $row6['Tax'];
+      $discount = $row6['Discount'];
+      $gross = $row6['Gross'];
+      $charge[] = array(
+        'reservation_id' => $reservation_id,
+        'branch' => $branch,
+        'item_group_id' => $package_id,
+        'item_group_name' => $package_name,
+        'item_id' => $package_id,
+        'item_name' => $package_name_short,
+        'unit_price' => number_format($unit_price),
+        'qty' => number_format($qty),
+        'subtotal' => number_format($subtotal),
+        'discount' => number_format($discount),
+        'service_fee' => number_format($service_fee),
+        'tex' => number_format($tax),
+        'gross' => number_format($gross)
+      );
+      $total_amount += intval($gross);
+      $service_amount += intval($service_fee);
+      $tax_amount += intval($tax);
+      $discount_amount += intval($discount);
+      $subtotal_amount += $subtotal;
+    }
   }
-
-  // 単品料金（パック以外）
-  $sql7 = 'select * from view_charges where reservation_id = ? and branch = ? and item_group_id NOT LIKE \'X%\' and package_category NOT LIKE \'F%\'';
+  //パッケージ以外の料理
+  $sql7 = 'select * from view_charges
+    where `reservation_id` = ?
+    and `branch` = ?
+    and item_group_id NOT LIKE \'X%\'
+    and package_category NOT LIKE \'F%\'';
   $stmt7 = $dbh->prepare($sql7);
   $stmt7->execute([$reservation_id, $branch]);
   $charges = $stmt7->fetchAll(PDO::FETCH_ASSOC);
-
-  foreach ($charges as $row) {
-    $unit_price = intval($row['unit_price']);
-    $qty = intval($row['qty']);
-    $subtotal = $unit_price * $qty;
-    $service_fee = intval($row['service_fee']);
-    $tax = intval($row['tax']);
-    $discount = intval($row['discount_amount']);
-    $gross = intval($row['amount_gross']);
-
+  
+  foreach($charges as $row){
+    $item_group_id = $row['item_group_id'];
+    $item_group_name = $row['item_group_name'];
+    $item_id = $row['item_id'];
+    $item_name = $row['item_name'];
+    $name_short = $row['name_short'];
+    $unit_price = $row['unit_price'];
+    $qty= $row['qty'];
+    $subtotal = intval($unit_price) * intval($qty);
+    $service_fee = $row['service_fee'];
+    $tax = $row['tax'];
+    $discount = $row['discount_amount'];
+    $gross = $row['amount_gross'];
+    
     $charge[] = array(
       'reservation_id' => $reservation_id,
       'branch' => $branch,
-      'item_group_id' => $row['item_group_id'],
-      'item_group_name' => $row['item_group_name'],
-      'item_id' => $row['item_id'],
-      'item_name' => $row['item_name'],
+      'item_group_id' => $item_group_id,
+      'item_group_name' => $item_group_name,
+      'item_id' => $item_id,
+      'item_name' => $item_name,
       'unit_price' => number_format($unit_price),
       'qty' => number_format($qty),
       'subtotal' => number_format($subtotal),
@@ -616,17 +670,13 @@ function getDetail($scheid) {
       'tex' => number_format($tax),
       'gross' => number_format($gross)
     );
-
-    // 合計金額の加算
-    $total_amount += $gross;
-    $service_amount += $service_fee;
-    $tax_amount += $tax;
-    $discount_amount += $discount;
+    $total_amount += intval($gross);
+    $service_amount += intval($service_fee);
+    $tax_amount += intval($tax);
+    $discount_amount += intval($discount);
     $subtotal_amount += $subtotal;
   }
-
-  // 返却配列の組み立て
-  return array(
+  $array=array(
     'detail' => $detail,
     'charges' => $charge,
     'total_amount' => $total_amount,
@@ -635,46 +685,39 @@ function getDetail($scheid) {
     'discount_amount' => $discount_amount,
     'subtotal_amount' => $subtotal_amount
   );
+  return $array;
 }
 
-function getMonthlySales($ym) {
+function getMonthlySales($ym){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
+  #$week = array( "日", "月", "火", "水", "木", "金", "土" );
+  $last_day = date('t', strtotime($ym));
+  $year_month = date('Y年 m月', strtotime($ym));
 
-  // 指定年月の月末日を取得（例：2024-06 → 30）
-  $ymObj = new DateTime($ym);
-  $last_day = $ymObj->format('t');
-
-  // 表示用年月（例：2024年 06月）
-  $year_month = $ymObj->format('Y年 m月');
-
-  // 日別売上サブトータルを取得（目的ID=3を除外）
-  $sql = "SELECT * FROM `view_daily_subtotal` WHERE `ym` = :ym AND `purpose_id` <> 3";
-  $stmt = $dbh->prepare($sql);
+  $sql = "SELECT * FROM `view_daily_subtotal` where `ym` = :ym and `purpose_id` <> 3";
+  $stmt = $dbh->prepare($sql); 
   $stmt->bindValue(':ym', $ym, PDO::PARAM_STR);
   $stmt->execute();
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $s_count = count($rows);
 
-  // 各カテゴリごとの売上初期化
   $sales = array();
   $total_enkai = 0;
   $total_kaigi = 0;
   $total_shokuji = 0;
   $total_others = 0;
   $total = 0;
-
-  if (count($rows) > 0) {
-    foreach ($rows as $row) {
+  if($s_count > 0) {
+    foreach($rows as $row) {
       $room_id = $row['room_id'];
       $date = $row['date'];
-      $reservation_name = cleanLanternName($row['reservation_name']); // 表示名クリーニング
+      $reservation_name = cleanLanternName($row['reservation_name']);
       $people = $row['people'];
       $banquet_category_id = $row['banquet_category_id'];
-      $start = $row['start'];
+      $start= $row['start'];
       $end = $row['end'];
       $gross = $row['gross'];
-      $ex_ts = $row['ex-ts']; // 売上集計対象金額
-
-      // 日別売上一覧へ追加
+      $ex_ts = $row['ex-ts'];
       $sales[] = array(
         'room_id' => $room_id,
         'date' => $date,
@@ -686,42 +729,38 @@ function getMonthlySales($ym) {
         'gross' => $gross,
         'ex_ts' => $ex_ts
       );
-
-      // カテゴリ別合計の集計
       $total += $ex_ts;
-      switch ($banquet_category_id) {
-        case 1:
-          $total_kaigi += $ex_ts; break;
-        case 2:
-          $total_enkai += $ex_ts; break;
-        case 3:
-          $total_shokuji += $ex_ts; break;
-        case 9:
-          $total_others += $ex_ts; break;
+      if($banquet_category_id == 1) {
+        $total_kaigi += $ex_ts;
+      } elseif($banquet_category_id == 2) {
+        $total_enkai += $ex_ts;
+      } elseif($banquet_category_id == 3) {
+        $total_shokuji += $ex_ts;
+      } elseif($banquet_category_id == 9) {
+        $total_others += $ex_ts;
       }
     }
-  }
-
-  // カレンダー表示対象の会場を取得
+  } 
   $rooms = array();
   $sql = "SELECT * FROM `banquet_rooms` WHERE `cal` = 1 ORDER BY `order` DESC, `banquet_room_id` ASC";
-  $room_rows = $dbh->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-
-  if (count($room_rows) === 0) {
+  $stmt = $dbh->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+  $count = count($stmt);
+  if($count == 0) {
     echo "会場が登録されていません。<br>";
     exit;
   }
+  foreach($stmt as $row) {
+    $room_id = $row['banquet_room_id'];
+    $room_name = $row['name'];
+    $floor = $row['floor'];
 
-  foreach ($room_rows as $row) {
-    $rooms[] = array(
-      'room_id' => $row['banquet_room_id'],
-      'room_name' => $row['name'],
-      'floor' => $row['floor']
+    $rooms[]= array(
+      'room_id' => $room_id,
+      'room_name' => $room_name,
+      'floor' => $floor,
     );
   }
-
-  // 結果をまとめて返却
-  return array(
+  $array =array(
     'ym' => $ym,
     'year_month' => $year_month,
     'last_day' => $last_day,
@@ -733,12 +772,12 @@ function getMonthlySales($ym) {
     'total_others' => $total_others,
     'total' => $total
   );
+  return $array;
 }
 
 function getDefectList($ym){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
-  $ymObj = new DateTime($ym);
-  $first_day = $ymObj->format('Y-m-01');
+  $first_day = date('Y-m-01', strtotime($ym));
 
 
   $defects = array();
