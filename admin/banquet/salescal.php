@@ -66,8 +66,9 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
       <div id="before_month"><a href="?ym=<?= $before_month ?>"><i class="fa-solid fa-arrow-left"></i>前月</a></div>
       <div id="this_month"><a href="?ym=<?= $this_month ?>">今月</a></div>
       <div id="after_month"><a href="?ym=<?= $after_month ?>">翌月<i class="fa-solid fa-arrow-right"></i></a></div>
-      <div id="download"><a href="output/salescal-csv.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-download"></i>CSV</a></div>
-      <div id="download"><a href="output/salescal-csv2.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-download"></i>CSV2</a></div>
+      <div id="download"><a href="output/salescal-csv2.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-download"></i>CSV</a></div>
+      <div id="download"><a href="output/salescal-excel-export.php?ym=<?= $ym ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
+
     </div>
   </div>
   <div><?=$year_month ?></div>

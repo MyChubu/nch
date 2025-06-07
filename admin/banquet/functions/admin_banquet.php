@@ -644,13 +644,20 @@ function getMonthlySales($ym) {
   $ymObj = new DateTime($ym);
   $last_day = $ymObj->format('t');
 
+  // 月初日を取得（例：2024-06 → 2024-06-01）
+  $first_day = $ymObj->format('Y-m-01');
+  // 月末日を取得（例：2024-06 → 2024-06-30）
+  $end_day = $ymObj->format('Y-m-' . $last_day);
+  
+
   // 表示用年月（例：2024年 06月）
   $year_month = $ymObj->format('Y年 m月');
 
   // 日別売上サブトータルを取得（目的ID=3を除外）
-  $sql = "SELECT * FROM `view_daily_subtotal` WHERE `ym` = :ym AND `purpose_id` <> 3";
+  $sql = "SELECT * FROM `view_daily_subtotal` WHERE `date` BETWEEN :fd AND :ed AND `purpose_id` NOT IN (3) ORDER BY `date` ASC";
   $stmt = $dbh->prepare($sql);
-  $stmt->bindValue(':ym', $ym, PDO::PARAM_STR);
+  $stmt->bindValue(':fd', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':ed', $end_day, PDO::PARAM_STR);
   $stmt->execute();
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

@@ -1,162 +1,494 @@
 <?php
+// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
+# ini_set('display_errors', 1);
+# ini_set('display_startup_errors', 1);
+# error_reporting(E_ALL);
+
 require_once('../../../common/conf.php');
-require_once ('../../../phpspreadsheet/vendor/autoload.php');
-use PhpOffice\PhpSpreadsheet\IOFactory;
+require_once('../functions/admin_banquet.php');
+require_once('../../../phpspreadsheet/vendor/autoload.php');
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
-$ym = date('Y-m');
-if(isset($_REQUEST['ym']) && $_REQUEST['ym'] != '') {
-  $ym = $_REQUEST['ym'];
-}
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
-$last_day = date('t', strtotime($ym));
-$year_month = date('Y年 m月', strtotime($ym));
-
-$sql = "SELECT * FROM `view_daily_subtotal` where `ym` = :ym and `purpose_id` <> 3";
-$stmt = $dbh->prepare($sql); 
-$stmt->bindValue(':ym', $ym, PDO::PARAM_STR);
-$stmt->execute();
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$s_count = count($rows);
-
-$sales = array();
-if($s_count > 0) {
-  foreach($rows as $row) {
-    $status = $row['status_name'];
-    $room_id = $row['room_id'];
-    $room_name = $row['room_name'];
-    $date = $row['date'];
-    $reservation_id = $row['reservation_id'];
-    $reservation_name = $row['reservation_name'];
-    $branch = $row['branch'];
-    $short_name = cleanLanternName($reservation_name);
-    $people = $row['people'];
-    $banquet_category_id = $row['banquet_category_id'];
-    $banquet_category_name = $row['banquet_category_name'];
-    $start= $row['start'];
-    $end = $row['end'];
-    $gross = $row['gross'];
-    $ex_ts = $row['ex-ts'];
-    if(!$ex_ts) {
-      $ex_ts = 0;
-    }
-    $sales[] = array(
-      'status'=>$status,
-      'banquet_category_name' => $banquet_category_name,
-      'reservation_id' => $reservation_id,
-      'branch' => $branch,
-      'date' => date('Y/m/d',strtotime($date)),
-      'floor' => '',
-      'room_name' => $room_name,
-      'short_name' => $short_name,
-      'people' => $people,
-      'start' => date('H:i',strtotime($start)),
-      'end' => date('H:i',strtotime($end)),
-      'room_id' => $room_id,
-      'banquet_category_id' => $banquet_category_id,
-      'ex_ts' => $ex_ts
-    );
-  }
-}
-
-try {
-  $filename = 'salescal2-'.$ym.'-'.date('YmdHis').'.csv';
-  header('Content-Type: text/csv; charset=Shift_JIS');
-  header('Content-Disposition: attachment; filename="'.$filename.'"');
-  $output = fopen('php://output', 'w');
- 
-  // CSVのヘッダ行
-  $header = array(
-    '予約状態名称',
-    '分類',
-    '予約番号',
-    '会場枝番',
-    '会場使用日',
-    'フロア',
-    '会場名称',
-    '予約名称',
-    '会場予約人数',
-    '宴会開始時間',
-    '宴会終了時間',
-    '会場コード',
-    '分類コード',
-    '金額'
-  );
-  fputcsv($output, array_map(function($v){ return mb_convert_encoding($v, 'SJIS-win', 'UTF-8'); }, $header));
-
-  // データ行
-  foreach($sales as $sale) {
-    $encodedRow = array_map(function($v){
-      return mb_convert_encoding($v, 'SJIS-win', 'UTF-8');
-    }, $sale);
-    fputcsv($output, $encodedRow);
-  }
-
-
-  fclose($output);
-} catch (Exception $e) {
-  echo "Error: " . $e->getMessage();
-}
-function cleanLanternName($name) {
-  // 不要な法人名接尾辞のリスト
-  $replaceWords = [
-      "株式会社", "㈱", "（株）", "(株)",
-      "一般社団法人", "(一社)", "（一社）",
-      "公益社団法人", "(公社)", "（公社）",
-      "有限会社", "㈲", "（有）", "(有)",
-      "一般財団法人", "(一財)", "（一財）",
-      "公益財団法人", "(公財)", "（公財）",
-      "財団法人", "(財)", "（財）",
-      "合同会社", "(同)", "（同）",
-      "学校法人", "(学)", "（学）",
-      "医療法人", "(医)", "（医）",
-      "社会福祉法人", "(社)", "（社）",
-      "宗教法人", "(宗)", "（宗）",
-      "特定非営利活動法人", "(特)", "（特）",
-      "医療法人社団", "(医社)", "（医社）",
-      "医療法人財団", "(医財)", "（医財）",
-      "(下見)","（下見）","【下見】", "下見", "下見 ", "下見　"
+function applyCategoryColor($sheet, $cell, $banquet_category_id) {
+  $colors = [
+    1 => 'FF92D050',
+    2 => 'FFFFFF00',
+    3 => 'FFFFC000',
+    9 => 'FFDDEBF7',
   ];
-
-  // 不要語句の削除
-  foreach ($replaceWords as $word) {
-      $name = str_replace($word, "", $name);
+  if (isset($colors[$banquet_category_id])) {
+    $sheet->getStyle($cell)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($colors[$banquet_category_id]);
   }
-
-  // 「第〇回」の削除（半角数字／全角数字／漢数字に対応）
-  $name = preg_replace("/第[0-9０-９一二三四五六七八九十百千万億兆]+回/u", "", $name);
-
-  // 西暦年度（例: 2025年度）の削除
-  $name = preg_replace("/[0-9０-９]{4}年度/u", "", $name);
-
-  // 和暦年度（例: 令和7年度、平成31年度）の削除
-  $name = preg_replace("/(令和|平成|昭和)[0-9０-９一二三四五六七八九十百千万]+年度/u", "", $name);
-  
-  $name = preg_replace("/[0-9０-９]{2}年度/u", "", $name);
-
-  $name = str_replace("小学校", "小", $name);
-  $name = str_replace("中学校", "中", $name);
-  $name = str_replace("高等学校", "高", $name);
-  $name = str_replace("高等専門学校", "高専", $name);
-  $name = str_replace("大学校", "大", $name);
-  $name = str_replace("専門学校", "専", $name);
-  $name = str_replace("短期大学", "短", $name);
-  $name = str_replace("労働組合連合会", "労連", $name);
-  $name = str_replace("労働組合", "労組", $name);
-  $name = str_replace("協同組合", "協組", $name);
-  $name = str_replace("協同組合連合会", "協連", $name);
-  $name = str_replace("連合会", "連", $name);
-  $name = str_replace("倫理法人会", "倫理", $name);
-  // 先頭の半角・全角スペースを削除
-  $name = preg_replace("/^[ 　]+/u", "", $name);
-
-  // 最初に出てくるスペース（半角・全角）で前半だけに分ける
-  $parts = preg_split("/[ 　]/u", $name, 2);  // 2つに分割（前後）
-  $name = $parts[0];  // 前半部分だけ使用
-
-  // 最初の10文字に切り詰め
-  $name = mb_substr($name, 0, 10);
-
-  return $name;
 }
+
+function centerCell($sheet, $cell) {
+  $sheet->getStyle($cell)->getAlignment()
+    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+    ->setVertical(Alignment::VERTICAL_CENTER);
+}
+
+function formatAmount($sheet, $cell) {
+  $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0');
+}
+
+function applyHeaderStyle($sheet, $cell) {
+  $sheet->getStyle($cell)->getFill()
+    ->setFillType(Fill::FILL_SOLID)
+    ->getStartColor()->setARGB('FFD9D9D9');
+  centerCell($sheet, $cell);
+  applyThinTopBorder($sheet, $cell);
+}
+
+function applyThinBorder($sheet, $cell) {
+  $sheet->getStyle($cell)
+    ->getBorders()->getBottom()
+    ->setBorderStyle(Border::BORDER_THIN);
+  $sheet->getStyle($cell)
+    ->getBorders()->getLeft()
+    ->setBorderStyle(Border::BORDER_THIN);
+  $sheet->getStyle($cell)
+    ->getBorders()->getRight()
+    ->setBorderStyle(Border::BORDER_THIN);
+}
+
+function applyThinTopBorder($sheet, $cell) {
+  $sheet->getStyle($cell)
+    ->getBorders()->getTop()
+    ->setBorderStyle(Border::BORDER_THIN);
+}
+
+// 横罫線（点線）を行全体に適用
+function applyDottedBottomBorder($sheet, $cell) {
+  // 点線の下罫線を設定
+  $sheet->getStyle($cell)
+    ->getBorders()->getBottom()
+    ->setBorderStyle(Border::BORDER_DOTTED);
+
+  // 左端と右端に実線の縦罫線を設定
+  $sheet->getStyle($cell)
+    ->getBorders()->getLeft()
+    ->setBorderStyle(Border::BORDER_THIN);
+
+  $sheet->getStyle($cell)
+    ->getBorders()->getRight()
+    ->setBorderStyle(Border::BORDER_THIN);
+}
+
+
+$ym = $_GET['ym'] ?? date('Y-m');
+$data = getMonthlySales($ym);
+$week = ['日', '月', '火', '水', '木', '金', '土'];
+$add_col = 32 - $data['last_day'];
+
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+// シート名を「2025年08月」形式に
+$dt = DateTime::createFromFormat('Y-m', $ym);
+$sheetName = $dt->format('Y年m月');
+$sheet->setTitle($sheetName);
+
+$spreadsheet->getDefaultStyle()->getFont()->setSize(9);
+$sheet->getColumnDimension('A')->setWidth(9);
+$sheet->getColumnDimension('B')->setWidth(10);
+$sheet->getColumnDimension('C')->setWidth(12);
+foreach (range('D', 'S') as $col) {
+  $sheet->getColumnDimension($col)->setWidth(19);
+}
+
+$row = 1;
+$sheet->setCellValue("A{$row}", $data['year_month']);
+$sheet->getStyle("A{$row}")->getFont()
+  ->setSize(20)
+  ->setBold(true)
+  ->setItalic(true);
+
+$row += 2;
+
+// ▼ 前半の見出し出力
+$sheet->setCellValue("A{$row}", '階');
+applyHeaderStyle($sheet, "A{$row}");
+$sheet->setCellValue("B{$row}", '会場名');
+applyHeaderStyle($sheet, "B{$row}");
+$sheet->setCellValue("C{$row}", '項目');
+applyHeaderStyle($sheet, "C{$row}");
+centerCell($sheet, "A{$row}");
+centerCell($sheet, "B{$row}");
+centerCell($sheet, "C{$row}");
+applyThinBorder($sheet, "A{$row}");
+applyThinBorder($sheet, "B{$row}");
+applyThinBorder($sheet, "C{$row}");
+
+$col = 'D';
+for ($i = 1; $i <= 16; $i++) {
+  $date = "$ym-" . sprintf('%02d', $i);
+  $w = (new DateTime($date))->format('w');
+  $header = ($i === 1 ? ((int)date('n', strtotime($date)) . '/' . $i) : $i) . ' (' .$week[$w]  . ')';
+  $cell = $col . $row;
+  $sheet->setCellValue($cell, $header);
+  applyHeaderStyle($sheet, $cell);
+  centerCell($sheet, $cell);
+  applyThinBorder($sheet, $cell);
+  $col++;
+}
+$row++;
+
+foreach ($data['rooms'] as $room) {
+  $mergeStartRow = $row;
+  $room_id = $room['room_id'];
+  $sheet->setCellValue("A{$row}", $room['floor']);
+  $sheet->mergeCells("A{$mergeStartRow}:A" . ($mergeStartRow + 2));
+  $sheet->mergeCells("A{$mergeStartRow}:A" . ($mergeStartRow + 2));
+  $sheet->setCellValue("B{$row}", $room['room_name']);
+  $sheet->mergeCells("B{$mergeStartRow}:B" . ($mergeStartRow + 2));
+  $sheet->mergeCells("B{$mergeStartRow}:B" . ($mergeStartRow + 2));
+  $sheet->setCellValue("C{$row}", '名称');
+  centerCell($sheet, "A{$row}"); centerCell($sheet, "B{$row}"); centerCell($sheet, "C{$row}");
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  applyDottedBottomBorder($sheet, "C{$row}");
+  $col = 'D';
+  $hasReservation = [];
+  for ($i = 1; $i <= 16; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = $sale['reservation_name'];
+        $bc = $sale['banquet_category_id'];
+        $hasReservation[$i] = true;
+        break;
+      }
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyDottedBottomBorder($sheet, $cell);
+    $col++;
+  }
+  $row++;
+  
+
+
+  $sheet->setCellValue("C{$row}", '時間（人数）');
+  centerCell($sheet, "C{$row}");
+  applyDottedBottomBorder($sheet, "C{$row}");
+  $col = 'D';
+  for ($i = 1; $i <= 16; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = (new DateTime($sale['start']))->format('H:i') . '-' . (new DateTime($sale['end']))->format('H:i') . " ({$sale['people']})";
+        $bc = $sale['banquet_category_id'];
+        break;
+      }
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyDottedBottomBorder($sheet, $cell);
+    $col++;
+  }
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  $row++;
+  
+
+
+  $sheet->setCellValue("C{$row}", '金額');
+  centerCell($sheet, "C{$row}");
+  applyThinBorder($sheet, "C{$row}");
+  $col = 'D';
+  for ($i = 1; $i <= 16; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    $hasSale = false;
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = ($sale['ex_ts'] !== null) ? $sale['ex_ts'] : 0;
+        $bc = $sale['banquet_category_id'];
+        $hasSale = true;
+        break;
+      }
+    }
+    if (!$hasSale && isset($hasReservation[$i])) {
+      $value = 0;
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyThinBorder($sheet, $cell);
+    if ($value !== '') formatAmount($sheet, $cell);
+    $col++;
+  }
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  $row++;
+    
+
+}
+
+// ▼ 後半の見出し出力
+$row++; // 前半と後半の間に1行空ける
+$sheet->setCellValue("A{$row}", '階');
+applyHeaderStyle($sheet, "A{$row}");
+$sheet->setCellValue("B{$row}", '会場名');
+applyHeaderStyle($sheet, "B{$row}");
+$sheet->setCellValue("C{$row}", '項目');
+applyHeaderStyle($sheet, "C{$row}");
+centerCell($sheet, "A{$row}");
+centerCell($sheet, "B{$row}");
+centerCell($sheet, "C{$row}");
+applyThinBorder($sheet, "A{$row}");
+applyThinBorder($sheet, "B{$row}");
+applyThinBorder($sheet, "C{$row}");
+$col = 'D';
+for ($i = 17; $i <= $data['last_day']; $i++) {
+  $date = "$ym-" . sprintf('%02d', $i);
+  $w = (new DateTime($date))->format('w');
+  $header = ($i === 17 ? ((int)date('n', strtotime($date)) . '/' . $i) : $i) . ' ('. $week[$w] .')';
+  $cell = $col . $row;
+  $sheet->setCellValue($cell, $header);
+  applyHeaderStyle($sheet, $cell);
+  centerCell($sheet, $cell);
+  applyThinBorder($sheet, $cell);
+  $col++;
+}
+for ($i = 0; $i < $add_col; $i++) {
+  $cell = $col++ . $row;
+  $sheet->setCellValue($cell, '');
+  centerCell($sheet, $cell);
+}
+$row++;
+
+foreach ($data['rooms'] as $room) {
+  $room_id = $room['room_id'];
+  $mergeStartRow = $row;
+  $sheet->setCellValue("A{$row}", $room['floor']);
+  $sheet->setCellValue("B{$row}", $room['room_name']);
+  $mergeStartRow = $row;
+  $sheet->mergeCells("A{$mergeStartRow}:A" . ($mergeStartRow + 2));
+  $sheet->mergeCells("B{$mergeStartRow}:B" . ($mergeStartRow + 2));
+
+  $sheet->setCellValue("C{$row}", '名称');
+  centerCell($sheet, "A{$row}"); centerCell($sheet, "B{$row}"); centerCell($sheet, "C{$row}");
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  applyDottedBottomBorder($sheet, "C{$row}");
+  $col = 'D';
+  $hasReservation = [];
+  for ($i = 17; $i <= $data['last_day']; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = $sale['reservation_name'];
+        $bc = $sale['banquet_category_id'];
+        $hasReservation[$i] = true;
+        break;
+      }
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyDottedBottomBorder($sheet, $cell);
+    $col++;
+  }
+  for ($i = 0; $i < $add_col; $i++) {
+    $cell = $col++ . $row;
+    $sheet->setCellValue($cell, '');
+    centerCell($sheet, $cell);
+  }
+  $row++;
+
+  $sheet->setCellValue("C{$row}", '時間（人数）');
+  centerCell($sheet, "C{$row}");
+  applyDottedBottomBorder($sheet, "C{$row}");
+  $col = 'D';
+  for ($i = 17; $i <= $data['last_day']; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = (new DateTime($sale['start']))->format('H:i') . '-' . (new DateTime($sale['end']))->format('H:i') . " ({$sale['people']})";
+        $bc = $sale['banquet_category_id'];
+        break;
+      }
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyDottedBottomBorder($sheet, $cell);
+    $col++;
+  }
+  for ($i = 0; $i < $add_col; $i++) {
+    $cell = $col++ . $row;
+    $sheet->setCellValue($cell, '');
+    centerCell($sheet, $cell);
+  }
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  $row++;
+
+  $sheet->setCellValue("C{$row}", '金額');
+  centerCell($sheet, "C{$row}");
+  applyThinBorder($sheet, "C{$row}");
+  $col = 'D';
+  for ($i = 17; $i <= $data['last_day']; $i++) {
+    $value = '';
+    $bc = 0;
+    $date = "$ym-" . sprintf('%02d', $i);
+    $hasSale = false;
+    foreach ($data['sales'] as $sale) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        $value = ($sale['ex_ts'] !== null) ? $sale['ex_ts'] : 0;
+        $bc = $sale['banquet_category_id'];
+        $hasSale = true;
+        break;
+      }
+    }
+    if (!$hasSale && isset($hasReservation[$i])) {
+      $value = 0;
+    }
+    $cell = $col . $row;
+    $sheet->setCellValue($cell, $value);
+    centerCell($sheet, $cell);
+    applyCategoryColor($sheet, $cell, $bc);
+    applyThinBorder($sheet, $cell);
+    if ($value !== '') formatAmount($sheet, $cell);
+    $col++;
+  }
+  for ($i = 0; $i < $add_col; $i++) {
+    $cell = $col++ . $row;
+    $sheet->setCellValue($cell, '');
+    centerCell($sheet, $cell);
+  }
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  $row++;
+
+
+}
+
+// 合計表出力
+// 合計表出力（ヘッダー）
+$row += 2;
+$sheet->setCellValue("A{$row}", '項目');
+$sheet->setCellValue("C{$row}", '金額');
+$sheet->mergeCells("A{$row}:B{$row}"); // ← ★ここで結合！
+$sheet->mergeCells("C{$row}:D{$row}"); // ← ★ここでも結合！
+
+centerCell($sheet, "A{$row}");
+centerCell($sheet, "C{$row}");
+applyHeaderStyle($sheet, "A{$row}");
+applyHeaderStyle($sheet, "B{$row}"); 
+applyHeaderStyle($sheet, "C{$row}");
+applyHeaderStyle($sheet, "D{$row}");
+applyThinBorder($sheet, "A{$row}");
+applyThinBorder($sheet, "B{$row}");
+applyThinBorder($sheet, "C{$row}");
+applyThinBorder($sheet, "D{$row}");
+$sheet->getStyle("D{$row}")
+  ->getBorders()->getRight()
+  ->setBorderStyle(Border::BORDER_THIN);
+$row++;
+
+
+$totals = [
+  ['会議', $data['total_kaigi']],
+  ['宴会', $data['total_enkai']],
+  ['食事', $data['total_shokuji']],
+  ['その他', $data['total_others']],
+  ['合計', $data['total']],
+];
+
+$category_ids = [
+  '会議' => 1,
+  '宴会' => 2,
+  '食事' => 3,
+  'その他' => 9,
+  '合計' => 0, // 色を付けたくない場合はIDを 0 にする or 条件でスキップ
+];
+
+// 合計データ行出力
+foreach ($totals as [$label, $amount]) {
+  $sheet->setCellValue("A{$row}", $label);
+  $sheet->setCellValue("C{$row}", $amount);
+  $sheet->mergeCells("A{$row}:B{$row}"); // ← ★ここでも結合！
+  $sheet->mergeCells("C{$row}:D{$row}"); // ← ★ここでも結合！
+  centerCell($sheet, "A{$row}");
+  centerCell($sheet, "C{$row}");
+  applyThinBorder($sheet, "A{$row}");
+  applyThinBorder($sheet, "B{$row}");
+  applyThinBorder($sheet, "C{$row}");
+  applyThinBorder($sheet, "D{$row}");
+  $sheet->getStyle("D{$row}")
+  ->getBorders()->getRight()
+  ->setBorderStyle(Border::BORDER_THIN);
+  formatAmount($sheet, "C{$row}");
+
+  // 背景色
+  $cat_id = $category_ids[$label] ?? 0;
+  if ($cat_id !== 0) {
+    applyCategoryColor($sheet, "A{$row}", $cat_id);
+    applyCategoryColor($sheet, "C{$row}", $cat_id);
+  }
+  $sheet->getStyle("A{$row}")->getFont()
+    ->setSize(15);
+  $sheet->getStyle("C{$row}")->getFont()
+    ->setSize(15)
+    ->setBold(true);
+
+  $row++;
+}
+
+// 用紙サイズ A3 に設定
+$sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
+// 向き：縦（ポートレート）
+$sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+
+
+// 余白を「狭く」（単位はインチ：1インチ＝2.54cm）
+$sheet->getPageMargins()->setTop(0.25);
+$sheet->getPageMargins()->setRight(0.25);
+$sheet->getPageMargins()->setLeft(0.25);
+$sheet->getPageMargins()->setBottom(0.25);
+
+// 全体を1ページに収める（横：1ページ、高さ：自動または1）
+$sheet->getPageSetup()->setFitToWidth(1);
+$sheet->getPageSetup()->setFitToHeight(1); // 高さはページ分割OKの場合
+
+// 印刷範囲も必要に応じて設定（例：A1 ～ 最終列/行）
+$lastCol = 'S'; // または $col の値を使って算出
+$lastRow = $row - 1;
+$sheet->getPageSetup()->setPrintArea("A1:{$lastCol}{$lastRow}");
+
+
+$now = date('YmdHis');
+$filename = "sales-{$ym}-{$now}.xlsx";
+
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header("Content-Disposition: attachment; filename={$filename}");
+header('Cache-Control: max-age=0');
+$writer = new Xlsx($spreadsheet);
+$writer->save('php://output');
+exit;
+
 ?>
