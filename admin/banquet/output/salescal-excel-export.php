@@ -128,8 +128,11 @@ applyThinBorder($sheet, "C{$row}");
 $col = 'D';
 for ($i = 1; $i <= 16; $i++) {
   $date = "$ym-" . sprintf('%02d', $i);
-  $w = (new DateTime($date))->format('w');
-  $header = ($i === 1 ? ((int)date('n', strtotime($date)) . '/' . $i) : $i) . ' (' .$week[$w]  . ')';
+  $dateObj = new DateTime($date);
+  $day = (int)$dateObj->format('j');   // 日
+  $month = (int)$dateObj->format('n'); // 月
+  $w = (int)$dateObj->format('w');     // 曜日番号（0=日）
+  $header = ($i === 1 ? "{$month}/{$day}" : $day) . ' (' . $week[$w] . ')';
   $cell = $col . $row;
   $sheet->setCellValue($cell, $header);
   applyHeaderStyle($sheet, $cell);
@@ -176,8 +179,6 @@ foreach ($data['rooms'] as $room) {
   }
   $row++;
   
-
-
   $sheet->setCellValue("C{$row}", '時間（人数）');
   centerCell($sheet, "C{$row}");
   applyDottedBottomBorder($sheet, "C{$row}");
@@ -204,8 +205,6 @@ foreach ($data['rooms'] as $room) {
   applyThinBorder($sheet, "B{$row}");
   $row++;
   
-
-
   $sheet->setCellValue("C{$row}", '金額');
   centerCell($sheet, "C{$row}");
   applyThinBorder($sheet, "C{$row}");
@@ -237,8 +236,6 @@ foreach ($data['rooms'] as $room) {
   applyThinBorder($sheet, "A{$row}");
   applyThinBorder($sheet, "B{$row}");
   $row++;
-    
-
 }
 
 // ▼ 後半の見出し出力
@@ -258,8 +255,11 @@ applyThinBorder($sheet, "C{$row}");
 $col = 'D';
 for ($i = 17; $i <= $data['last_day']; $i++) {
   $date = "$ym-" . sprintf('%02d', $i);
-  $w = (new DateTime($date))->format('w');
-  $header = ($i === 17 ? ((int)date('n', strtotime($date)) . '/' . $i) : $i) . ' ('. $week[$w] .')';
+  $dateObj = new DateTime($date);
+  $day = (int)$dateObj->format('j');   // 日
+  $month = (int)$dateObj->format('n'); // 月
+  $w = (int)$dateObj->format('w');     // 曜日番号（0=日）
+  $header = ($i === 17 ? "{$month}/{$day}" : $day) . ' (' . $week[$w] . ')';
   $cell = $col . $row;
   $sheet->setCellValue($cell, $header);
   applyHeaderStyle($sheet, $cell);
@@ -383,8 +383,6 @@ foreach ($data['rooms'] as $room) {
   applyThinBorder($sheet, "A{$row}");
   applyThinBorder($sheet, "B{$row}");
   $row++;
-
-
 }
 
 // 合計表出力
@@ -409,7 +407,6 @@ $sheet->getStyle("D{$row}")
   ->getBorders()->getRight()
   ->setBorderStyle(Border::BORDER_THIN);
 $row++;
-
 
 $totals = [
   ['会議', $data['total_kaigi']],
@@ -455,7 +452,6 @@ foreach ($totals as [$label, $amount]) {
   $sheet->getStyle("C{$row}")->getFont()
     ->setSize(15)
     ->setBold(true);
-
   $row++;
 }
 
@@ -463,7 +459,6 @@ foreach ($totals as [$label, $amount]) {
 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
 // 向き：縦（ポートレート）
 $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
-
 
 // 余白を「狭く」（単位はインチ：1インチ＝2.54cm）
 $sheet->getPageMargins()->setTop(0.25);
@@ -480,7 +475,6 @@ $lastCol = 'S'; // または $col の値を使って算出
 $lastRow = $row - 1;
 $sheet->getPageSetup()->setPrintArea("A1:{$lastCol}{$lastRow}");
 
-
 $now = date('YmdHis');
 $filename = "sales-{$ym}-{$now}.xlsx";
 
@@ -490,5 +484,4 @@ header('Cache-Control: max-age=0');
 $writer = new Xlsx($spreadsheet);
 $writer->save('php://output');
 exit;
-
 ?>
