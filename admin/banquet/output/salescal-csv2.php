@@ -19,6 +19,8 @@ $dt = DateTime::createFromFormat('Y-m', $ym);
 $last_day = $dt->format('t');  // 月の最終日
 $year_month = $dt->format('Y年 m月');  // 表示用年月フォーマット
 
+$ymObj = new DateTime($ym);
+
 // 月初日を取得（例：2024-06 → 2024-06-01）
 $first_day = $ymObj->format('Y-m-01');
 // 月末日を取得（例：2024-06 → 2024-06-30）
