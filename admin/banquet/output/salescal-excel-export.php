@@ -16,6 +16,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
+//カテゴリーの色設定
 function applyCategoryColor($sheet, $cell, $banquet_category_id) {
   $colors = [
     1 => 'FF92D050',
@@ -27,17 +28,17 @@ function applyCategoryColor($sheet, $cell, $banquet_category_id) {
     $sheet->getStyle($cell)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($colors[$banquet_category_id]);
   }
 }
-
+// セルを中央揃え
 function centerCell($sheet, $cell) {
   $sheet->getStyle($cell)->getAlignment()
     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
     ->setVertical(Alignment::VERTICAL_CENTER);
 }
-
+// 桁区切り
 function formatAmount($sheet, $cell) {
   $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0');
 }
-
+// 表のヘッダースタイル
 function applyHeaderStyle($sheet, $cell) {
   $sheet->getStyle($cell)->getFill()
     ->setFillType(Fill::FILL_SOLID)
@@ -45,7 +46,7 @@ function applyHeaderStyle($sheet, $cell) {
   centerCell($sheet, $cell);
   applyThinTopBorder($sheet, $cell);
 }
-
+// 横罫線（細線）をセルに適用
 function applyThinBorder($sheet, $cell) {
   $sheet->getStyle($cell)
     ->getBorders()->getBottom()
@@ -57,7 +58,7 @@ function applyThinBorder($sheet, $cell) {
     ->getBorders()->getRight()
     ->setBorderStyle(Border::BORDER_THIN);
 }
-
+// 上罫線（細線）をセルに適用
 function applyThinTopBorder($sheet, $cell) {
   $sheet->getStyle($cell)
     ->getBorders()->getTop()
@@ -93,7 +94,7 @@ $sheet = $spreadsheet->getActiveSheet();
 $dt = DateTime::createFromFormat('Y-m', $ym);
 $sheetName = $dt->format('Y年m月');
 $sheet->setTitle($sheetName);
-
+// シートのタイトルを設定
 $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
 $sheet->getColumnDimension('A')->setWidth(9);
 $sheet->getColumnDimension('B')->setWidth(10);
@@ -101,22 +102,22 @@ $sheet->getColumnDimension('C')->setWidth(12);
 foreach (range('D', 'S') as $col) {
   $sheet->getColumnDimension($col)->setWidth(19);
 }
-
 $row = 1;
+
+// 年月出力
 $sheet->setCellValue("A{$row}", $data['year_month']);
 $sheet->getStyle("A{$row}")->getFont()
   ->setSize(20)
   ->setBold(true)
   ->setItalic(true);
-
 $row += 2;
 
-// ▼ 前半の見出し出力
+// ▼ 表のヘッダー出力（前半 1-16日）
 $sheet->setCellValue("A{$row}", '階');
-applyHeaderStyle($sheet, "A{$row}");
 $sheet->setCellValue("B{$row}", '会場名');
-applyHeaderStyle($sheet, "B{$row}");
 $sheet->setCellValue("C{$row}", '項目');
+applyHeaderStyle($sheet, "A{$row}");
+applyHeaderStyle($sheet, "B{$row}");
 applyHeaderStyle($sheet, "C{$row}");
 centerCell($sheet, "A{$row}");
 centerCell($sheet, "B{$row}");
@@ -124,7 +125,7 @@ centerCell($sheet, "C{$row}");
 applyThinBorder($sheet, "A{$row}");
 applyThinBorder($sheet, "B{$row}");
 applyThinBorder($sheet, "C{$row}");
-
+// 日付ヘッダーの出力
 $col = 'D';
 for ($i = 1; $i <= 16; $i++) {
   $date = "$ym-" . sprintf('%02d', $i);
@@ -241,10 +242,10 @@ foreach ($data['rooms'] as $room) {
 // ▼ 後半の見出し出力
 $row++; // 前半と後半の間に1行空ける
 $sheet->setCellValue("A{$row}", '階');
-applyHeaderStyle($sheet, "A{$row}");
 $sheet->setCellValue("B{$row}", '会場名');
-applyHeaderStyle($sheet, "B{$row}");
 $sheet->setCellValue("C{$row}", '項目');
+applyHeaderStyle($sheet, "A{$row}");
+applyHeaderStyle($sheet, "B{$row}");
 applyHeaderStyle($sheet, "C{$row}");
 centerCell($sheet, "A{$row}");
 centerCell($sheet, "B{$row}");
