@@ -258,3 +258,8 @@ aside.sidebar ul{
 aside.sidebar ul li i{
   margin-right: 8px;
 }
+
+.footer_logo{
+  width: 200px;
+  height: auto;
+}
