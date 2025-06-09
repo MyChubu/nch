@@ -24,6 +24,8 @@ function centerCell($sheet, $cell) {
 
 function formatAmount($sheet, $cell) {
   $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0');
+  $sheet->getStyle($cell)->getFont()->setSize(14);
+
 }
 
 function applyCategoryColor($sheet, $cell, $banquet_category_id) {
@@ -44,6 +46,7 @@ function applyHeaderStyle($sheet, $cell) {
   $sheet->getStyle($cell)->getFill()
     ->setFillType(Fill::FILL_SOLID)
     ->getStartColor()->setARGB('FFD9D9D9');
+  $sheet ->getStyle($cell)->getFont()->setSize(14)->setBold(true);
   centerCell($sheet, $cell);
   applyThinTopBorder($sheet, $cell);
 }
@@ -51,6 +54,7 @@ function applyHeaderStyle($sheet, $cell) {
 function applyEmptyHeaderStyle($sheet, $cell) {
   $sheet->getStyle($cell)->getFill()
     ->setFillType(Fill::FILL_SOLID);
+  
   centerCell($sheet, $cell);
   applyThinTopBorder($sheet, $cell);
 }
@@ -87,6 +91,9 @@ function outputRoomRows($sheet, &$row, $room, $data, $ym_for_date, $dayStart, $d
   $sheet->mergeCells("B{$mergeStartRow}:B" . ($mergeStartRow + 2));
   centerCell($sheet, "A{$row}");
   centerCell($sheet, "B{$row}");
+  $sheet ->getStyle("A{$row}")->getFont()->setSize(14)->setBold(true);
+  $sheet ->getStyle("B{$row}")->getFont()->setSize(14)->setBold(true);
+
   // フロア・会場列は最初の行でだけ適用（3行共通）
   // A列・B列の罫線は先頭行のみに適用（3行共通）
   if ($index === 0) {
@@ -103,6 +110,7 @@ function outputRoomRows($sheet, &$row, $room, $data, $ym_for_date, $dayStart, $d
   ];
 
   foreach ($rowTypes as $index => $type) {
+    $sheet->getRowDimension($row)->setRowHeight(18);
     $sheet->setCellValue("C{$row}", $type['label']);
     centerCell($sheet, "C{$row}");
     if ($type['border'] === 'dotted') {
@@ -184,23 +192,41 @@ $week = ['日', '月', '火', '水', '木', '金', '土'];
 $add_col = 32 - $data['last_day'];
 
 $spreadsheet = new Spreadsheet();
+$spreadsheet->getDefaultStyle()->getFont()->setName('ＭＳ Ｐゴシック');
 $sheet = $spreadsheet->getActiveSheet();
 $sheetName = DateTime::createFromFormat('Y-m', $ym)->format('Y年m月');
 $sheet->setTitle($sheetName);
-$spreadsheet->getDefaultStyle()->getFont()->setSize(9);
+$spreadsheet->getDefaultStyle()->getFont()->setSize(10);
 
 // 列幅の初期設定
 $sheet->getColumnDimension('A')->setWidth(9);
-$sheet->getColumnDimension('B')->setWidth(10);
-$sheet->getColumnDimension('C')->setWidth(12);
+$sheet->getColumnDimension('B')->setWidth(11);
+$sheet->getColumnDimension('C')->setWidth(14);
 foreach (range('D', 'S') as $col) {
-  $sheet->getColumnDimension($col)->setWidth(19);
+  $sheet->getColumnDimension($col)->setWidth(21);
 }
 
 $row = 1;
 $sheet->setCellValue("A{$row}", $data['year_month']);
 $sheet->getStyle("A{$row}")->getFont()->setSize(20)->setBold(true)->setItalic(true);
-$row += 2;
+
+$sheet->setCellValue("D{$row}", '会場予約状況');
+$sheet->getStyle("D{$row}")->getFont()->setSize(20)->setBold(true);
+
+$sheet->setCellValue("G{$row}", '会議');
+$sheet->setCellValue("H{$row}", '宴会');
+$sheet->setCellValue("I{$row}", '食事');
+$sheet->getStyle("G{$row}")->getFont()->setSize(15);
+$sheet->getStyle("H{$row}")->getFont()->setSize(15);
+$sheet->getStyle("I{$row}")->getFont()->setSize(15);
+centerCell($sheet, "G{$row}");
+centerCell($sheet, "H{$row}");
+centerCell($sheet, "I{$row}");
+applyCategoryColor($sheet, "G{$row}", 1);
+applyCategoryColor($sheet, "H{$row}", 2);
+applyCategoryColor($sheet, "I{$row}", 3);
+
+$row ++;
 
 // ▼ 見出し出力（前半）
 $sheet->setCellValue("A{$row}", '階');
@@ -272,7 +298,7 @@ foreach ($data['rooms'] as $room) {
 // ▼ 合計欄出力
 $row += 2;
 $sheet->setCellValue("A{$row}", '項目');
-$sheet->setCellValue("C{$row}", '金額');
+$sheet->setCellValue("C{$row}", '金額・税サ別（円）');
 $sheet->mergeCells("A{$row}:B{$row}");
 $sheet->mergeCells("C{$row}:D{$row}");
 foreach (['A','B','C','D'] as $col) {
@@ -302,8 +328,8 @@ foreach ($totals as [$label, $amount, $cat_id]) {
     applyCategoryColor($sheet, "C{$row}", $cat_id);
   }
   $sheet->getStyle("A{$row}")->getFont()->setSize(15);
-  $sheet->getStyle("C{$row}")->getFont()->setSize(15)->setBold(true);
   formatAmount($sheet, "C{$row}");
+  $sheet->getStyle("C{$row}")->getFont()->setSize(18)->setBold(true);
   $row++;
 }
 // アクティブセルをA1に設定
