@@ -928,7 +928,7 @@ function getDefectList($ym){
   return $defects;
 }
 
-function cleanLanternName($name) {
+function cleanLanternName($name, $max_length = 10) {
   // 不要な法人名接尾辞のリスト
   $replaceWords = [
       "株式会社", "㈱", "（株）", "(株)",
@@ -963,12 +963,14 @@ function cleanLanternName($name) {
   // 先頭の半角・全角スペースを削除
   $name = preg_replace("/^[ 　]+/u", "", $name);
 
+  $name = preg_replace("/[【※]/u", " ", $name); // 各文字単独で置換
+
   // 最初に出てくるスペース（半角・全角）で前半だけに分ける
   $parts = preg_split("/[ 　]/u", $name, 2);  // 2つに分割（前後）
   $name = $parts[0];  // 前半部分だけ使用
 
   // 最初の10文字に切り詰め
-  $name = mb_substr($name, 0, 10);
+  $name = mb_substr($name, 0, $max_length);
 
   return $name;
 }
