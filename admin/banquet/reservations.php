@@ -6,9 +6,32 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
 $date = date('Y-m-d');
 $w = date('w');
 $wd= $week[$w];
-$h= date('H');
-$sd = '2025-05-01';
-$ed = '2025-09-30';
+
+$ym=$_REQUEST['ym'] ?? date('Y-m');
+$mon = $_REQUEST['mon'] ?? 3;
+
+$sd = $ym . '-01';
+$edate = new DateTime($sd);
+switch($mon){
+  case 1:
+    $ed = $edate->modify('last day of this month')->format('Y-m-d');
+    break;
+  case 2://翌月の最終日
+    $ed = $edate->modify('last day of next month')->format('Y-m-d');
+    break;
+  case 3: //2ヶ月後の最終日
+    $ed = $edate->modify('last day of +2 month')->format('Y-m-d');
+    break;
+  case 6:
+    $ed = $edate->modify('last day of +5 month')->format('Y-m-d');
+    break;
+  case 12:
+    $ed = $edate->modify('last day of +11 month')->format('Y-m-d');
+    break;
+  default:
+    $ed = date('Y-m-t', strtotime($sd . ' +2 month'));
+}
+
 $sql ="SELECT
     `reservation_id`,
     `reservation_name`,
@@ -69,6 +92,17 @@ if($count > 0){
 <main>
   <div class="wrapper">
     <div id="controller">
+      <form  method="get" enqtype="application/x-www-form-urlencoded">
+        <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required> から
+        <select name="mon" id="mon">
+          <option value="1" <?= $mon == 1 ? 'selected' : '' ?>>1ヶ月</option>
+          <option value="2" <?= $mon == 2 ? 'selected' : '' ?>>2ヶ月</option>
+          <option value="3" <?= $mon == 3 ? 'selected' : '' ?>>3ヶ月</option>
+          <option value="6" <?= $mon == 6 ? 'selected' : '' ?>>6ヶ月</option>
+          <option value="12" <?= $mon == 12 ? 'selected' : '' ?>>1年</option>
+        </select>
+        <button type="submit">表示</button>
+      </form>
     </div>
     <div>
       <h1>会議・宴会予約リスト</h1>
@@ -76,6 +110,7 @@ if($count > 0){
 
     </div>
     <div>
+      <div><?= $sd ?> から <?= $ed ?> までの予約を表示しています。</div>
       <?php if(sizeof($reservations) > 0): ?>
         <table class="banquet-table" id="data-table">
           <thead>
