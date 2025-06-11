@@ -80,18 +80,18 @@ if($count > 0){
         <table class="banquet-table" id="data-table">
           <thead>
             <tr>
-              <th>予約日<span class="sort-arrow"></span></th>
-              <th>曜</th>
-              <th>日数<span class="sort-arrow"></span></th>
-              <th>予約ID<span class="sort-arrow"></span></th>
-              <th>予約名<span class="sort-arrow"></span></th>
-              <th>販売<span class="sort-arrow"></span></th>
-              <th>代理店名<span class="sort-arrow"></span></th>
-              <th>担当<span class="sort-arrow"></span></th>
-              <th>ステータス<span class="sort-arrow"></span></th>
-              <th>人数<span class="sort-arrow"></span></th>
-              <th>売上（税抜）<span class="sort-arrow"></span></th>
-              <th>売上（税込）<span class="sort-arrow"></span></th>
+              <th><i class="fa-solid fa-calendar-days"></i></th>
+              <th><i class="fa-solid fa-w"></i></th>
+              <th>日数</th>
+              <th><i class="fa-solid fa-hashtag"></i></th>
+              <th>予約名</th>
+              <th><i class="fa-solid fa-flag"></i></th>
+              <th><i class="fa-solid fa-building"></i></th>
+              <th><i class="fa-solid fa-user"></i></th>
+              <th><i class="fa-solid fa-signal"></i></th>
+              <th><i class="fa-solid fa-users"></i></th>
+              <th>売上（税抜）</th>
+              <th>売上（税込）</th>
             </tr>
           </thead>
           <tbody>
@@ -124,11 +124,11 @@ if($count > 0){
                   <?php 
                   if($reservation['agent_id'] > 0){
                     if($reservation['agent_name2'] != ""){
-                       echo htmlspecialchars($reservation['agent_name2']);
+                       echo htmlspecialchars(cleanLanternName2($reservation['agent_name2'],30));
                     } elseif($reservation['reserver'] != ""){ 
-                      echo htmlspecialchars($reservation['reserver']);
+                      echo htmlspecialchars(cleanLanternName2($reservation['reserver'],30));
                     }else {
-                      echo htmlspecialchars($reservation['agent_name']);
+                      echo htmlspecialchars(cleanLanternName2($reservation['agent_name'],30));
                     }
                    
                   } else {

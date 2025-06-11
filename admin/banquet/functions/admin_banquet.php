@@ -974,4 +974,51 @@ function cleanLanternName($name, $max_length = 10) {
 
   return $name;
 }
+
+function cleanLanternName2($name, $max_length = 10) {
+  // 不要な法人名接尾辞のリスト
+  $replaceWords = [
+      "株式会社", "㈱", "（株）", "(株)",
+      "一般社団法人", "(一社)", "（一社）",
+      "公益社団法人", "(公社)", "（公社）",
+      "有限会社", "㈲", "（有）", "(有)",
+      "一般財団法人", "(一財)", "（一財）",
+      "公益財団法人", "(公財)", "（公財）",
+      "学校法人", "(学)", "（学）",
+      "医療法人", "(医)", "（医）",
+      "財団法人", "(財)", "（財）",
+      "合同会社", "(同)", "（同）",
+      "(下見)","（下見）","【下見】", "下見", "下見 ", "下見　"
+  ];
+
+  // 不要語句の削除
+  foreach ($replaceWords as $word) {
+      $name = str_replace($word, "", $name);
+  }
+  $name = str_replace("労働組合連合会", "労連", $name);
+  $name = str_replace("労働組合", "労組", $name);
+
+  // 「第〇回」の削除（半角数字／全角数字／漢数字に対応）
+  $name = preg_replace("/第[0-9０-９一二三四五六七八九十百千万億兆]+回/u", "", $name);
+
+  // 西暦年度（例: 2025年度）の削除
+  $name = preg_replace("/[0-9０-９]{4}年度/u", "", $name);
+
+  // 和暦年度（例: 令和7年度、平成31年度）の削除
+  $name = preg_replace("/(令和|平成|昭和)[0-9０-９一二三四五六七八九十百千万]+年度/u", "", $name);
+
+  // 先頭の半角・全角スペースを削除
+  $name = preg_replace("/^[ 　]+/u", "", $name);
+
+  $name = preg_replace("/[【※]/u", " ", $name); // 各文字単独で置換
+
+  // 最初に出てくるスペース（半角・全角）で前半だけに分ける
+ # $parts = preg_split("/[ 　]/u", $name, 2);  // 2つに分割（前後）
+ # $name = $parts[0];  // 前半部分だけ使用
+
+  // 最初の10文字に切り詰め
+  $name = mb_substr($name, 0, $max_length);
+
+  return $name;
+}
 ?>

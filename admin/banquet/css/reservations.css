@@ -16,6 +16,7 @@ th, td {
   border-bottom: 1px dotted #999;
   padding: 3px;
   text-align: center;
+  min-width:80px;
 }
 
 
