@@ -110,7 +110,7 @@ $week_after = $dt_week_after->format('Y-m-d');
 
             <div class="event_name"><?= $events_en[$i]['event_name'] ?></div>
           </td>
-          <td><?= $events_en[$i]['pic'] ?></td>
+          <td><?= cleanLanternName($events_en[$i]['pic']) ?></td>
           <td><?= $events_en[$i]['room_name'] ?></td>
           <td><?= $events_en[$i]['floor'] ?></td>
           <td><?= $events_en[$i]['start'] ?></td>
@@ -127,7 +127,8 @@ $week_after = $dt_week_after->format('Y-m-d');
             ?>
           </td>
           <td><?= $events_en[$i]['people'] ?></td>
-          <td><?= mb_convert_kana($events_en[$i]['status_name'],'KVsa') ?></td>
+
+          <td><?= statusletter($events_en[$i]['status']) ?></td>
           <td><?= mb_convert_kana($events_en[$i]['purpose_short'],'KVas') ?></td>
           <td>
             <?php if($events_en[$i]['enable'] == 1): ?>
@@ -181,13 +182,13 @@ $week_after = $dt_week_after->format('Y-m-d');
             <?php endif; ?>
             <div class="event_name"><?= $events_ka[$i]['event_name'] ?></div>
           </td>
-          <td><?= $events_ka[$i]['pic'] ?></td>
+          <td><?= cleanLanternName($events_ka[$i]['pic']) ?></td>
           <td><?= $events_ka[$i]['room_name'] ?></td>
           <td><?= $events_ka[$i]['floor'] ?></td>
           <td><?= $events_ka[$i]['start'] ?></td>
           <td><?= $events_ka[$i]['end'] ?></td>
           <td><?= $events_ka[$i]['people'] ?></td>
-          <td><?= mb_convert_kana($events_ka[$i]['status_name'],'KVsa') ?></td>
+          <td><?= statusletter($events_ka[$i]['status']) ?></td>
           <td><?= mb_convert_kana($events_ka[$i]['purpose_short'],'KVas') ?></td>
           <td>
             <?php if($events_ka[$i]['enable'] == 1): ?>
@@ -240,13 +241,13 @@ $week_after = $dt_week_after->format('Y-m-d');
             <?php endif; ?>
             <div class="event_name"><?= $events_other[$i]['event_name'] ?></div>
           </td>
-          <td><?= $events_other[$i]['pic'] ?></td>
+          <td><?= cleanLanternName($events_other[$i]['pic']) ?></td>
           <td><?= $events_other[$i]['room_name'] ?></td>
           <td><?= $events_other[$i]['floor'] ?></td>
           <td><?= $events_other[$i]['start'] ?></td>
           <td><?= $events_other[$i]['end'] ?></td>
           <td><?= $events_other[$i]['people'] ?></td>
-          <td><?= mb_convert_kana($events_other[$i]['status_name'],'KVsa') ?></td>
+          <td><?= statusletter($events_other[$i]['status']) ?></td>
           <td><?= mb_convert_kana($events_other[$i]['purpose_short'],'KVas') ?></td>
           <td>
             <?php if($events_other[$i]['enable'] == 1): ?>

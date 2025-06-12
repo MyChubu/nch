@@ -67,6 +67,7 @@ $stmt->execute();
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
 
+
 if($count > 0) {
   foreach($results as $result) {
     $agent_short = $result['agent_short'];
@@ -95,6 +96,7 @@ if($count > 0) {
     );
   }
 }
+
 
 ?>
 <!DOCTYPE html>
@@ -207,7 +209,7 @@ if($count > 0) {
               <th>予約ID<span class='sort-arrow'></span></th>
               <th>代理店<span class='sort-arrow'></span></th>
               <th>予約名<span class='sort-arrow'></span></th>
-              <th>予約状況<span class='sort-arrow'></span></th>
+              <th>状況<span class='sort-arrow'></span></th>
               <th>カテゴリ<span class='sort-arrow'></span></th>
               <th>売上<span class='sort-arrow'></span></th>
               <th>純売上<span class='sort-arrow'></span></th>
@@ -227,7 +229,7 @@ if($count > 0) {
                 <td><?=$row['agent_short'] ?></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
                 <td><?=$row['status_name'] ?></td>
-                <td><?=$row['sales_category_name'] ?></td>
+                <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>

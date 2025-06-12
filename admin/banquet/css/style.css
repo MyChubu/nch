@@ -274,3 +274,44 @@ aside.sidebar ul li i{
 .cell_w80{ width: 80px; }
 .cell_w90{ width: 90px; }
 .cell_w100{ width: 100px; }
+
+span.sales-cat{
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  margin-right: 3px;
+  background-color: #000;
+  color: #FFF;
+  font-size: 9px;
+  padding-bottom: 2px;
+  font-weight: 700;
+  text-align: center;
+}
+span.sales-cat-ka{
+  background-color:darkgreen;
+}
+span.sales-cat-en{
+  background-color:blue
+}
+span.sales-cat-sho{
+  background-color:darkorange;
+}
+
+span.status-letter{
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  margin-right: 3px;
+  background-color: #000;
+  color: #FFF;
+  font-size: 13px;
+  padding: 0 3px 3px;
+  text-align: center;
+}
+span.status-letter-1{ background-color: red;}
+span.status-letter-2{ background-color:blue;}
+span.status-letter-3{ background-color:green;}
+span.status-letter-4{ background-color:lightgray;}
+span.status-letter-5{ background-color:black;}

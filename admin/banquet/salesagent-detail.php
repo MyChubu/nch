@@ -192,7 +192,7 @@ if($count > 0) {
               <th>予約日<span class="sort-arrow"></span></th>
               <th>予約ID<span class="sort-arrow"></span></th>
               <th>予約名<span class="sort-arrow"></span></th>
-              <th>予約状況<span class="sort-arrow"></span></th>
+              <th>状況<span class="sort-arrow"></span></th>
               <th>カテゴリ<span class="sort-arrow"></span></th>
               <th>売上<span class="sort-arrow"></span></th>
               <th>純売上<span class="sort-arrow"></span></th>
@@ -212,13 +212,13 @@ if($count > 0) {
           ?>
               <tr>
                 <td><?=$sales_office ?></td>
-                <td><?=$row['pic'] ?></td>
+                <td><?=cleanLanternName($row['pic']) ?></td>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$row['reservation_date'] ?></td>
                 <td><a href="connection_list.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
-                <td><?=$row['status_name'] ?></td>
-                <td><?=$row['sales_category_name'] ?></td>
+                <td><?=statusletter($row['status']) ?></td>
+                <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>

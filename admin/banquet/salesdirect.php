@@ -294,7 +294,7 @@ $dbh = null;
               if($counter > 0) {
                 ?>
                 <tr>
-                  <td colspan="3">合計</td>
+                  <td colspan="2">合計</td>
                   <td><?=number_format($c_count) ?></td>
                   <td><?=number_format($c_gross) ?></td>
                   <td><?=number_format($c_net) ?></td>
@@ -324,8 +324,8 @@ $dbh = null;
                   <thead>
             <tr>
               <th>年月</th>
-              <th>部門ID</th>
-              <th>部門名</th>
+              <!--<th>部門ID</th>-->
+              <th>部門</th>
               <th>件数</th>
               <th>売上</th>
               <th>純売上</th>
@@ -340,8 +340,8 @@ $dbh = null;
           ?>
               <tr>
                 <td><?=$row['ym'] ?></td>
-                <td><?=$row['sales_category_id'] ?></td>
-                <td><?=$row['sales_category_name'] ?></td>
+                <!--<td><?=$row['sales_category_id'] ?></td>-->
+                <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <td><?=$row['count'] ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
@@ -370,7 +370,7 @@ $dbh = null;
               ?>
             <?php endforeach; ?>
             <tr>
-              <td colspan="3">合計</td>
+              <td colspan="2">合計</td>
               <td><?=number_format($c_count) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
@@ -389,7 +389,7 @@ $dbh = null;
               <thead>
                 <tr>
                   <th>年月</th>
-                  <th>部門ID</th>
+                  <!--<th>部門ID</th>-->
                   <th>部門名</th>
                   <th>件数</th>
                   <th>売上</th>
@@ -402,7 +402,7 @@ $dbh = null;
               </thead>
               <tbody>
                 <tr>
-                  <td colspan="3">合計</td>
+                  <td colspan="2">合計</td>
                   <td><?=number_format($total_count) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>

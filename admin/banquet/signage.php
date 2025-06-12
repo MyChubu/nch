@@ -80,7 +80,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
           <td><?= $events[$i]['end'] ?></td>
           <td><?= $events[$i]['room_name'] ?></td>
           <td><?= $events[$i]['floor'] ?></td>
-          <td><?= mb_convert_kana($events[$i]['status_name'],'KVsa') ?></td>
+          <td><?= statusletter($events[$i]['status']) ?></td>
           <td><?= mb_convert_kana($events[$i]['purpose_short'],'KVas') ?></td>
           <td><?= mb_convert_kana($events[$i]['category_name'],'KVas') ?></td>
           <td>

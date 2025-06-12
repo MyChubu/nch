@@ -1021,4 +1021,29 @@ function cleanLanternName2($name, $max_length = 10) {
 
   return $name;
 }
+
+function salescatletter($sales_category_id) {
+  $sales_category = array(
+    1 => "<span class='sales-cat sales-cat-ka'>会</span>",
+    2 => "<span class='sales-cat sales-cat-en'>宴</span>",
+    3 => "<span class='sales-cat sales-cat-sho'>食</span>",
+    4 => "<span class='sales-cat sales-cat-ka'>会</span><span class='sales-cat sales-cat-en'>宴</span>",
+    5 => "<span class='sales-cat sales-cat-ka'>会</span><span class='sales-cat sales-cat-sho'>食</span>",
+    6 => "<span class='sales-cat sales-cat-ka'>会</span><span class='sales-cat sales-cat-en'>宴</span><span class='sales-cat sales-cat-sho'>食</span>"
+  );
+  
+  return isset($sales_category[$sales_category_id]) ? $sales_category[$sales_category_id] : "不明";
+}
+
+function statusletter($status) {
+  $status_letters = array(
+    1 => "<span class='status-letter status-letter-1'>決</span>",
+    2 => "<span class='status-letter status-letter-2'>仮</span>",
+    3 => "<span class='status-letter status-letter-3'>営</span>",
+    4 => "<span class='status-letter status-letter-4'>待</span>",
+    5 => "<span class='status-letter status-letter-5'>×</span>",
+  );
+
+  return isset($status_letters[$status]) ? $status_letters[$status] : "不明";
+}
 ?>
