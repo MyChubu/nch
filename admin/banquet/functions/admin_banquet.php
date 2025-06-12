@@ -317,6 +317,7 @@ function getConnectionList($reservation_id){
         'end' => $event_end,
         'room_name' => $row['room_name'],
         'floor' => $floor,
+        'status' => $row['status'],
         'status_name' => mb_convert_kana($row['status_name'], 'KVas'),
         'enable' => $row['enable'],
         'pic' => $pic,

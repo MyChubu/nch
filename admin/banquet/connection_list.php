@@ -60,8 +60,8 @@ $subtotal_amount = $array['subtotal_amount'];
       <td><?=$event['end'] ?></td>
       <td><?=$event['room_name'] ?></td>
       <td><?=$event['floor'] ?></td>
-      <td><?=$event['status_name'] ?></td>
-      <td><?=$event['pic'] ?></td>
+      <td><?=statusletter($event['status']) ?></td>
+      <td><?=cleanLanternName($event['pic']) ?></td>
       <td>
         <?php if($event['enable'] == 1): ?>
           <i class="fa-solid fa-square-check"></i>

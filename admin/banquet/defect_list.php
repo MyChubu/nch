@@ -62,7 +62,7 @@ $defects = getDefectList($ym);
         <thead>
           <tr>
             <th>エラー名<span class="sort-arrow"></span></th>
-            <th>ステータス<span class="sort-arrow"></span></th>
+            <th>状況<span class="sort-arrow"></span></th>
             <th>日付<span class="sort-arrow"></span></th>
             <th>予約ID<span class="sort-arrow"></span></th>
             <th>枝番<span class="sort-arrow"></span></th>
@@ -89,7 +89,7 @@ $defects = getDefectList($ym);
             <?php else: ?>
               <tr>
                 <td><?= $row['error_name'] ?></td>
-                <td><?= $row['status_name'] ?></td>
+                <td><?= statusletter($row['status']) ?></td>
                 <td><a href="./?event_date=<?= $row['res_date'] ?>"><?= $row['res_date'] ?></a></td>
                 <td><a href="connection_list.php?resid=<?= $row['reservation_id'] ?>"><?= $row['reservation_id'] ?></a></td>
                 <td><a href="detail.php?scheid=<?=$row['sche_id'] ?>"><?= $row['branch'] ?></a></td>

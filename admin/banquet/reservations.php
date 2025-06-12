@@ -171,21 +171,7 @@ if($count > 0){
                   ?>
                 </td>
                 <td><?= htmlspecialchars(cleanLanternName($reservation['pic'],3)) ?></td>
-                <?php
-                if($reservation['status'] == 1){
-                  $status_name = "決定";
-                } elseif($reservation['status'] == 2){
-                  $status_name = "仮";
-                } elseif($reservation['status'] == 3){
-                  $status_name ="営業";
-                } elseif($reservation['status'] == 5){
-                  $status_name = "CXL";
-                } else {
-                  $status_name = "不明";
-                }
-                ?>
-                <td><?= $status_name ?></td>
-                
+                <td><?=statusletter($reservation['status']) ?></td>
                 <td><?= htmlspecialchars($reservation['people']) ?></td>
                 <td><?= number_format($reservation['net']) ?></td>
                 <td><?= number_format($reservation['gross']) ?></td>

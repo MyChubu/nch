@@ -614,7 +614,7 @@ if($count > 0) {
         ?>
               <tr>
                 <td><?=$row['ym'] ?></td>
-                <td><?=$row['pic'] ?></td>
+                <td><?=cleanLanternName($row['pic']) ?></td>
                 <td><?=$row['count'] ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
@@ -725,7 +725,7 @@ if($count > 0) {
               if($counter > 0) {
                 ?>
                 <tr>
-                  <td colspan="3">合計</td>
+                  <td colspan="2">合計</td>
                   <td><?=number_format($c_count) ?></td>
                   <td><?=number_format($c_gross) ?></td>
                   <td><?=number_format($c_net) ?></td>
@@ -755,8 +755,8 @@ if($count > 0) {
                   <thead>
             <tr>
               <th>年月</th>
-              <th>部門ID</th>
-              <th>部門名</th>
+              <!--<th>部門ID</th>-->
+              <th>部門</th>
               <th>件数</th>
               <th>売上</th>
               <th>純売上</th>
@@ -771,8 +771,8 @@ if($count > 0) {
           ?>
               <tr>
                 <td><?=$row['ym'] ?></td>
-                <td><?=$row['sales_category_id'] ?></td>
-                <td><?=$row['sales_category_name'] ?></td>
+                <td><?= salescatletter($row['sales_category_id']) ?></td>
+                <!--<td><?=$row['sales_category_name'] ?></td>-->
                 <td><?=$row['count'] ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
@@ -801,7 +801,7 @@ if($count > 0) {
               ?>
             <?php endforeach; ?>
             <tr>
-              <td colspan="3">合計</td>
+              <td colspan="2">合計</td>
               <td><?=number_format($c_count) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
@@ -820,8 +820,8 @@ if($count > 0) {
               <thead>
                 <tr>
                   <th>年月</th>
-                  <th>部門ID</th>
-                  <th>部門名</th>
+                  <!--<th>部門ID</th>-->
+                  <th>部門</th>
                   <th>件数</th>
                   <th>売上</th>
                   <th>純売上</th>
@@ -833,7 +833,7 @@ if($count > 0) {
               </thead>
               <tbody>
                 <tr>
-                  <td colspan="3">合計</td>
+                  <td colspan="2">合計</td>
                   <td><?=number_format($total_count) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>
@@ -851,162 +851,6 @@ if($count > 0) {
       <?php endif; ?>
     </div>
 
-
-
-    <div>
-      <h2>カテゴリー別（旧）</h2>
-      <?php if(sizeof($category_sales) > 0): ?>
-        <?php
-          $catg = 0;
-          $counter = 0;
-          $total_count = 0;
-          $total_gross = 0;
-          $total_net = 0;
-          $total_service_fee = 0;
-          $total_tax = 0;
-          $total_discount = 0;
-          $total_ex_ts = 0;
-
-          $c_count = 0;
-          $c_gross = 0;
-          $c_net = 0;
-          $c_service = 0;
-          $c_tax = 0;
-          $c_discount =0;
-          $c_ex_ts =0;
-        ?>
-        <?php foreach($category_sales as $row): ?>
-          <?php
-            $cat = $row['banquet_category_id'];
-            
-        if($catg != $cat){
-              $catg = $cat;
-              if($counter > 0) {
-                ?>
-                <tr>
-                  <td colspan="3">合計</td>
-                  <td><?=number_format($c_count) ?></td>
-                  <td><?=number_format($c_gross) ?></td>
-                  <td><?=number_format($c_net) ?></td>
-                  <td><?=number_format($c_service) ?></td>
-                  <td><?=number_format($c_tax) ?></td>
-                  <td><?=number_format($c_discount) ?></td>
-                  <td><?=number_format($c_ex_ts) ?></td>
-                </tr>
-              </tbody>
-              </table>
-                </div>
-            <?php
-                  $c_count = 0;
-                  $c_gross = 0;
-                  $c_net = 0;
-                  $c_service = 0;
-                  $c_tax = 0;
-                  $c_discount =0;
-                  $c_ex_ts =0;
-                }
-                echo "<div><h4>";
-                echo $catg==""?"部門なし":$row['banquet_category_name'];
-                echo "</h4>";
-                echo "<table>
-                  <thead>
-            <tr>
-              <th>年月</th>
-              <th>部門ID</th>
-              <th>部門名</th>
-              <th>部屋数</th>
-              <th>売上</th>
-              <th>純売上</th>
-              <th>サービス料</th>
-              <th>消費税</th>
-              <th>割引</th>
-              <th>税・サ抜</th>
-            </tr>
-          </thead>
-          <tbody>";
-              }
-          ?>
-              <tr>
-                <td><?=$row['ym'] ?></td>
-                <td><?=$row['banquet_category_id'] ?></td>
-                <td><?=$row['banquet_category_name'] ?></td>
-                <td><?=$row['count'] ?></td>
-                <td><?=number_format($row['gross']) ?></td>
-                <td><?=number_format($row['net']) ?></td>
-                <td><?=number_format($row['service_fee']) ?></td>
-                <td><?=number_format($row['tax']) ?></td>
-                <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
-              </tr>
-              <?php
-                $total_count += $row['count'];
-                $total_gross += $row['gross'];
-                $total_net += $row['net'];
-                $total_service_fee += $row['service_fee'];
-                $total_tax += $row['tax'];
-                $total_discount += $row['discount'];
-                $total_ex_ts += $row['ex-ts'];
-
-                $c_count += $row['count'];
-                $c_gross += $row['gross'];
-                $c_net += $row['net'];
-                $c_service += $row['service_fee'];
-                $c_tax += $row['tax'];
-                $c_discount += $row['discount'];
-                $c_ex_ts += $row['ex-ts'];
-                $counter++;
-              ?>
-            <?php endforeach; ?>
-            <tr>
-              <td colspan="3">合計</td>
-              <td><?=number_format($c_count) ?></td>
-              <td><?=number_format($c_gross) ?></td>
-              <td><?=number_format($c_net) ?></td>
-              <td><?=number_format($c_service) ?></td>
-              <td><?=number_format($c_tax) ?></td>
-              <td><?=number_format($c_discount) ?></td>
-              <td><?=number_format($c_ex_ts) ?></td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
-        
-        <div>
-            <h4>合計</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>年月</th>
-                  <th>部門ID</th>
-                  <th>部門名</th>
-                  <th>部屋数</th>
-                  <th>売上</th>
-                  <th>純売上</th>
-                  <th>サービス料</th>
-                  <th>消費税</th>
-                  <th>割引</th>
-                  <th>税・サ抜</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="3">合計</td>
-                  <td><?=number_format($total_count) ?></td>
-                  <td><?=number_format($total_gross) ?></td>
-                  <td><?=number_format($total_net) ?></td>
-                  <td><?=number_format($total_service_fee) ?></td>
-                  <td><?=number_format($total_tax) ?></td>
-                  <td><?=number_format($total_discount) ?></td>
-                  <td><?=number_format($total_ex_ts) ?></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-      <?php else: ?>
-        <p>売上データはありません。</p>
-      <?php endif; ?>
-    </div>
 
   </div>
   

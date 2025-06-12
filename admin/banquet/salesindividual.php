@@ -38,7 +38,7 @@ $sql = "SELECT
   `reservation_date`,
   `reservation_id`,
   `reservation_name`,
-  'status',
+  `status`,
   `status_name`,
   `pic`,
   `pic_id`,
@@ -228,7 +228,7 @@ if($count > 0) {
                 <td><a href="connection_list.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
                 <td><?=$row['agent_short'] ?></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
-                <td><?=$row['status_name'] ?></td>
+                <td><?=statusletter($row['status']) ?></td>
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
