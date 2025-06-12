@@ -57,6 +57,7 @@ $defects = getDefectList($ym);
     </div>
 
     <?php if(sizeof($defects) > 0): ?>
+
       <table id="data-table">
         <thead>
           <tr>
@@ -103,6 +104,7 @@ $defects = getDefectList($ym);
           <?php endforeach; ?>
         </tbody>
       </table>
+
     <?php else: ?>
       <div class="no-data">
         <p>エラーはありません</p>

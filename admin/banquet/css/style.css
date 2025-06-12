@@ -263,3 +263,14 @@ aside.sidebar ul li i{
   width: 200px;
   height: auto;
 }
+
+.cell_w10{ width: 10px; }
+.cell_w20{ width: 20px; }
+.cell_w30{ width: 30px; }
+.cell_w40{ width: 40px; }
+.cell_w50{ width: 50px; }
+.cell_w60{ width: 60px; } 
+.cell_w70{ width: 70px; }
+.cell_w80{ width: 80px; }
+.cell_w90{ width: 90px; }
+.cell_w100{ width: 100px; }

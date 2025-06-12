@@ -13,6 +13,8 @@ table.cal3w th {
   font-size: 14px;
   font-weight: bold;
   text-align: center;
+  position: sticky ;
+  top: 0;
 }
 table.cal3w td {
   border: 1px solid #ddd;

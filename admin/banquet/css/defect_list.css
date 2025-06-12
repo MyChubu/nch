@@ -21,6 +21,8 @@ th, td {
 
 th {
   background-color: #ddd;
+  position: sticky;
+  top: 0;
 }
 
 

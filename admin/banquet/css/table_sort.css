@@ -5,7 +5,8 @@
 }
 
 #data-table th {
-  position: relative;
+  position: sticky;
+  top: 0;
   background-color: #007bff;
   color: white;
   cursor: pointer;

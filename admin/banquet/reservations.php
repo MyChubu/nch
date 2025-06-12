@@ -112,19 +112,19 @@ if($count > 0){
     <div>
       <div><?= $sd ?> から <?= $ed ?> までの予約を表示しています。</div>
       <?php if(sizeof($reservations) > 0): ?>
+        
         <table class="banquet-table" id="data-table">
           <thead>
             <tr>
-              <th><i class="fa-solid fa-calendar-days"></i></th>
-              <th><i class="fa-solid fa-w"></i></th>
-              <th>日数</th>
-              <th><i class="fa-solid fa-hashtag"></i></th>
+              <th class="cell_w100"><i class="fa-solid fa-calendar-days"></i></th>
+              <th class="cell_w40">日</th>
+              <th class="cell_w50"><i class="fa-solid fa-hashtag"></i></th>
               <th>予約名</th>
-              <th><i class="fa-solid fa-flag"></i></th>
+              <th class="cell_w40"><i class="fa-solid fa-flag"></i></th>
               <th><i class="fa-solid fa-building"></i></th>
-              <th><i class="fa-solid fa-user"></i></th>
-              <th><i class="fa-solid fa-signal"></i></th>
-              <th><i class="fa-solid fa-users"></i></th>
+              <th class="cell_w50"><i class="fa-solid fa-user"></i></th>
+              <th class="cell_w30"><i class="fa-solid fa-signal"></i></th>
+              <th class="cell_w30"><i class="fa-solid fa-users"></i></th>
               <th>売上（税抜）</th>
               <th>売上（税込）</th>
             </tr>
@@ -147,8 +147,7 @@ if($count > 0){
                 
               ?>
               <tr>
-                <td><?= htmlspecialchars($reservation['reservation_date']) ?></td>
-                <td><?= htmlspecialchars($dayName) ?></td>
+                <td><?= htmlspecialchars($reservation['reservation_date']) ?> (<?= htmlspecialchars($dayName) ?>)</td>
                 <td><?= htmlspecialchars($days) ?></td>
                 <td><?= htmlspecialchars($reservation['reservation_id']) ?></td>
                 <td><?= htmlspecialchars(cleanLanternName($reservation['reservation_name'],20)) ?></td>
@@ -172,7 +171,20 @@ if($count > 0){
                   ?>
                 </td>
                 <td><?= htmlspecialchars(cleanLanternName($reservation['pic'],3)) ?></td>
-                <td><?= htmlspecialchars($reservation['status_name']) ?></td>
+                <?php
+                if($reservation['status'] == 1){
+                  $status_name = "決定";
+                } elseif($reservation['status'] == 2){
+                  $status_name = "仮";
+                } elseif($reservation['status'] == 3){
+                  $status_name ="営業";
+                } elseif($reservation['status'] == 5){
+                  $status_name = "CXL";
+                } else {
+                  $status_name = "不明";
+                }
+                ?>
+                <td><?= $status_name ?></td>
                 
                 <td><?= htmlspecialchars($reservation['people']) ?></td>
                 <td><?= number_format($reservation['net']) ?></td>
