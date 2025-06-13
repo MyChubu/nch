@@ -85,6 +85,7 @@ $week_after = $dt_week_after->format('Y-m-d');
         <th><i class="fa-solid fa-arrow-left"></i></th>
         <th><i class="fa-solid fa-utensils"></i></th>
         <th><i class="fa-solid fa-people-group"></i></th>
+        <th><i class="fa-solid fa-wine-glass"></i></th>
         <th><i class="fa-solid fa-signal"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
@@ -127,7 +128,19 @@ $week_after = $dt_week_after->format('Y-m-d');
             ?>
           </td>
           <td><?= $events_en[$i]['people'] ?></td>
-
+          <td>
+            <?php
+              if( sizeof($events_en[$i]['drink1']) > 0 ):
+                foreach($events_en[$i]['drink1'] as $drink):
+                  $dc=$drink['short_name'];
+                  explode('-',$dc);
+                  echo '<div><span class="dc dc-'.$dc[3].'">'.$dc[3]. '</span></div>';
+                endforeach;
+              else:
+                echo '-';
+              endif;
+            ?>
+          </td>
           <td><?= statusletter($events_en[$i]['status']) ?></td>
           <td><?= mb_convert_kana($events_en[$i]['purpose_short'],'KVas') ?></td>
           <td>

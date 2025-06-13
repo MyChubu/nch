@@ -190,6 +190,29 @@ function getKaEnList($date){
         );
       }
 
+      //飲み放題
+      $sql9= 'select * from `view_charges` where `reservation_id` = ? AND `branch`= ?  AND `drink1` = 1';
+      $stmt9 = $dbh->prepare($sql9);
+      $stmt9->execute([$reservation_id, $branch]);
+      $f_count = $stmt9->rowCount();
+      if($f_count > 0){
+        foreach ($stmt9 as $row9) {
+          $item_name = mb_convert_kana($row9['item_name'], "KVas");
+          $short_name = mb_convert_kana($row9['name_short'], "KVas");
+          $unit_price = $row9['unit_price'];
+          $qty = $row9['qty'];
+          $amount_gross = $row9['amount_gross'];
+          $amount_net = $row9['amount_net'];
+          $drink1[] =array(
+            'name' => $item_name,
+            'short_name' => $short_name,
+            'unit_price' => $unit_price,
+            'qty' => $qty,
+            'amount_gross' => $amount_gross,
+          );
+        }
+      }
+
       // イベントデータ（共通部分）を配列に格納
       $event_common = array(
         'reservation_id' => $reservation_id,

@@ -170,12 +170,14 @@ if($count >0){
       if($f_count > 0){
         foreach ($stmt8 as $row8) {
           $item_name = mb_convert_kana($row8['item_name'], "KVas");
+          $short_name = mb_convert_kana($row8['name_short'], "KVas");
           $unit_price = $row8['unit_price'];
           $qty = $row8['qty'];
           $amount_gross = $row8['amount_gross'];
           $amount_net = $row8['amount_net'];
           $drink1[] =array(
             'name' => $item_name,
+            'short_name' => $short_name,
             'unit_price' => $unit_price,
             'qty' => $qty,
             'amount_gross' => $amount_gross,
@@ -191,12 +193,14 @@ if($count >0){
       if($f_count > 0){
         foreach ($stmt8 as $row8) {
           $item_name = mb_convert_kana($row8['item_name'], "KVas");
+          $short_name = mb_convert_kana($row8['name_short'], "KVas");
           $unit_price = $row8['unit_price'];
           $qty = $row8['qty'];
           $amount_gross = $row8['amount_gross'];
           $amount_net = $row8['amount_net'];
           $drink2[] =array(
             'name' => $item_name,
+            'short_name' => $short_name,
             'unit_price' => $unit_price,
             'qty' => $qty,
             'amount_gross' => $amount_gross,
