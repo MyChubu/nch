@@ -44,6 +44,7 @@ $sql ="SELECT
     `reserver`,
     `pic`,
     `reservation_date`,
+    `sales_category_id`,
     MIN(`start`) as `start`, 
     MAX(`end`) as `end`, 
     MAX(`people`) as `people`,
@@ -124,6 +125,7 @@ if($count > 0){
               <th><i class="fa-solid fa-building"></i></th>
               <th class="cell_w50"><i class="fa-solid fa-user"></i></th>
               <th class="cell_w30"><i class="fa-solid fa-signal"></i></th>
+              <th class="cell_w30">部門</th>
               <th class="cell_w30"><i class="fa-solid fa-users"></i></th>
               <th>売上（税抜）</th>
               <th>売上（税込）</th>
@@ -172,6 +174,7 @@ if($count > 0){
                 </td>
                 <td><?= htmlspecialchars(cleanLanternName($reservation['pic'],3)) ?></td>
                 <td><?=statusletter($reservation['status']) ?></td>
+                <td class="cell_w80"><?= salescatletter($reservation['sales_category_id']) ?></td>
                 <td><?= htmlspecialchars($reservation['people']) ?></td>
                 <td><?= number_format($reservation['net']) ?></td>
                 <td><?= number_format($reservation['gross']) ?></td>

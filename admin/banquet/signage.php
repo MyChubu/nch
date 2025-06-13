@@ -62,8 +62,8 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
         <th><i class="fa-solid fa-location-dot"></i></th>
         <th><i class="fa-solid fa-stairs"></i></th>
         <th><i class="fa-solid fa-signal"></i></th>
-        <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-layer-group"></i></th>
+        <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
         <th><i class="fa-solid fa-floppy-disk"></i></th>
         <th><i class="fa-solid fa-gear"></i></th>
@@ -81,8 +81,9 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
           <td><?= $events[$i]['room_name'] ?></td>
           <td><?= $events[$i]['floor'] ?></td>
           <td><?= statusletter($events[$i]['status']) ?></td>
+          <td><?= salescatletter($events[$i]['category_id']) ?></td>
           <td><?= mb_convert_kana($events[$i]['purpose_short'],'KVas') ?></td>
-          <td><?= mb_convert_kana($events[$i]['category_name'],'KVas') ?></td>
+          
           <td>
             <label class="toggleButton">
               <input type="checkbox" class="toggleButton__checkbox" name="events[<?=$i ?>][enable]" <?=$events[$i]['enable']==1? 'checked':''; ?> />

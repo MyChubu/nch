@@ -737,7 +737,7 @@ if($count > 0) {
               </tbody>
               </table>
                 </div>
-            <?php
+              <?php
                   $c_count = 0;
                   $c_gross = 0;
                   $c_net = 0;
@@ -746,29 +746,27 @@ if($count > 0) {
                   $c_discount =0;
                   $c_ex_ts =0;
                 }
+              ?>
   
-                echo "<div><h4>";
-                
-                echo $catg==""?"部門なし":$row['sales_category_name'];
-                echo "</h4>";
-                echo "<table>
-                  <thead>
-            <tr>
-              <th>年月</th>
-              <!--<th>部門ID</th>-->
-              <th>部門</th>
-              <th>件数</th>
-              <th>売上</th>
-              <th>純売上</th>
-              <th>サービス料</th>
-              <th>消費税</th>
-              <th>割引</th>
-              <th>税・サ抜</th>
-            </tr>
-          </thead>
-          <tbody>";
-              }
-          ?>
+                <div>
+                  <h4><?=$catg==""?"部門なし":"<a href='salescategory.php?nendo=".$nendo."&amp;cat=".$row['sales_category_id']."'>".$row['sales_category_name']."</a>" ?></h4>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>年月</th>
+                        <!--<th>部門ID</th>-->
+                        <th>部門</th>
+                        <th>件数</th>
+                        <th>売上</th>
+                        <th>純売上</th>
+                        <th>サービス料</th>
+                        <th>消費税</th>
+                        <th>割引</th>
+                        <th>税・サ抜</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+             <?php  } ?>
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
