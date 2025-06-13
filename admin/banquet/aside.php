@@ -29,7 +29,7 @@
   <ul>
     <li><i class="fa-solid fa-calendar-check"></i><a href="../banquet/monthly.php" target="_blank">月間予定</a></li>
     <li><i class="fa-solid fa-calendar-days"></i><a href="../banquet/salescal.php" target="_blank">日別・部屋別Cal</a></li>
-    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/reservations.php">受注リスト</a></li>
+    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/reservations.php">受注リスト1</a></li>
   </ul>
   <h3>発注</h3>
   <ul>
