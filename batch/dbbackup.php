@@ -24,4 +24,21 @@ if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
 } else {
   echo "アーカイブ作成失敗\n";
 }
+
+// ★ ここから古いファイルの削除処理 ★
+
+$now = time();
+$expire = 30 * 24 * 60 * 60; // 30日（秒数換算）
+
+$files = glob($filePath . '*');  // フォルダー内のすべてのファイルを取得
+
+foreach ($files as $file) {
+  if (is_file($file)) {
+    $filemtime = filemtime($file);
+    if ($now - $filemtime > $expire) {
+      unlink($file);
+      echo "削除しました: {$file}\n";
+    }
+  }
+}
 ?>
