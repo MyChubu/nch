@@ -1,4 +1,4 @@
-CREATE VIEW `pre_daily_subtotal2` AS
+CREATE VIEW `pre_daily_subtotal3` AS
 select `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`status` AS `status`,
 `S`.`status_name` AS `status_name`,
@@ -7,13 +7,14 @@ select `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`reservation_date` AS `reservation_date`,
 `S`.`branch` AS `branch`,
 count(`S`.`reservation_id`) AS `count`,
-date_format(`S`.`date`,'%Y-%m') AS `ym`,
+date_format(`S`.`reservation_date`,'%Y-%m') AS `ym`,
 `S`.`date` AS `date`,
 `S`.`room_id` AS `room_id`,
 `R`.`name` AS `room_name`,
 `S`.`start` AS `start`,
 `S`.`end` AS `end`,
 max(`S`.`people`) AS `people`,
+sum((`C`.`unit_price` * `C`.`qty`)) AS `subtotal`,
 sum(`C`.`amount_gross`) AS `gross`,
 sum(`C`.`amount_net`) AS `net`,
 sum(`C`.`service_fee`) AS `service_fee`,
@@ -38,22 +39,17 @@ sum(((`C`.`amount_gross` - `C`.`service_fee`) - `C`.`tax`)) AS `ex-ts`,
 `AG`.`agent_group_short` AS `agent_short`,
 `S`.`agent_name` AS `agent_name2`,
 `S`.`reserver` AS `reserver`
-
-from 
-(
+from (
   (
     (
       (
         (
           (
-            (`banquet_schedules` `S` 
-              left join `banquet_charges` `C` on(
-                (
-                  (`C`.`reservation_id` = `S`.`reservation_id`) 
-                  and (`C`.`branch` = `S`.`branch`) 
-                  and (`C`.`branch` <> 9999) 
-                  and (not((`C`.`item_group_id` like 'X%')))
-                )
+            (`banquet_schedules` `S` left join `banquet_charges` `C` on(
+                ((`C`.`reservation_id` = `S`.`reservation_id`) 
+                and (`C`.`branch` = `S`.`branch`) 
+                and (`C`.`branch` <> 9999) 
+                and (not((`C`.`item_group_id` like 'X%'))))
               )
             ) left join `banquet_purposes` `P` on(
               (`S`.`purpose_id` = `P`.`banquet_purpose_id`)
@@ -73,11 +69,15 @@ from
   ) left join `banquet_agents` `AG` on(
     (`S`.`agent_id` = `AG`.`agent_id`)
   )
-) 
+)
 where (
   (`S`.`banquet_schedule_id` is not null) 
   and (`S`.`status` not in (4,5)) 
   and (`S`.`purpose_id` not in (0,88,94)) 
-  and (`S`.`reservation_name` <> '朝食会場'))
-group by `S`.`date`,`P`.`banquet_category_id`,`S`.`room_id`
-order by `S`.`date`,`P`.`banquet_category_id`,`S`.`start`
+  and (`S`.`reservation_name` <> '朝食会場')
+) 
+group by `S`.`date`,
+`P`.`banquet_category_id`,
+`S`.`room_id` order by `S`.`date`,
+`P`.`banquet_category_id`,
+`S`.`start`
