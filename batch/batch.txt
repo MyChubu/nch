@@ -7,3 +7,6 @@ cronで実行
 
 ■　1日1回実行
 ・dbbackup.php // DBをダンプしZIPで保存 毎日AM1:01に実行
+
+■　週１で実行
+・sourcebackup.php　// サイトのソースコード全体をバックアップ 毎週土曜AM2:01に実行
