@@ -26,6 +26,7 @@ $sales = array();
 $sql = "SELECT 
 `sales`.`ym`,
 COUNT(`sales`.`reservation_id`) AS `count`,
+SUM(`sales`.`subtotal`) AS `subtotal`,
 SUM(`sales`.`gross`) AS `gross`,
 SUM(`sales`.`net`) AS `net`,
 SUM(`sales`.`service_fee`) AS `service_fee`,
@@ -36,6 +37,7 @@ FROM (
 SELECT 
 `ym`,
 `reservation_id`,
+SUM(`subtotal`) AS `subtotal`,
 SUM(`gross`) AS `gross`,
 SUM(`net`) AS `net`,
 SUM(`service_fee`) AS `service_fee`,
@@ -59,6 +61,7 @@ if($count > 0) {
     $sales[] = array(
       'ym' => $result['ym'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -85,6 +88,7 @@ if($count > 0) {
     $last_year_sales[] = array(
       'ym' => $result['ym'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -103,6 +107,7 @@ $sql = "SELECT
 `sales`.`pic`,
 `sales`.`pic_id`,
 COUNT(`sales`.`reservation_id`) AS `count`,
+SUM(`sales`.`subtotal`) AS `subtotal`,
 SUM(`sales`.`gross`) AS `gross`,
 SUM(`sales`.`net`) AS `net`,
 SUM(`sales`.`service_fee`) AS `service_fee`,
@@ -115,6 +120,7 @@ FROM(
   `reservation_id`,
   `pic`,
   `pic_id`,
+  SUM(`subtotal`) AS `subtotal`,
   SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
   SUM(`service_fee`) AS `service_fee`,
@@ -145,6 +151,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -170,6 +177,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -187,6 +195,7 @@ $sql = "SELECT
     `banquet_category_id`,
     `banquet_category_name`,
     COUNT(`reservation_id`) AS `count`,
+    SUM(`subtotal`) AS `subtotal`,
     SUM(`gross`) AS `gross`,
     SUM(`net`) AS `net`,
     SUM(`service_fee`) AS `service_fee`,
@@ -211,6 +220,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -237,6 +247,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -253,6 +264,7 @@ $sql = "SELECT
   `sales`.`sales_category_id`,
   `sales`.`sales_category_name`,
   COUNT(`reservation_id`) AS `count`,
+  SUM(`subtotal`) AS `subtotal`,
   SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
   SUM(`service_fee`) AS `service_fee`,
@@ -265,6 +277,7 @@ FROM(
     `sales_category_id`,
     `sales_category_name`,
     `reservation_id`,
+    SUM(`subtotal`) AS `subtotal`,
     SUM(`gross`) AS `gross`,
     SUM(`net`) AS `net`,
     SUM(`service_fee`) AS `service_fee`,
@@ -291,6 +304,7 @@ FROM(
        'sales_category_id' => $result['sales_category_id'],
        'sales_category_name' => $result['sales_category_name'],
        'count' => $result['count'],
+       'subtotal' => $result['subtotal'],
        'gross' => $result['gross'],
        'net' => $result['net'],
        'service_fee' => $result['service_fee'],
@@ -307,12 +321,13 @@ $individual_category_sales =array();
 
 $sql = "SELECT  `ym`,`pic`,`banquet_category_id`,`banquet_category_name`,
 COUNT(`reservation_id`) AS `count`,
+SUM(`subtotal`) AS `subtotal`,
 SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`,
-  SUM(`service_fee`) AS `service_fee`,
-  SUM(`tax`) AS `tax`,
-  SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`
+SUM(`net`) AS `net`,
+SUM(`service_fee`) AS `service_fee`,
+SUM(`tax`) AS `tax`,
+SUM(`discount`) AS `discount`,
+SUM(`ex-ts`) AS `ex-ts`
  FROM `view_daily_subtotal`
  WHERE `date` BETWEEN :first_day AND :last_day
  GROUP BY `ym`,`pic`,`banquet_category_id`,`banquet_category_name`
@@ -333,6 +348,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -359,6 +375,7 @@ if($count > 0) {
       'banquet_category_id' => $result['banquet_category_id'],
       'banquet_category_name' => $result['banquet_category_name'],
       'count' => $result['count'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -411,7 +428,9 @@ if($count > 0) {
       <h2>月別売上</h2>
       <?php if(sizeof($sales) > 0): ?>
         <?php
+          
           $total_count = 0;
+          $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
           $total_service_fee = 0;
@@ -424,12 +443,13 @@ if($count > 0) {
             <tr>
               <th>年月</th>
               <th>件数</th>
-              <th>売上</th>
-              <th>純売上</th>
-              <th>サービス料</th>
-              <th>消費税</th>
-              <th>割引</th>
-              <th>税・サ抜</th>
+              <th>&#9312;&nbsp;金額</th>
+              <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+              <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+              <th>&#9315;&nbsp;サービス料</th>
+              <th>&#9316;&nbsp;消費税</th>
+              <th>&#9317;&nbsp;割引</th>
+              <!--<th>税・サ抜</th>-->
             </tr>
           </thead>
           <tbody>
@@ -437,15 +457,17 @@ if($count > 0) {
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$row['count'] ?></td>
+                <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
+                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
                 $total_service_fee += $row['service_fee'];
@@ -457,12 +479,13 @@ if($count > 0) {
             <tr>
               <td>合計</td>
               <td><?=number_format($total_count) ?></td>
+              <td><?=number_format($total_subtotal) ?></td>
               <td><?=number_format($total_gross) ?></td>
               <td><?=number_format($total_net) ?></td>
               <td><?=number_format($total_service_fee) ?></td>
               <td><?=number_format($total_tax) ?></td>
               <td><?=number_format($total_discount) ?></td>
-              <td><?=number_format($total_ex_ts) ?></td>
+              <!--<td><?=number_format($total_ex_ts) ?></td>-->
             </tr>
           </tbody>
         </table>
@@ -475,6 +498,7 @@ if($count > 0) {
       <?php if(sizeof($last_year_sales) > 0): ?>
         <?php
           $total_count = 0;
+          $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
           $total_service_fee = 0;
@@ -487,12 +511,13 @@ if($count > 0) {
             <tr>
               <th>年月</th>
               <th>件数</th>
-              <th>売上</th>
-              <th>純売上</th>
-              <th>サービス料</th>
-              <th>消費税</th>
-              <th>割引</th>
-              <th>税・サ抜</th>
+              <th>&#9312;&nbsp;金額</th>
+              <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+              <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+              <th>&#9315;&nbsp;サービス料</th>
+              <th>&#9316;&nbsp;消費税</th>
+              <th>&#9317;&nbsp;割引</th>
+              <!--<th>税・サ抜</th>-->
             </tr>
           </thead>
           <tbody>
@@ -500,15 +525,17 @@ if($count > 0) {
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$row['count'] ?></td>
+                <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
+                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
                 $total_service_fee += $row['service_fee'];
@@ -520,12 +547,13 @@ if($count > 0) {
             <tr>
               <td>合計</td>
               <td><?=number_format($total_count) ?></td>
+              <td><?=number_format($total_subtotal) ?></td>
               <td><?=number_format($total_gross) ?></td>
               <td><?=number_format($total_net) ?></td>
               <td><?=number_format($total_service_fee) ?></td>
               <td><?=number_format($total_tax) ?></td>
               <td><?=number_format($total_discount) ?></td>
-              <td><?=number_format($total_ex_ts) ?></td>
+              <!--<td><?=number_format($total_ex_ts) ?></td>-->
             </tr>
           </tbody>
         </table>
@@ -542,6 +570,7 @@ if($count > 0) {
           $picn_id = " ";
           $counter = 0;
           $total_count = 0;
+          $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
           $total_service_fee = 0;
@@ -551,6 +580,7 @@ if($count > 0) {
           $counter =0;
 
           $i_count = 0;
+          $i_subtotal = 0;
           $i_gross = 0;
           $i_net = 0;
           $i_service = 0;
@@ -570,12 +600,13 @@ if($count > 0) {
               <tr>
                 <td colspan="2">合計</td>
                 <td><?=number_format($i_count) ?></td>
+                <td><?=number_format($i_subtotal) ?></td>
                 <td><?=number_format($i_gross) ?></td>
                 <td><?=number_format($i_net) ?></td>
                 <td><?=number_format($i_service) ?></td>
                 <td><?=number_format($i_tax) ?></td>
                 <td><?=number_format($i_discount) ?></td>
-                <td><?=number_format($i_ex_ts) ?></td>
+                <!--<td><?=number_format($i_ex_ts) ?></td>-->
               </tr>
             </tbody>
           </table>
@@ -583,6 +614,7 @@ if($count > 0) {
               <?php
             }
             $i_count = 0;
+            $i_subtotal = 0;
             $i_gross = 0;
             $i_net = 0;
             $i_service = 0;
@@ -601,12 +633,13 @@ if($count > 0) {
               <th>年月</th>
               <th>担当</th>
               <th>件数</th>
-              <th>売上</th>
-              <th>純売上</th>
-              <th>サービス料</th>
-              <th>消費税</th>
-              <th>割引</th>
-              <th>税・サ抜</th>
+              <th>&#9312;&nbsp;金額</th>
+              <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+              <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+              <th>&#9315;&nbsp;サービス料</th>
+              <th>&#9316;&nbsp;消費税</th>
+              <th>&#9317;&nbsp;割引</th>
+              <!--<th>税・サ抜</th>-->
             </tr>
           </thead>
           <tbody>";
@@ -616,15 +649,17 @@ if($count > 0) {
                 <td><?=$row['ym'] ?></td>
                 <td><?=cleanLanternName($row['pic']) ?></td>
                 <td><?=$row['count'] ?></td>
+                <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
+                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
                 $total_service_fee += $row['service_fee'];
@@ -633,6 +668,7 @@ if($count > 0) {
                 $total_ex_ts += $row['ex-ts'];
 
                 $i_count += $row['count'];
+                $i_subtotal += $row['subtotal'];
                 $i_gross += $row['gross'];
                 $i_net += $row['net'];
                 $i_service += $row['service_fee'];
@@ -647,12 +683,13 @@ if($count > 0) {
             <tr>
                 <td colspan="2">合計</td>
                 <td><?=number_format($i_count) ?></td>
+                <td><?=number_format($i_subtotal) ?></td>
                 <td><?=number_format($i_gross) ?></td>
                 <td><?=number_format($i_net) ?></td>
                 <td><?=number_format($i_service) ?></td>
                 <td><?=number_format($i_tax) ?></td>
                 <td><?=number_format($i_discount) ?></td>
-                <td><?=number_format($i_ex_ts) ?></td>
+                <!--<td><?=number_format($i_ex_ts) ?></td>-->
               </tr>
             </tbody>
           </table>
@@ -666,24 +703,26 @@ if($count > 0) {
                   <th>年月</th>
                   <th>担当</th>
                   <th>件数</th>
-                  <th>売上</th>
-                  <th>純売上</th>
-                  <th>サービス料</th>
-                  <th>消費税</th>
-                  <th>割引</th>
-                  <th>税・サ抜</th>
+                  <th>&#9312;&nbsp;金額</th>
+                  <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+                  <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+                  <th>&#9315;&nbsp;サービス料</th>
+                  <th>&#9316;&nbsp;消費税</th>
+                  <th>&#9317;&nbsp;割引</th>
+                  <!--<th>税・サ抜</th>-->
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td colspan="2">合計</td>
                   <td><?=number_format($total_count) ?></td>
+                  <td><?=number_format($total_subtotal) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>
                   <td><?=number_format($total_service_fee) ?></td>
                   <td><?=number_format($total_tax) ?></td>
                   <td><?=number_format($total_discount) ?></td>
-                  <td><?=number_format($total_ex_ts) ?></td>
+                  <!--<td><?=number_format($total_ex_ts) ?></td>-->
                 </tr>
               </tbody>
             </table>
@@ -701,6 +740,7 @@ if($count > 0) {
           $catg = " ";
           $counter = 0;
           $total_count = 0;
+          $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
           $total_service_fee = 0;
@@ -709,6 +749,7 @@ if($count > 0) {
           $total_ex_ts = 0;
 
           $c_count = 0;
+          $c_subtotal = 0;
           $c_gross = 0;
           $c_net = 0;
           $c_service = 0;
@@ -727,18 +768,20 @@ if($count > 0) {
                 <tr>
                   <td colspan="2">合計</td>
                   <td><?=number_format($c_count) ?></td>
+                  <td><?=number_format($c_subtotal) ?></td>
                   <td><?=number_format($c_gross) ?></td>
                   <td><?=number_format($c_net) ?></td>
                   <td><?=number_format($c_service) ?></td>
                   <td><?=number_format($c_tax) ?></td>
                   <td><?=number_format($c_discount) ?></td>
-                  <td><?=number_format($c_ex_ts) ?></td>
+                  <!--<td><?=number_format($c_ex_ts) ?></td>-->
                 </tr>
               </tbody>
               </table>
                 </div>
               <?php
                   $c_count = 0;
+                  $c_subtotal = 0;
                   $c_gross = 0;
                   $c_net = 0;
                   $c_service = 0;
@@ -757,12 +800,13 @@ if($count > 0) {
                         <!--<th>部門ID</th>-->
                         <th>部門</th>
                         <th>件数</th>
-                        <th>売上</th>
-                        <th>純売上</th>
-                        <th>サービス料</th>
-                        <th>消費税</th>
-                        <th>割引</th>
-                        <th>税・サ抜</th>
+                        <th>&#9312;&nbsp;金額</th>
+                        <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+                        <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+                        <th>&#9315;&nbsp;サービス料</th>
+                        <th>&#9316;&nbsp;消費税</th>
+                        <th>&#9317;&nbsp;割引</th>
+                        <!--<th>税・サ抜</th>-->
                       </tr>
                     </thead>
                     <tbody>
@@ -772,15 +816,17 @@ if($count > 0) {
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <!--<td><?=$row['sales_category_name'] ?></td>-->
                 <td><?=$row['count'] ?></td>
+                <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
+                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
                 $total_service_fee += $row['service_fee'];
@@ -789,6 +835,7 @@ if($count > 0) {
                 $total_ex_ts += $row['ex-ts'];
 
                 $c_count += $row['count'];
+                $c_subtotal += $row['subtotal'];
                 $c_gross += $row['gross'];
                 $c_net += $row['net'];
                 $c_service += $row['service_fee'];
@@ -801,12 +848,13 @@ if($count > 0) {
             <tr>
               <td colspan="2">合計</td>
               <td><?=number_format($c_count) ?></td>
+              <td><?=number_format($c_subtotal) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
               <td><?=number_format($c_service) ?></td>
               <td><?=number_format($c_tax) ?></td>
               <td><?=number_format($c_discount) ?></td>
-              <td><?=number_format($c_ex_ts) ?></td>
+              <!--<td><?=number_format($c_ex_ts) ?></td>-->
             </tr>
           </tbody>
         </table>
@@ -821,24 +869,26 @@ if($count > 0) {
                   <!--<th>部門ID</th>-->
                   <th>部門</th>
                   <th>件数</th>
-                  <th>売上</th>
-                  <th>純売上</th>
-                  <th>サービス料</th>
-                  <th>消費税</th>
-                  <th>割引</th>
-                  <th>税・サ抜</th>
+                  <th>&#9312;&nbsp;金額</th>
+                  <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+                  <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+                  <th>&#9315;&nbsp;サービス料</th>
+                  <th>&#9316;&nbsp;消費税</th>
+                  <th>&#9317;&nbsp;割引</th>
+                  <!--<th>税・サ抜</th>-->
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td colspan="2">合計</td>
                   <td><?=number_format($total_count) ?></td>
+                  <td><?=number_format($total_subtotal) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>
                   <td><?=number_format($total_service_fee) ?></td>
                   <td><?=number_format($total_tax) ?></td>
                   <td><?=number_format($total_discount) ?></td>
-                  <td><?=number_format($total_ex_ts) ?></td>
+                  <!--<td><?=number_format($total_ex_ts) ?></td>-->
                 </tr>
               </tbody>
             </table>
@@ -848,6 +898,8 @@ if($count > 0) {
         <p>売上データはありません。</p>
       <?php endif; ?>
     </div>
+
+  
 
 
   </div>

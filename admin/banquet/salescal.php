@@ -251,6 +251,12 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
       <tr style="background-color:#ddd;"><td>合計</td><td><?=number_format($total) ?></td></tr>
     </table>
   </div>
+  <div class="block">
+    <p>※金額は税・サービス料抜きです。</p>
+    <p>※このカレンダーは、各会場の予約状況を月単位で表示しています。</p>
+    <p>※同日同会場で複数の利用がある場合、金額が高い・利用人数が多い予約が表示されますが、表示金額は同会場の合計値を表示します。</p>
+    <p>※月を跨ぐ案件がある場合は、他の集計と合計値が異なることがあります。</p>
+  </div>
 </main>
 <?php include("footer.php"); ?>
 </body>

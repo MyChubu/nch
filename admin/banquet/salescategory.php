@@ -66,6 +66,7 @@ $sql = "SELECT
   `sales_category_name`,
   `agent_id`,
   `agent_short`,
+  SUM(`subtotal`) AS `subtotal`,
   SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
   SUM(`service_fee`) AS `service_fee`,
@@ -107,6 +108,7 @@ if($count > 0) {
       'agent_short' => $agent_short,
       'status' => $result['status'],
       'status_name' => $result['status_name'],
+      'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
       'service_fee' => $result['service_fee'],
@@ -171,6 +173,7 @@ if($count > 0) {
         <?php
 
           $total_count = 0;
+          $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
           $total_service_fee = 0;
@@ -180,6 +183,7 @@ if($count > 0) {
           $counter =0;
 
           $i_count = 0;
+          $i_subtotal = 0;
           $i_gross = 0;
           $i_net = 0;
           $i_service = 0;
@@ -199,14 +203,14 @@ if($count > 0) {
               <th>予約名<span class='sort-arrow'></span></th>
               <th>担当<span class='sort-arrow'></span></th>
               <th>状況<span class='sort-arrow'></span></th>
-              
               <th>カテゴリ<span class='sort-arrow'></span></th>
-              <th>売上<span class='sort-arrow'></span></th>
-              <th>純売上<span class='sort-arrow'></span></th>
-              <th>サービス料<span class='sort-arrow'></span></th>
-              <th>消費税<span class='sort-arrow'></span></th>
-              <th>割引<span class='sort-arrow'></span></th>
-              <th>税・サ抜<span class='sort-arrow'></span></th>
+              <th>&#9312;&nbsp;金額</th>
+              <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
+              <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
+              <th>&#9315;&nbsp;サービス料</th>
+              <th>&#9316;&nbsp;消費税</th>
+              <th>&#9317;&nbsp;割引</th>
+              <!--<th>税・サ抜</th>-->
             </tr>
           </thead>
           <tbody>
@@ -221,15 +225,17 @@ if($count > 0) {
             <td><?=cleanLanternName($row['pic']) ?></td>
             <td><?=statusletter($row['status']) ?></td>
             <td><?= salescatletter($row['sales_category_id']) ?></td>
+            <td><?=number_format($row['subtotal']) ?></td>
             <td><?=number_format($row['gross']) ?></td>
             <td><?=number_format($row['net']) ?></td>
             <td><?=number_format($row['service_fee']) ?></td>
             <td><?=number_format($row['tax']) ?></td>
             <td><?=number_format($row['discount']) ?></td>
-            <td><?=number_format($row['ex-ts']) ?></td>
+            <!--<td><?=number_format($row['ex-ts']) ?></td>-->
           </tr>
           <?php
             $total_count += $row['count'];
+            $total_subtotal += $row['subtotal'];
             $total_gross += $row['gross'];
             $total_net += $row['net'];
             $total_service_fee += $row['service_fee'];
@@ -237,6 +243,7 @@ if($count > 0) {
             $total_discount += $row['discount'];
             $total_ex_ts += $row['ex-ts'];
             $i_count += $row['count'];
+            $i_subtotal += $row['subtotal'];
             $i_gross += $row['gross'];
             $i_net += $row['net'];
             $i_service += $row['service_fee'];
@@ -255,12 +262,13 @@ if($count > 0) {
                 <td><?=sizeof($sales) ?></td>
                 <td></td>
                 <td></td>
+                <td><?=number_format($i_subtotal) ?></td>
                 <td><?=number_format($i_gross) ?></td>
                 <td><?=number_format($i_net) ?></td>
                 <td><?=number_format($i_service) ?></td>
                 <td><?=number_format($i_tax) ?></td>
                 <td><?=number_format($i_discount) ?></td>
-                <td><?=number_format($i_ex_ts) ?></td>
+                <!--<td><?=number_format($i_ex_ts) ?></td>-->
               </tr>
             </tfoot>
           </table>

@@ -332,6 +332,19 @@ foreach ($totals as [$label, $amount, $cat_id]) {
   $sheet->getStyle("C{$row}")->getFont()->setSize(18)->setBold(true);
   $row++;
 }
+$row+2; // 空行
+// ▼ 備考欄
+$sheet->setCellValue("A{$row}", '【備考】');
+$row++;
+$sheet->setCellValue("A{$row}", '※金額は税・サービス料抜きです。');
+$row++;
+$sheet->setCellValue("A{$row}", '※このカレンダーは、各会場の予約状況を月単位で表示しています。');
+$row++;
+$sheet->setCellValue("A{$row}", '※同日同会場で複数の利用がある場合、金額が高い・利用人数が多い予約が表示されますが、表示金額は同会場の合計値を表示します。');
+$row++;
+$sheet->setCellValue("A{$row}", '※月を跨ぐ案件がある場合は、他の集計と合計値が異なることがあります。');
+
+
 // アクティブセルをA1に設定
 $sheet->setSelectedCell('A1');
 
