@@ -317,3 +317,17 @@ span.status-letter-2{ background-color:blue;}
 span.status-letter-3{ background-color:green;}
 span.status-letter-4{ background-color:lightgray;}
 span.status-letter-5{ background-color:black;}
+
+span.dc {
+  display: inline-block;
+  background-color:black;
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 1.5em;
+  text-align: center;
+}
+span.dc-A { background-color: #ff0000;}
+span.dc-B { background-color: darkgreen;}
+span.dc-C { background-color: #0000ff;}
