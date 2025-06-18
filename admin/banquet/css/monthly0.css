@@ -5,7 +5,7 @@ main{
 table.cal3w {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 12px;
 }
 table.cal3w th {
   background-color: #f2f2f2;
@@ -20,7 +20,7 @@ table.cal3w td {
   border: 1px solid #ddd;
   padding: 2px;
   vertical-align: top;
-  font-size: 12px;
+  font-size: 10px;;
 }
 table.cal3w tr:nth-child(even) {
   background-color: #f9f9f9;

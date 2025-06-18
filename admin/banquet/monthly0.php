@@ -8,17 +8,6 @@ error_reporting(E_ALL);
 require_once('../../common/conf.php');
 require_once('functions/admin_banquet.php');
 
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
-$users= array();
-$sql= "SELECT `pic_id`, `name` FROM `users` WHERE `group` = 1 ORDER BY `user_id` ASC";
-$stmt = $dbh->prepare($sql);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$pic_def = array();
-foreach ($results as $u) {
-    $pic_def[] = $u['pic_id']; // デフォルトのピックIDを配列に追加
-}
-
 // 今日の日付を取得（フォーマット: Y-m-d）
 $today = (new DateTime())->format('Y-m-d');
 
@@ -26,20 +15,6 @@ $today = (new DateTime())->format('Y-m-d');
 $ym = date('Y-m');
 if (isset($_REQUEST['ym']) && $_REQUEST['ym'] !== '') {
     $ym = $_REQUEST['ym'];
-}
-$pic_ids = $_REQUEST['pic_ids'];
-if(!is_array($pic_ids) || count($pic_ids) === 0) {
-  // チェックボックスが未選択の場合、デフォルトのピックIDを使用
-  $pic_ids = $pic_def;
-}
-
-// 動的にIN句を作成
-$placeholders = [];
-$params = [];
-foreach ($pic_ids as $index => $pic_id) {
-  $ph = ":pic_id$index";
-  $placeholders[] = $ph;
-  $params[$ph] = $pic_id;
 }
 
 // 年と月を分解（表示用）
@@ -83,41 +58,31 @@ if ($ew <= 3) {
 $end_date = $end_date_dt->format('Y-m-d');
 
 // データベース接続と予約データの取得
-
+$dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = "SELECT
-  `reservation_id`,
-  `reservation_name`,
-  `date`,
-  `status`,
-  min(`start`) as `start`,
-  max(`end`) as `end`,
-  count(`reservation_id`) as `count`,
-  `pic`,
-  `pic_id`
-  FROM `banquet_schedules`
-  WHERE `date` BETWEEN :start_date AND :end_date
-  AND `status` <> 5
-  AND `pic_id` IN (" . implode(',', $placeholders) . ")
-  AND `reservation_name` NOT LIKE '朝食会場'
-  AND `reservation_name` NOT LIKE '倉庫'
-  GROUP BY `reservation_id`, `date`
-  ORDER BY `date`, `start`, `end`, `reservation_id`";
+        `reservation_id`,
+        `reservation_name`,
+        `date`,
+        `status`,
+        min(`start`) as `start`,
+        max(`end`) as `end`,
+        count(`reservation_id`) as `count`,
+        `pic`
+        FROM `banquet_schedules`
+        WHERE `date` BETWEEN :start_date AND :end_date
+        AND `status` <> 5
+        AND `reservation_name` NOT LIKE '朝食会場'
+        AND `reservation_name` NOT LIKE '倉庫'
+        GROUP BY `reservation_id`, `date`
+        ORDER BY `date`, `start`, `end`, `reservation_id`";
 
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':start_date', $start_date, PDO::PARAM_STR);
 $stmt->bindValue(':end_date', $end_date, PDO::PARAM_STR);
-foreach ($params as $ph => $val) {
-  $stmt->bindValue($ph, $val, PDO::PARAM_STR);
-}
-
 $stmt->execute();
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
 $stmt->closeCursor();
-
-
-
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -135,20 +100,9 @@ $stmt->closeCursor();
 <main>
   <!-- 月のコントローラー（前月・当月・翌月） -->
   <div id="controller_month">
-    <div id="before_month"><a href=""><i class="fa-solid fa-arrow-left"></i>前月</a></div>
-    <div id="current_month"><span><?= $yearmonth[0] ?>年<?= $yearmonth[1] ?>月</span></div>
-    <div id="next_month"><a href="">翌月<i class="fa-solid fa-arrow-right"></i></a></div>
-    <div id="next_month"><a href="">今月<i class="fa-solid fa-arrow-right"></i></a></div>
-  </div>
-  <div id="pic_select">
-      <?php foreach ($results as $user): ?>
-        <label>
-          <input type="checkbox" name="pic_ids[]" value="<?= $user['pic_id'] ?>" <?php if (in_array($user['pic_id'], $pic_ids)) echo 'checked'; ?>>
-          <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8') ?>
-        </label>
-      <?php endforeach; ?>
-      </div>
-  <div>
+    <div id="before_month"><a href="?ym=<?= $before_month ?>" title="<?= $before_month ?>"><i class="fa-solid fa-arrow-left"></i>前月</a></div>
+    <div id="this_month"><span><?= $yearmonth[0] ?>年<?= $yearmonth[1] ?>月</span></div>
+    <div id="next_month"><a href="?ym=<?= $next_month ?>" title="<?= $next_month ?>">翌月<i class="fa-solid fa-arrow-right"></i></a></div>
   </div>
 
 <?php if($count > 0): ?>

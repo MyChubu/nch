@@ -1,20 +1,46 @@
 <?php
 // ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
 
 // 必要な設定ファイルと関数を読み込み
 require_once('../../common/conf.php');
 require_once('functions/admin_banquet.php');
 
+$dbh = new PDO(DSN, DB_USER, DB_PASS);
+$users= array();
+$sql= "SELECT `pic_id`, `name` FROM `users` WHERE `group` = 1 ORDER BY `user_id` ASC";
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$pic_def = array();
+foreach ($results as $u) {
+    $pic_def[] = $u['pic_id']; // デフォルトのピックIDを配列に追加
+}
+
 // 今日の日付を取得（フォーマット: Y-m-d）
 $today = (new DateTime())->format('Y-m-d');
 
 // 指定された年月があれば取得、なければ今月
-$ym = date('Y-m');
+$this_month = (new DateTime())->format('Y-m');
+$ym = $this_month; // デフォルトは今月
 if (isset($_REQUEST['ym']) && $_REQUEST['ym'] !== '') {
     $ym = $_REQUEST['ym'];
+}
+$pic_ids = $_REQUEST['pic_ids'];
+if(!is_array($pic_ids) || count($pic_ids) === 0) {
+  // チェックボックスが未選択の場合、デフォルトのピックIDを使用
+  $pic_ids = $pic_def;
+}
+
+// 動的にIN句を作成
+$placeholders = [];
+$params = [];
+foreach ($pic_ids as $index => $pic_id) {
+  $ph = ":pic_id$index";
+  $placeholders[] = $ph;
+  $params[$ph] = $pic_id;
 }
 
 // 年と月を分解（表示用）
@@ -58,37 +84,49 @@ if ($ew <= 3) {
 $end_date = $end_date_dt->format('Y-m-d');
 
 // データベース接続と予約データの取得
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
+
 $sql = "SELECT
-        `reservation_id`,
-        `reservation_name`,
-        `date`,
-        `status`,
-        min(`start`) as `start`,
-        max(`end`) as `end`,
-        count(`reservation_id`) as `count`,
-        `pic`
-        FROM `banquet_schedules`
-        WHERE `date` BETWEEN :start_date AND :end_date
-        AND `status` <> 5
-        AND `reservation_name` NOT LIKE '朝食会場'
-        AND `reservation_name` NOT LIKE '倉庫'
-        GROUP BY `reservation_id`, `date`
-        ORDER BY `date`, `start`, `end`, `reservation_id`";
+  `reservation_id`,
+  `reservation_name`,
+  `date`,
+  `status`,
+  min(`start`) as `start`,
+  max(`end`) as `end`,
+  count(`reservation_id`) as `count`,
+  `pic`,
+  `pic_id`
+  FROM `banquet_schedules`
+  WHERE `date` BETWEEN :start_date AND :end_date
+  AND `status` <> 5
+  AND `pic_id` IN (" . implode(',', $placeholders) . ")
+  AND `reservation_name` NOT LIKE '朝食会場'
+  AND `reservation_name` NOT LIKE '倉庫'
+  GROUP BY `reservation_id`, `date`
+  ORDER BY `date`, `start`, `end`, `reservation_id`";
 
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':start_date', $start_date, PDO::PARAM_STR);
 $stmt->bindValue(':end_date', $end_date, PDO::PARAM_STR);
+foreach ($params as $ph => $val) {
+  $stmt->bindValue($ph, $val, PDO::PARAM_STR);
+}
+
 $stmt->execute();
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
 $stmt->closeCursor();
+
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache">
   <title><?=$ym ?>予定</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
@@ -98,12 +136,35 @@ $stmt->closeCursor();
 <body>
 <?php include("header.php"); ?>
 <main>
-  <!-- 月のコントローラー（前月・当月・翌月） -->
-  <div id="controller_month">
-    <div id="before_month"><a href="?ym=<?= $before_month ?>" title="<?= $before_month ?>"><i class="fa-solid fa-arrow-left"></i>前月</a></div>
-    <div id="this_month"><span><?= $yearmonth[0] ?>年<?= $yearmonth[1] ?>月</span></div>
-    <div id="next_month"><a href="?ym=<?= $next_month ?>" title="<?= $next_month ?>">翌月<i class="fa-solid fa-arrow-right"></i></a></div>
+  <div id="controller">
+    <div id="controller_left">
+      <h1><?=$yearmonth[0]."年".$yearmonth[1]."月" ?></h1>
+      <div class="post-buttons">
+        <div class="post-button" data-ym="<?=$before_month ?>"><i class="fa-solid fa-arrow-left"></i>前月</div>
+        <div class="post-button" data-ym="<?=$this_month ?>"><i class="fa-solid fa-arrow-up"></i>今月</div>
+        <div class="post-button" data-ym="<?=$next_month ?>">翌月<i class="fa-solid fa-arrow-right"></i></div>
+      </div>
+    </div>
+    <div id="controller_right2">
+      <div class="pic_select_area">
+        <div class="post-button" data-ym="<?=$ym ?>" data-mode="reload"><i class="fa-solid fa-rotate-right"></i>更新</div>
+        
+        <div id="pic_select">
+          <?php foreach ($results as $user): ?>
+            <label>
+              <input type="checkbox" name="pic_ids[]" value="<?= $user['pic_id'] ?>" <?php if (in_array($user['pic_id'], $pic_ids)) echo 'checked'; ?>>
+              <?= htmlspecialchars(cleanLanternName($user['name']), ENT_QUOTES, 'UTF-8') ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+        <div class="button01" id="select_all_btn">全選択</div>
+      </div>
+      
+      <form id="postForm" method="POST"></form>
+    </div>
   </div>
+  <!-- 月のコントローラー（前月・当月・翌月） -->
+
 
 <?php if($count > 0): ?>
 <!-- カレンダー本体 -->
@@ -151,7 +212,7 @@ $stmt->closeCursor();
               if (!$start_dt) continue;
               $event_time = $start_dt->format('H:i');
 
-              $event_name = cleanLanternName($event['reservation_name']);
+              $event_name = cleanLanternName($event['reservation_name'],8);
               $pic = mb_convert_kana($event['pic'], 'KVas');
               $pic = explode(' ', $pic);
 
@@ -193,5 +254,85 @@ $stmt->closeCursor();
 <?php endif; ?>
 </main>
 <?php include("footer.php"); ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // 汎用POST送信関数
+    function submitPost(params) {
+        const form = document.getElementById('postForm');
+        form.innerHTML = ''; // 既存クリア
+
+        // パラメータをフォームに追加
+        for (const name in params) {
+            if (Array.isArray(params[name])) {
+                params[name].forEach(val => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name + '[]';
+                    input.value = val;
+                    form.appendChild(input);
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = params[name];
+                form.appendChild(input);
+            }
+        }
+
+        form.submit();
+    }
+
+    // data-*属性を全部拾ってオブジェクト化
+    function getDataAttributes(element) {
+        const params = {};
+        Array.from(element.attributes).forEach(attr => {
+            if (attr.name.startsWith('data-')) {
+                const key = attr.name.substring(5); // data-を削除
+                params[key] = attr.value;
+            }
+        });
+        return params;
+    }
+
+    // ボタンイベント
+    document.querySelectorAll('.post-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const params = getDataAttributes(this);
+
+            // pic_ids[]も取得
+            const picIds = [];
+            document.querySelectorAll('#pic_select input[name="pic_ids[]"]:checked').forEach(function(checkbox) {
+                picIds.push(checkbox.value);
+            });
+
+            // pic_idsも含めて送信
+            params['pic_ids'] = picIds;
+
+            submitPost(params);
+        });
+    });
+
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const selectAllBtn = document.getElementById('select_all_btn');
+
+    selectAllBtn.addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('#pic_select input[name="pic_ids[]"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+        // すべてチェックされていれば解除、そうでなければ全選択
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+
+        // ボタンの表示も切り替え（任意）
+        //selectAllBtn.textContent = allChecked ? '全選択' : '全解除';
+    });
+});
+
+</script>
+
 </body>
+
 </html>
