@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
 
 require_once('../../common/conf.php');
 require_once('functions/admin_banquet.php');

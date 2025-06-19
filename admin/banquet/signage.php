@@ -20,6 +20,8 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache">
   <title>デジサイ表示設定（<?=$date ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
@@ -61,9 +63,11 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
         <th><i class="fa-solid fa-arrow-left"></i></th>
         <th><i class="fa-solid fa-location-dot"></i></th>
         <th><i class="fa-solid fa-stairs"></i></th>
+        <th><i class="fa-solid fa-user"></i></th>
         <th><i class="fa-solid fa-signal"></i></th>
         <th><i class="fa-solid fa-layer-group"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
+        <th><i class="fa-solid fa-plus"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
         <th><i class="fa-solid fa-floppy-disk"></i></th>
         <th><i class="fa-solid fa-gear"></i></th>
@@ -80,10 +84,17 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
           <td><?= $events[$i]['end'] ?></td>
           <td><?= $events[$i]['room_name'] ?></td>
           <td><?= $events[$i]['floor'] ?></td>
+          <td><?= cleanLanternName($events[$i]['pic'],3) ?></td>
           <td><?= statusletter($events[$i]['status']) ?></td>
           <td><?= salescatletter($events[$i]['category_id']) ?></td>
           <td><?= mb_convert_kana($events[$i]['purpose_short'],'KVas') ?></td>
-          
+          <td>
+            <?php if($events[$i]['additional_sales'] == 1): ?>
+              <span class="additional_sales">追</span>
+              <?php else: ?>
+                &nbsp;
+            <?php endif; ?>
+          </td>
           <td>
             <label class="toggleButton">
               <input type="checkbox" class="toggleButton__checkbox" name="events[<?=$i ?>][enable]" <?=$events[$i]['enable']==1? 'checked':''; ?> />

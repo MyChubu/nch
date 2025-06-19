@@ -42,6 +42,8 @@ $week_after = $dt_week_after->format('Y-m-d');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache">
   <title>会議・宴会一覧（<?=$date ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
@@ -109,7 +111,12 @@ $week_after = $dt_week_after->format('Y-m-d');
                 <div class="agent_name"><?= $agent_name ?></div>
             <?php endif; ?>
 
-            <div class="event_name"><?= $events_en[$i]['event_name'] ?></div>
+            <div class="event_name">
+              <?php if($events_en[$i]['additional_sales'] == 1): ?>
+                <span class="additional_sales">追</span>
+              <?php endif; ?>
+              <?= $events_en[$i]['event_name'] ?>
+            </div>
           </td>
           <td><?= cleanLanternName($events_en[$i]['pic']) ?></td>
           <td><?= $events_en[$i]['room_name'] ?></td>
@@ -193,7 +200,12 @@ $week_after = $dt_week_after->format('Y-m-d');
               ?>
                 <div class="agent_name"><?= $agent_name ?></div>
             <?php endif; ?>
-            <div class="event_name"><?= $events_ka[$i]['event_name'] ?></div>
+            <div class="event_name">
+              <?php if($events_ka[$i]['additional_sales'] == 1): ?>
+                <span class="additional_sales">追</span>
+              <?php endif; ?>
+              <?= $events_ka[$i]['event_name'] ?>
+            </div>
           </td>
           <td><?= cleanLanternName($events_ka[$i]['pic']) ?></td>
           <td><?= $events_ka[$i]['room_name'] ?></td>
@@ -252,7 +264,12 @@ $week_after = $dt_week_after->format('Y-m-d');
               ?>
                 <div class="agent_name"><?= $agent_name ?></div>
             <?php endif; ?>
-            <div class="event_name"><?= $events_other[$i]['event_name'] ?></div>
+            <div class="event_name">
+              <?php if($events_other[$i]['additional_sales'] == 1): ?>
+                <span class="additional_sales">追</span>
+              <?php endif; ?>
+              <?= $events_other[$i]['event_name'] ?>
+            </div>
           </td>
           <td><?= cleanLanternName($events_other[$i]['pic']) ?></td>
           <td><?= $events_other[$i]['room_name'] ?></td>

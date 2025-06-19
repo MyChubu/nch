@@ -99,6 +99,7 @@ $sql = "SELECT
   WHERE `date` BETWEEN :start_date AND :end_date
   AND `status` <> 5
   AND `pic_id` IN (" . implode(',', $placeholders) . ")
+  AND `additional_sales` = 0
   AND `reservation_name` NOT LIKE '朝食会場'
   AND `reservation_name` NOT LIKE '倉庫'
   GROUP BY `reservation_id`, `date`

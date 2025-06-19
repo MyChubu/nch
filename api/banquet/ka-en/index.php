@@ -32,9 +32,9 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
 $hizuke .= '（' . $week[(int)$dateObj->format('w')] . '）';
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where date = ?  order by start ASC, branch ASC';
+$sql = 'select * from banquet_schedules where date = ? and additional_sales = ?  order by start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
-$stmt->execute([$date]);
+$stmt->execute([$date, 0]);
 $count = $stmt->rowCount();
 $events=array();
 $events_en=array();

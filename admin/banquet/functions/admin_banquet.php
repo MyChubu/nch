@@ -63,6 +63,8 @@ function getBanquetEvents($date) {
         'purpose_short' => $purpose_short,                              // 使用目的略称
         'category_id' => $banquet_category_id,                          // カテゴリーID
         'category_name' => $category_name,                              // カテゴリー名
+        'pic' => mb_convert_kana($row['pic'], 'KVas'),                  // 担当者名（全角変換）
+        'additional_sales' => $row['additional_sales'],                 // 追加売上フラグ
         'enable' => $row['enable'],                                     // 有効フラグ
         'added' => $addedObj->format('Y/m/d'),                          // 登録日
         'modified' => $modifiedObj->format('Y/m/d'),                    // 最終更新日
@@ -234,6 +236,7 @@ function getKaEnList($date){
         'category_name' => $category_name,
         'summary_category' => $summary_category,
         'pic' => mb_convert_kana($row['pic'], 'KVas'),
+        'additional_sales' => $row['additional_sales'],
         'agent_id' => $agent_id,
         'agent_name' => $agent_name,
         'agent_group' => $agent_group,

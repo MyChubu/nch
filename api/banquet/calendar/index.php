@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
 
 require_once('../../../common/conf.php');
 
@@ -56,6 +56,7 @@ $sql = "SELECT
         FROM `banquet_schedules`
         WHERE `date` BETWEEN :start_date AND :end_date
         AND `status` <> 5
+        AND `additional_sales` = 0
         AND `reservation_name` not like '朝食会場'
         AND `reservation_name` not like '倉庫'
         GROUP BY `reservation_id`, `date`
