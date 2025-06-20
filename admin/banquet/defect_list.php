@@ -90,7 +90,7 @@ $defects = getDefectList($ym);
               <tr>
                 <td><?= $row['error_name'] ?></td>
                 <td><?= statusletter($row['status']) ?></td>
-                <td><a href="./?event_date=<?= $row['res_date'] ?>"><?= $row['res_date'] ?></a></td>
+                <td><a href="./signage.php?event_date=<?= $row['res_date'] ?>"><?= $row['res_date'] ?></a></td>
                 <td><a href="connection_list.php?resid=<?= $row['reservation_id'] ?>"><?= $row['reservation_id'] ?></a></td>
                 <td><a href="detail.php?scheid=<?=$row['sche_id'] ?>"><?= $row['branch'] ?></a></td>
                 <td><?= $row['reservation_name'] ?></td>

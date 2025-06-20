@@ -769,10 +769,13 @@ function getMonthlySales($ym) {
   );
 }
 
-function getDefectList($ym){
+function getDefectList($ym,$months =3){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
   $ymObj = new DateTime($ym);
   $first_day = $ymObj->format('Y-m-01');
+  $calc_months = $months - 1; // 月の計算
+  //３ヶ月後の月末日を取得
+  $end_day = $ymObj->modify("+{$calc_months} month")->format('Y-m-t');
 
 
   $defects = array();
@@ -780,11 +783,13 @@ function getDefectList($ym){
   //営業担当者が記入されていない
   $error_name = "営業担当者未記入";
   $sql = "SELECT * FROM `banquet_schedules`
-          WHERE `date` >= :first_day
+          WHERE `date` between :first_day AND :end_day
           AND `status` IN (1,2,3)
+          AND `additional_sales` = 0
           AND `pic` = ''  ORDER BY `date`,`reservation_id`,`branch`";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':end_day', $end_day, PDO::PARAM_STR);
   $stmt->execute();
   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $count = $stmt->rowCount();
@@ -825,11 +830,13 @@ function getDefectList($ym){
   //決定予約・仮予約で目的がおかしいもの
   $error_name="決定・仮で目的が不正";
   $sql = "SELECT * FROM `banquet_schedules`
-          WHERE `date` >= :first_day
+          WHERE `date` between :first_day and :end_day
           AND `status` IN (1,2)
+          AND `additional_sales` = 0
           AND `purpose_id` IN (0,3,88,93,94)  ORDER BY `date`,`reservation_id`,`branch`";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':end_day', $end_day, PDO::PARAM_STR);
   $stmt->execute();
   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $count = $stmt->rowCount();
@@ -869,11 +876,13 @@ function getDefectList($ym){
   //営業押さえで目的がおかしいもの
   $error_name="営業押さえで目的が不正";
   $sql = "SELECT * FROM `banquet_schedules`
-          WHERE `date` >= :first_day
+          WHERE `date` between :first_day and :end_day
           AND `status` IN (3)
+          AND `additional_sales` = 0
           AND `purpose_id` NOT IN (0,3,88,93,94) ORDER BY `date`,`reservation_id`,`branch`";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':end_day', $end_day, PDO::PARAM_STR);
   $stmt->execute();
   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $count = $stmt->rowCount();
@@ -913,9 +922,16 @@ function getDefectList($ym){
 
   //決定予約・仮予約で金額データがないもの
   $error_name="決定・仮で明細なし";
-  $sql = "SELECT *  FROM `view_daily_subtotal` WHERE `status` IN (1,2) AND `date` >= :first_day AND `gross` IS NULL ORDER BY `date`,`reservation_id`,`branch`";
+  $sql = "SELECT *  FROM `view_daily_subtotal` 
+    WHERE
+      `status` IN (1,2) 
+      AND `date` between :first_day and :end_day
+      AND `gross` IS NULL 
+      AND `additional_sales` = 0
+      ORDER BY `date`,`reservation_id`,`branch`";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':end_day', $end_day, PDO::PARAM_STR);
   $stmt->execute();
   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $count = $stmt->rowCount();
