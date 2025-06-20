@@ -38,6 +38,7 @@ $sql = "SELECT
   `reservation_date`,
   `reservation_id`,
   `reservation_name`,
+  `additional_sales`,
   `status`,
   `status_name`,
   `pic`,
@@ -78,6 +79,7 @@ if($count > 0) {
     $individual_sales[] = array(
       'ym' => $result['ym'],
       'reservation_id' => $result['reservation_id'],
+      'additional_sales' => $result['additional_sales'],
       'reservation_date' => $result['reservation_date'],
       'reservation_name' => $result['reservation_name'],
       'sales_category_id' => $result['sales_category_id'],
@@ -150,6 +152,8 @@ if($count > 0) {
           $picn_id = " ";
           $counter = 0;
           $total_count = 0;
+          $total_additional_sales = 0;
+          $total_sales_count = 0;
           $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
@@ -160,6 +164,8 @@ if($count > 0) {
           $counter =0;
 
           $i_count = 0;
+          $i_additional_sales = 0;
+          $i_sales_count = 0;
           $i_subtotal = 0;
           $i_gross = 0;
           $i_net = 0;
@@ -181,7 +187,7 @@ if($count > 0) {
               <tfoot>
               <tr>
                 <td colspan="3">合計</td>
-                <td><?=number_format($i_count) ?></td>
+                <td><?=number_format($i_sales_count) ?></td>
                 <td><?=numfmt_format($i_subtotal) ?></td>
                 <td><?=number_format($i_gross) ?></td>
                 <td><?=number_format($i_net) ?></td>
@@ -196,6 +202,8 @@ if($count > 0) {
               <?php
             }
             $i_count = 0;
+            $i_additional_sales = 0;
+            $i_sales_count = 0;
             $i_subtotal = 0;
             $i_gross = 0;
             $i_net = 0;
@@ -215,6 +223,7 @@ if($count > 0) {
               <th>予約ID<span class='sort-arrow'></span></th>
               <th>代理店<span class='sort-arrow'></span></th>
               <th>予約名<span class='sort-arrow'></span></th>
+              <th>追加</th>
               <th>状況<span class='sort-arrow'></span></th>
               <th>カテゴリ<span class='sort-arrow'></span></th>
               <th>&#9312;&nbsp;金額</th>
@@ -235,7 +244,15 @@ if($count > 0) {
                 <td><a href="connection_list.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
                 <td><?=$row['agent_short'] ?></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
+                <td>
+                  <?php if($row['additional_sales'] > 0): ?>
+                    <span class="additional_sales">追</span>
+                  <?php else: ?>
+                    -
+                  <?php endif; ?>
+                </td>
                 <td><?=statusletter($row['status']) ?></td>
+                
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
@@ -247,6 +264,8 @@ if($count > 0) {
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_additional_sales += $row['additional_sales'];
+                $total_sales_count += $sales_count;
                 $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
@@ -256,6 +275,8 @@ if($count > 0) {
                 $total_ex_ts += $row['ex-ts'];
 
                 $i_count += $row['count'];
+                $i_additional_sales += $row['additional_sales'];
+                $i_sales_count += $sales_count;
                 $i_subtotal += $row['subtotal'];
                 $i_gross += $row['gross'];
                 $i_net += $row['net'];
@@ -273,6 +294,7 @@ if($count > 0) {
               <tr>
                 <td colspan="4">合計</td>
                 <td><?=sizeof($individual_sales) ?></td>
+                <td><?=number_format($i_additional_sales) ?></td>
                 <td></td>
                 <td></td>
                 <td><?=number_format($total_subtotal) ?></td>

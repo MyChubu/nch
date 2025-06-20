@@ -54,6 +54,7 @@ $sql ="SELECT
   WHERE 
     `reservation_date` BETWEEN :sd AND :ed
     AND `status` IN (1,2) 
+    AND `additional_sales` = 0
   GROUP BY `reservation_id` 
   ORDER BY `reservation_date`,`reservation_id`;";
 $stmt = $dbh->prepare($sql);

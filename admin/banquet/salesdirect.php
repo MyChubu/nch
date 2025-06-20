@@ -26,6 +26,7 @@ $sales = array();
 
 $sql = "SELECT `sales`.`ym`,`sales`.`agent_id`,
 COUNT(`sales`.`reservation_id`) AS `count`,
+SUM(`sales`.`additional_sales`) AS `additional_sales`,
 SUM(`sales`.`subtotal`) AS `subtotal`,
 SUM(`sales`.`gross`) AS `gross`,
 SUM(`sales`.`net`) AS `net`,
@@ -36,9 +37,10 @@ SUM(`sales`.`ex-ts`) AS `ex-ts`
  FROM (
 
 SELECT `ym`,`agent_id`,
-`reservation_id`,
-SUM(`subtotal`) AS `subtotal`,
-SUM(`gross`) AS `gross`,
+  `reservation_id`,
+  `additional_sales`,
+  SUM(`subtotal`) AS `subtotal`,
+  SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
   SUM(`service_fee`) AS `service_fee`,
   SUM(`tax`) AS `tax`,
@@ -63,6 +65,7 @@ if($count > 0) {
     $sales[] = array(
       'ym' => $result['ym'],
       'count' => $result['count'],
+      'additional_sales' => $result['additional_sales'],
       'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
@@ -79,6 +82,7 @@ $sales_category_sales = array();
 $sql = "SELECT `sales`.`ym`,`sales`.`agent_id`,
 `sales`.`sales_category_id`,`sales`.`sales_category_name`,
 COUNT(`sales`.`reservation_id`) AS `count`,
+SUM(`sales`.`additional_sales`) AS `additional_sales`,
 SUM(`sales`.`subtotal`) AS `subtotal`,
 SUM(`sales`.`gross`) AS `gross`,
 SUM(`sales`.`net`) AS `net`,
@@ -89,11 +93,12 @@ SUM(`sales`.`ex-ts`) AS `ex-ts`
  FROM (
 
 SELECT `ym`,`agent_id`,
-`reservation_id`,
-`sales_category_id`,
-`sales_category_name`,
+  `reservation_id`,
+  `additional_sales`,
+  `sales_category_id`,
+  `sales_category_name`,
   SUM(`subtotal`) AS `subtotal`,
-SUM(`gross`) AS `gross`,
+  SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
   SUM(`service_fee`) AS `service_fee`,
   SUM(`tax`) AS `tax`,
@@ -120,6 +125,7 @@ if($count > 0) {
       'sales_category_id' => $result['sales_category_id'],
       'sales_category_name' => $result['sales_category_name'],
       'count' => $result['count'],
+      'additional_sales' => $result['additional_sales'],
       'subtotal' => $result['subtotal'],
       'gross' => $result['gross'],
       'net' => $result['net'],
@@ -186,6 +192,8 @@ $dbh = null;
         <?php
           $counter = 0;
           $total_count = 0;
+          $total_additional_sales = 0;
+          $total_sales_cont = 0;
           $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
@@ -195,6 +203,8 @@ $dbh = null;
           $total_ex_ts = 0;
 
           $c_count = 0;
+          $c_additional_sales = 0;
+          $c_sales_count = 0;
           $c_subtotal = 0;
           $c_gross = 0;
           $c_net = 0;
@@ -208,6 +218,7 @@ $dbh = null;
             <tr>
               <th>年月</th>
               <th>件数</th>
+              <!--<th>追加</th>-->
               <th>&#9312;&nbsp;金額</th>
               <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
               <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
@@ -221,10 +232,11 @@ $dbh = null;
 
         ?>
         <?php foreach($sales as $row): ?>
-          
+          <?php $sales_count = $row['count'] - $row['additional_sales']; ?>
               <tr>
                 <td><?=$row['ym'] ?></td>
-                <td><?=$row['count'] ?></td>
+                <td><?=$sales_count ?></td>
+                <!--<td><?=$row['additional_sales'] ?></td>-->
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
@@ -235,6 +247,8 @@ $dbh = null;
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_additional_sales += $row['additional_sales'];
+                $total_sales_count += $sales_count;
                 $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
@@ -244,6 +258,8 @@ $dbh = null;
                 $total_ex_ts += $row['ex-ts'];
 
                 $c_count += $row['count'];
+                $c_additional_sales += $row['additional_sales'];
+                $c_sales_count += $sales_count;
                 $c_subtotal += $row['subtotal'];
                 $c_gross += $row['gross'];
                 $c_net += $row['net'];
@@ -256,7 +272,8 @@ $dbh = null;
             <?php endforeach; ?>
             <tr>
               <td>合計</td>
-              <td><?=number_format($c_count) ?></td>
+              <td><?=number_format($c_sales_count) ?></td>
+              <!--<td><?=number_format($c_additional_sales) ?></td>-->
               <td><?=number_format($c_subtotal) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
@@ -281,6 +298,8 @@ $dbh = null;
           $catg = " ";
           $counter = 0;
           $total_count = 0;
+          $total_additional_sales = 0;
+          $total_sales_count = 0;
           $total_subtotal = 0;
           $total_gross = 0;
           $total_net = 0;
@@ -290,6 +309,8 @@ $dbh = null;
           $total_ex_ts = 0;
 
           $c_count = 0;
+          $c_additional_sales = 0;
+          $c_sales_count = 0;
           $c_subtotal = 0;
           $c_gross = 0;
           $c_net = 0;
@@ -301,6 +322,7 @@ $dbh = null;
         <?php foreach($sales_category_sales as $row): ?>
           <?php
             $cat = $row['sales_category_id'];
+            $sales_count = $row['count'] - $row['additional_sales'];
             
         if($catg != $cat){
               $catg = $cat;
@@ -308,7 +330,8 @@ $dbh = null;
                 ?>
                 <tr>
                   <td colspan="2">合計</td>
-                  <td><?=number_format($c_count) ?></td>
+                  <td><?=number_format($c_sales_count) ?></td>
+                  <!--<td><?=number_format($c_additional_sales) ?></td>-->
                   <td><?=number_format($c_subtotal) ?></td>
                   <td><?=number_format($c_gross) ?></td>
                   <td><?=number_format($c_net) ?></td>
@@ -322,6 +345,8 @@ $dbh = null;
                 </div>
             <?php
                   $c_count = 0;
+                  $c_additional_sales = 0;
+                  $c_sales_count = 0;
                   $c_subtotal = 0;
                   $c_gross = 0;
                   $c_net = 0;
@@ -342,6 +367,7 @@ $dbh = null;
               <!--<th>部門ID</th>-->
               <th>部門</th>
               <th>件数</th>
+              <!--<th>追加</th>-->
               <th>&#9312;&nbsp;金額</th>
               <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
               <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
@@ -358,7 +384,8 @@ $dbh = null;
                 <td><?=$row['ym'] ?></td>
                 <!--<td><?=$row['sales_category_id'] ?></td>-->
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
-                <td><?=$row['count'] ?></td>
+                <td><?=$sales_count ?></td>
+                <!--<td><?=$row['additional_sales'] ?></td>-->
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
@@ -369,6 +396,8 @@ $dbh = null;
               </tr>
               <?php
                 $total_count += $row['count'];
+                $total_additional_sales += $row['additional_sales'];
+                $total_sales_count += $sales_count;
                 $total_subtotal += $row['subtotal'];
                 $total_gross += $row['gross'];
                 $total_net += $row['net'];
@@ -378,6 +407,8 @@ $dbh = null;
                 $total_ex_ts += $row['ex-ts'];
 
                 $c_count += $row['count'];
+                $c_additional_sales += $row['additional_sales'];
+                $c_sales_count += $sales_count;
                 $c_subtotal += $row['subtotal'];
                 $c_gross += $row['gross'];
                 $c_net += $row['net'];
@@ -390,7 +421,8 @@ $dbh = null;
             <?php endforeach; ?>
             <tr>
               <td colspan="2">合計</td>
-              <td><?=number_format($c_count) ?></td>
+              <td><?=number_format($c_sales_count) ?></td>
+              <!--<td><?=number_format($c_additional_sales) ?></td>-->
               <td><?=number_format($c_subtotal) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
@@ -412,6 +444,7 @@ $dbh = null;
                   <!--<th>部門ID</th>-->
                   <th>部門名</th>
                   <th>件数</th>
+                  <!--<th>追加</th>-->
                   <th>&#9312;&nbsp;金額</th>
                   <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
                   <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
@@ -424,7 +457,8 @@ $dbh = null;
               <tbody>
                 <tr>
                   <td colspan="2">合計</td>
-                  <td><?=number_format($total_count) ?></td>
+                  <td><?=number_format($total_sales_count) ?></td>
+                  <!--<td><?=number_format($total_additional_sales) ?></td>-->
                   <td><?=number_format($total_subtotal) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>
