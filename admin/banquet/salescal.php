@@ -99,7 +99,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $reservation_name = "&nbsp;";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $reservation_name = $sale['reservation_name'];
                   $bc = $sale['banquet_category_id'];
                   break;
@@ -117,7 +117,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $value = "&nbsp;";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $start = (new DateTime($sale['start']))->format('H:i');
                   $end = (new DateTime($sale['end']))->format('H:i');
                   $people = $sale['people'];
@@ -138,7 +138,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $ex_ts = "";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $ex_ts = number_format($sale['ex_ts'] ?? 0);
                   $bc = $sale['banquet_category_id'];
                   break;
@@ -181,7 +181,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $reservation_name = "&nbsp;";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $reservation_name = $sale['reservation_name'];
                   $bc = $sale['banquet_category_id'];
                   break;
@@ -200,7 +200,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $value = "&nbsp;";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $start = (new DateTime($sale['start']))->format('H:i');
                   $end = (new DateTime($sale['end']))->format('H:i');
                   $people = $sale['people'];
@@ -222,7 +222,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
               $ex_ts = "";
               $date = $ym . '-' . sprintf('%02d', $i);
               foreach($sales as $sale) {
-                if($sale['room_id'] == $room_id && $sale['date'] == $date) {
+                if($sale['room_id'] == $room_id && $sale['date'] == $date && $sale['additional_sales'] != 1) {
                   $ex_ts = number_format($sale['ex_ts'] ?? 0);
                   $bc = $sale['banquet_category_id'];
                   break;
@@ -255,6 +255,7 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
     <p>※金額は税・サービス料抜きです。</p>
     <p>※このカレンダーは、各会場の予約状況を月単位で表示しています。</p>
     <p>※同日同会場で複数の利用がある場合、金額が高い・利用人数が多い予約が表示されますが、表示金額は同会場の合計値を表示します。</p>
+    <p>※追加売上は表示されませんが、合計には加算されます。</p>
     <p>※月を跨ぐ案件がある場合は、他の集計と合計値が異なることがあります。</p>
   </div>
 </main>

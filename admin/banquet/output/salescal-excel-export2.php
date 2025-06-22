@@ -164,7 +164,7 @@ foreach ($data['rooms'] as $room) {
     $bc = 0;
     $date = "$ym-" . sprintf('%02d', $i);
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = $sale['reservation_name'];
         $bc = $sale['banquet_category_id'];
         $hasReservation[$i] = true;
@@ -189,7 +189,7 @@ foreach ($data['rooms'] as $room) {
     $bc = 0;
     $date = "$ym-" . sprintf('%02d', $i);
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = (new DateTime($sale['start']))->format('H:i') . '-' . (new DateTime($sale['end']))->format('H:i') . " ({$sale['people']})";
         $bc = $sale['banquet_category_id'];
         break;
@@ -216,7 +216,7 @@ foreach ($data['rooms'] as $room) {
     $date = "$ym-" . sprintf('%02d', $i);
     $hasSale = false;
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = ($sale['ex_ts'] !== null) ? $sale['ex_ts'] : 0;
         $bc = $sale['banquet_category_id'];
         $hasSale = true;
@@ -296,7 +296,7 @@ foreach ($data['rooms'] as $room) {
     $bc = 0;
     $date = "$ym-" . sprintf('%02d', $i);
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = $sale['reservation_name'];
         $bc = $sale['banquet_category_id'];
         $hasReservation[$i] = true;
@@ -326,7 +326,7 @@ foreach ($data['rooms'] as $room) {
     $bc = 0;
     $date = "$ym-" . sprintf('%02d', $i);
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = (new DateTime($sale['start']))->format('H:i') . '-' . (new DateTime($sale['end']))->format('H:i') . " ({$sale['people']})";
         $bc = $sale['banquet_category_id'];
         break;
@@ -358,7 +358,7 @@ foreach ($data['rooms'] as $room) {
     $date = "$ym-" . sprintf('%02d', $i);
     $hasSale = false;
     foreach ($data['sales'] as $sale) {
-      if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+      if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
         $value = ($sale['ex_ts'] !== null) ? $sale['ex_ts'] : 0;
         $bc = $sale['banquet_category_id'];
         $hasSale = true;
