@@ -111,6 +111,9 @@ if($count > 0){
           <option value="6" <?= $mon == 6 ? 'selected' : '' ?>>6ヶ月</option>
           <option value="12" <?= $mon == 12 ? 'selected' : '' ?>>1年</option>
         </select>
+        <label for="cxl">
+        <input type="checkbox" name="cxl" id="cxl" value="1" <?= $cxl == 1 ? 'checked' : '' ?>>
+        キャンセルを含む</label>
         <button type="submit">表示</button>
       </form>
     </div>
