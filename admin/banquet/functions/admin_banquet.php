@@ -780,6 +780,7 @@ function getMonthlySales($ym) {
       $end = $row['end'];
       $gross = $row['gross'];
       $ex_ts = $row['ex-ts']; // 売上集計対象金額
+      $additional_sales = $row['additional_sales'];
 
       // 日別売上一覧へ追加
       $sales[] = array(
@@ -791,7 +792,8 @@ function getMonthlySales($ym) {
         'start' => $start,
         'end' => $end,
         'gross' => $gross,
-        'ex_ts' => $ex_ts
+        'ex_ts' => $ex_ts,
+        'additional_sales' => $additional_sales
       );
 
       // カテゴリ別合計の集計

@@ -125,7 +125,7 @@ function outputRoomRows($sheet, &$row, $room, $data, $ym_for_date, $dayStart, $d
       $value = ''; $bc = 0; $hasSale = false;
 
       foreach ($data['sales'] as $sale) {
-        if ($sale['room_id'] === $room_id && $sale['date'] === $date) {
+        if ($sale['room_id'] === $room_id && $sale['date'] === $date && $sale['additional_sales'] != 1) {
           $value = $type['getter']($sale);
           $bc = $sale['banquet_category_id'];
           $hasSale = true;
@@ -341,6 +341,8 @@ $row++;
 $sheet->setCellValue("A{$row}", '※このカレンダーは、各会場の予約状況を月単位で表示しています。');
 $row++;
 $sheet->setCellValue("A{$row}", '※同日同会場で複数の利用がある場合、金額が高い・利用人数が多い予約が表示されますが、表示金額は同会場の合計値を表示します。');
+$row++;
+$sheet->setCellValue("A{$row}", '※追加売上は表示されませんが、合計には加算されます。');
 $row++;
 $sheet->setCellValue("A{$row}", '※月を跨ぐ案件がある場合は、他の集計と合計値が異なることがあります。');
 
