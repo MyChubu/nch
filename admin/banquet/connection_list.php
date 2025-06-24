@@ -48,7 +48,7 @@ $subtotal_amount = $array['subtotal_amount'];
           <tr>
             <th>売上種類</th>
             <td>
-              <?php if($detail['addithonal_sales'] == 1): ?>
+              <?php if($detail['additional_sales'] == 1): ?>
                 追加売上
               <?php else: ?>
                 通常売上
