@@ -4,6 +4,7 @@ require_once('functions/admin_banquet.php');
 $reservation_id = $_REQUEST['resid'];
 
 $array = getConnectionList($reservation_id);
+$detail = getDetail2($reservation_id);
 $events = $array['events'];
 $charges = $array['charges'];
 $total_amount = $array['total_amount'];
@@ -11,8 +12,6 @@ $service_amount = $array['service_amount'];
 $tax_amount = $array['tax_amount'];
 $discount_amount = $array['discount_amount'];
 $subtotal_amount = $array['subtotal_amount'];
-
-
 
 ?>
 <!DOCTYPE html>
@@ -31,10 +30,72 @@ $subtotal_amount = $array['subtotal_amount'];
 <?php include("header.php"); ?>
 <main>
 <div class="wrapper">
+  <?php if(sizeof($detail) > 0): ?>
+    <div>
+      <h2>予約サマリー</h2>
+      <table class="event_table">
+        <thead>
+          <tr>
+            <th>項目</th>
+            <th>値</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><i class="fa-solid fa-hashtag"></i></th>
+            <td><?=$detail['reservation_id'] ?></td>
+          </tr>
+          <tr>
+            <th>売上種類</th>
+            <td>
+              <?php if($detail['addithonal_sales'] == 1): ?>
+                追加売上
+              <?php else: ?>
+                通常売上
+              <?php endif; ?>
+            </td>
+          <tr>
+            <th>予約名</th>
+            <td><?=$detail['reservation_name'] ?></td>
+          </tr>
+          <tr>
+            <th><i class="fa-solid fa-people-group"></i></th>
+            <td><?=$detail['people'] ?></td>
+          </tr>
+          <tr>
+            <th><i class="fa-solid fa-calendar-days"></i></th>
+            <td><?=$detail['event_date'] ?></td>
+          </tr>
+          <tr>
+            <th><i class="fa-solid fa-signal"></i></th>
+            <td><?=statusletter($detail['status']) ?></td>
+          </tr>
+          <tr>
+            <th><i class="fa-solid fa-user"></i></th>
+            <td><?=mb_convert_kana($detail['pic'],'KVas') ?></td>
+          </tr>
+          <tr>
+            <th>販売</th>
+            <td>
+              <?php if($detail['agent_id'] == 0): ?>
+                直販
+              <?php else: ?>
+                <?=$detail['agent_name'] ?> 
+              <?php endif; ?>
+            </td>
+          </tr>
+          <tr>
+            <th>利用種類</th>
+            <td><?=salescatletter($detail['sales_category_id']) ?></td>
+          </tr>
+      </table>
+    </div>
+    <?php endif; ?>
+
+  <h2>イベント一覧</h2>
   <table class="event_table">
     <tr>
       <th><i class="fa-solid fa-hashtag"></i></th>
-      <th>予約名</th>
       <th><i class="fa-solid fa-code-branch"></i></th>
       <th>イベント名</th>
       <th><i class="fa-solid fa-calendar-days"></i></th>
@@ -43,7 +104,7 @@ $subtotal_amount = $array['subtotal_amount'];
       <th><i class="fa-solid fa-location-dot"></i></th>
       <th><i class="fa-solid fa-stairs"></i></th>
       <th><i class="fa-solid fa-signal"></i></th>
-      <th><i class="fa-solid fa-user"></i></th>
+    
       <th><i class="fa-solid fa-display"></i></th>
       <th><i class="fa-solid fa-gear"></i></th>
     </tr>
@@ -52,7 +113,6 @@ $subtotal_amount = $array['subtotal_amount'];
             $event_date = $e_dt->format('Y-m-d'); ?>
     <tr>
       <td><?=$event['reservation_id'] ?></td>
-      <td><?=$event['resevation_name'] ?></td>
       <td><?=$event['branch'] ?></td>
       <td><?=$event['event_name'] ?></td>
       <td><a href="signage.php?event_date=<?=$event_date ?>"><?=$event['date'] ?></a></td>
@@ -61,7 +121,6 @@ $subtotal_amount = $array['subtotal_amount'];
       <td><?=$event['room_name'] ?></td>
       <td><?=$event['floor'] ?></td>
       <td><?=statusletter($event['status']) ?></td>
-      <td><?=cleanLanternName($event['pic']) ?></td>
       <td>
         <?php if($event['enable'] == 1): ?>
           <i class="fa-solid fa-square-check"></i>
@@ -89,13 +148,13 @@ $subtotal_amount = $array['subtotal_amount'];
           <th>商品名</th>
           <th><i class="fa-solid fa-at"></i></th>
           <th>数量</th>
-          <th>料金</th>
-          <th>割引</th>
-          <th>請求額</th>
-          <th>サ料</th>
-          <th>税</th>
-          <th>税抜</th>
-          <th>税・サ抜</th>
+          
+          <th>&#9312;&nbsp;金額</th>
+          <th>&#9313;&nbsp;売上<br>（&#9312; - &#9317;）</th>
+          <th>&#9314;&nbsp;純売上<br>（&#9313; - &#9315; - &#9316;）</th>
+          <th>&#9315;&nbsp;サービス料</th>
+          <th>&#9316;&nbsp;消費税</th>
+          <th>&#9317;&nbsp;割引</th>
         </tr>
         <?php foreach($charges as $charge): ?>
         <tr>
@@ -109,23 +168,21 @@ $subtotal_amount = $array['subtotal_amount'];
           <td><?=number_format($charge['unit_price']) ?></td>
           <td><?=number_format($charge['qty']) ?></td>
           <td><?=number_format($charge['subtotal']) ?></td>
-          <td><?=number_format($charge['discount']) ?></td>
           <td><?=number_format($charge['gross']) ?></td>
+          <td><?=number_format($charge['gross'] - $charge['tax'] - $charge['service_fee']) ?></td>
           <td><?=number_format($charge['service_fee']) ?></td>
           <td><?=number_format($charge['tax']) ?></td>
-          <td><?=number_format($charge['gross'] - $charge['tax']) ?></td>
-          <td><?=number_format($charge['gross'] - $charge['tax'] - $charge['service_fee']) ?></td>
+          <td><?=number_format($charge['discount']) ?></td>
         </tr>
         <?php endforeach; ?>
         <tr class="total">
           <td colspan="9">合計</td>
           <td><?=number_format($subtotal_amount) ?></td>
-          <td><?=number_format($discount_amount) ?></td>
           <td><?=number_format($total_amount) ?></td>
+          <td><?=number_format($total_amount - $tax_amount - $service_amount) ?></td>
           <td><?=number_format($service_amount) ?></td>
           <td><?=number_format($tax_amount) ?></td>
-          <td><?=number_format($total_amount - $tax_amount) ?></td>
-          <td><?=number_format($total_amount - $tax_amount - $service_amount) ?></td>
+          <td><?=number_format($discount_amount) ?></td>
         </tr>
       </table>
 

@@ -452,6 +452,79 @@ function getConnectionList($reservation_id){
   );
 }
 
+function getDetail2($reservation_id) {
+  // 曜日配列（0〜6: 日〜土）
+  $week = array('日', '月', '火', '水', '木', '金', '土');
+ 
+
+  // DB接続
+  $dbh = new PDO(DSN, DB_USER, DB_PASS);
+
+  // 宴会スケジュールの取得
+  $sql ='SELECT
+    reservation_id,
+    MAX(people) AS people,
+    reservation_name,
+    reservation_date,
+    MIN(date) AS start_date,
+    MAX(date) AS end_date,
+    status,
+    pic,
+    pic_id,
+    agent_id,
+    agent_name,
+    reserver,
+    additional_sales,
+    sales_dept_id,
+    sales_dept_name
+    FROM banquet_schedules
+    WHERE reservation_id = ? GROUP BY reservation_id';
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([$reservation_id]);
+  $count = $stmt->rowCount();
+  if($count > 0){
+    $data = $stmt->fetch();
+    // 各種基本情報の取得
+    
+
+    $start_date = new DateTime($data['start_date']);
+    $end_date = new DateTime($data['end_date']);
+    if($start_date->format('Y-m-d') == $end_date->format('Y-m-d')) {
+      $event_date = $start_date->format('Y/m/d') . '(' . $week[(int)$start_date->format('w')] . ')';
+    } else {
+      $event_date = $start_date->format('Y/m/d') . '(' . $week[(int)$start_date->format('w')] . ') ~ ' .
+                    $end_date->format('Y/m/d') . '(' . $week[(int)$end_date->format('w')] . ')';
+    }
+
+    $sql2 = 'SELECT * FROM banquet_sales_dept WHERE sales_dept_id = ?';
+    $stmt2 = $dbh->prepare($sql2);
+    $stmt2->execute([$data['sales_dept_id']]);
+    $sales_dept = $stmt2->fetch();
+    $category_id = $sales_dept['category_id'];
+    
+    $detail= array(
+      'reservation_id' => $data['reservation_id'], // 予約ID
+      'reservation_name' => $data['reservation_name'], // 予約名
+      'people' => $data['people'], // 人数
+      'event_date' => $event_date, // イベント日付
+      'status' => $data['status'], // ステータスコード
+      'pic' => $data['pic'], // 担当者名（全角変換）
+      'pic_id' => $data['pic_id'], // 担当者ID
+      'agent_id' => $data['agent_id'], // エージェントID
+      'agent_name' => mb_convert_kana($data['agent_name'], 'KVas'), // エージェント名（全角変換）
+      'reserver' => mb_convert_kana($data['reserver'], 'KVas'), // 申込会社名（全角変換）
+      'additional_sales' => $data['additional_sales'], // 追加売上フラグ
+      'sales_dept_id' => $data['sales_dept_id'], // 営業部門ID
+      'sales_dept_name' => mb_convert_kana($data['sales_dept_name'], 'KVas'), // 営業部門名（全角変換）
+      'sales_category_id' => $category_id // 営業部門カテゴリID
+    );
+    
+  }else{
+    $detail = array(); // 予約がない場合は空の配列を返す
+  }
+  return $detail; // 詳細情報を返す（空の場合もある）
+}
+
 function getDetail($scheid) {
   // 曜日配列（0〜6: 日〜土）
   $week = array('日', '月', '火', '水', '木', '金', '土');
