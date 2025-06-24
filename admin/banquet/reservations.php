@@ -12,9 +12,9 @@ $mon = $_REQUEST['mon'] ?? 3;
 $cxl = $_REQUEST['cxl'] ?? 0;
 
 if($cxl == 1){
-  $status_arr = [1,2,5];
+  $status_arr = "(1,2,5)";
 }else {
-  $status_arr = [1,2];
+  $status_arr = "(1,2)";
 }
 
 $sd = $ym . '-01';
@@ -60,14 +60,13 @@ $sql ="SELECT
   FROM `view_daily_subtotal` 
   WHERE 
     `reservation_date` BETWEEN :sd AND :ed
-    AND `status` IN (:status_arr) 
+    AND `status` IN " . $status_arr . "
     AND `additional_sales` = 0
-  GROUP BY `reservation_id` 
+  GROUP BY `reservation_id`, `status`
   ORDER BY `reservation_date`,`reservation_id`;";
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':sd', $sd, PDO::PARAM_STR);
 $stmt->bindValue(':ed', $ed, PDO::PARAM_STR);
-$stmt->bindValue(':status_arr', implode(',', $status_arr), PDO::PARAM_STR);
 $stmt->execute();
 $count = $stmt->rowCount();
 if($count > 0){
@@ -76,6 +75,7 @@ if($count > 0){
   $reservations = [];
 }
 
+#var_dump($reservations);
 
 
 ?>
@@ -112,8 +112,8 @@ if($count > 0){
           <option value="12" <?= $mon == 12 ? 'selected' : '' ?>>1年</option>
         </select>
         <label for="cxl">
-        <input type="checkbox" name="cxl" id="cxl" value="1" <?= $cxl == 1 ? 'checked' : '' ?>>
-        キャンセルを含む</label>
+       <!-- <input type="checkbox" name="cxl" id="cxl" value="1" <?= $cxl == 1 ? 'checked' : '' ?>>
+        キャンセルを含む</label>-->
         <button type="submit">表示</button>
       </form>
     </div>

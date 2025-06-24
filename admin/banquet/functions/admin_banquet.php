@@ -453,6 +453,7 @@ function getConnectionList($reservation_id){
 }
 
 function getDetail2($reservation_id) {
+  //coonection_list　用
   // 曜日配列（0〜6: 日〜土）
   $week = array('日', '月', '火', '水', '木', '金', '土');
  
