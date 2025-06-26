@@ -308,15 +308,31 @@ for($i = 0; $i < 12; $i++) {
 //エージェント・直販比率
 $direct = 0;
 $agent = 0;
+$d_count = 0;
+$a_count = 0;
 $da_total=0;
-$sql="SELECT 
+$agents= array();
+$agent_sales = array();
+$agent_count = array();
+$sql="SELECT
+`S`.`agent_id`,
+`S`.`agent_name`,
+COUNT(`S`.`reservation_id`) AS `count`,
+SUM(`S`.`gross`) AS `gross`,
+SUM(`S`.`net`) AS `net`
+FROM(
+  SELECT 
   `agent_id`,
   `agent_name`,
+  `reservation_id`,
   SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :firsr_day AND :last_day
-  GROUP BY  `agent_id`;";
+  GROUP BY `reservation_id`
+  ORDER BY `gross` DESC) AS `S`
+GROUP BY `agent_id`
+ORDER BY `gross` DESC";
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':firsr_day', $first_day, PDO::PARAM_STR);
 $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
@@ -326,13 +342,19 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach($results as $result) {
   if($result['agent_id'] == 0 ) {
     $direct += $result['net'];
+    $d_count += $result['count'];
   } else {
     $agent += $result['net'];
+    $a_count += $result['count'];
+    array_push($agents, $result['agent_name']);
+    array_push($agent_sales, $result['net']);
+    array_push($agent_count, $result['count']);
   }
   $da_total += $result['net'];
 }
-
 $d_a=array($direct, $agent);
+$d_a_count = array($d_count, $a_count);
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -666,5 +688,89 @@ new Chart(ctx, config);
   };
   new Chart(ctx3, daConfig);
 </script>
+<script>
+  // 代理店ごとの売上シェアの円グラフ
+  const ctx4 = document.getElementById('agentChart').getContext('2d');
+  const agentData = {
+    labels: [<?= implode(',', array_map(function($agent) { return '"' . $agent . '"'; }, $agents)) ?>],
+    datasets: [{
+      label: '代理店売上シェア',
+      data: [<?= implode(',', $agent_sales) ?>],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(0, 246, 143, 0.8)',
+        'rgba(54, 235, 151, 0.8)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(0, 246, 143, 1)', 
+        'rgba(54, 235, 151, 1)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+      ],
+      borderWidth: 1
+    }]
+  };
+  const agentConfig = {
+    type: 'doughnut',
+    data: agentData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: '代理店ごとの売上シェア'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            if (isNaN(percentage)) {
+              return ''; // NaNの場合は表示しない
+            }
+            else if (percentage < 3) {
+              return ''; // 3%未満は表示しない
+            }else{
+              return percentage + '%';
+            }
+            
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  new Chart(ctx4, agentConfig);
+</script>
+
 </body>
 </html>
