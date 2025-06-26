@@ -308,6 +308,7 @@ for($i = 0; $i < 12; $i++) {
 //エージェント・直販比率
 $direct = 0;
 $agent = 0;
+$da_total=0;
 $sql="SELECT 
   `agent_id`,
   `agent_name`,
@@ -328,9 +329,10 @@ foreach($results as $result) {
   } else {
     $agent += $result['net'];
   }
+  $da_total += $result['net'];
 }
+
 $d_a=array($direct, $agent);
-var_dump($d_a);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -345,6 +347,7 @@ var_dump($d_a);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
   <!--<script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>-->
   <!--<script src="js/admin_banquet.js"></script>-->
@@ -356,7 +359,7 @@ var_dump($d_a);
       gap: 20px;
     }
     .chartbox {
-      width: calc(48% -20px)  ;
+      width: calc(48% - 20px)  ;
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
@@ -643,9 +646,23 @@ new Chart(ctx, config);
         title: {
           display: true,
           text: '代理店・直販比率'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            return percentage + '%';
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
         }
       }
-    }
+    },
+    plugins: [ChartDataLabels]
   };
   new Chart(ctx3, daConfig);
 </script>
