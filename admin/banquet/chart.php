@@ -378,10 +378,10 @@ $d_a_count = array($d_count, $a_count);
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 10px;
     }
     .chartbox {
-      width: calc(48% - 20px)  ;
+      width: calc(48% - 10px)  ;
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
@@ -408,14 +408,20 @@ $d_a_count = array($d_count, $a_count);
 
   <div class="pie_charts">
     <div class="chartbox">
-      <h2>販売経路</h2>
-      <div>代理店と直販の比率</div>
+      <h2>販売経路（金額）</h2>
       <canvas id="daChart"></canvas>
     </div>
     <div class="chartbox">
-      <h2>代理店シェア</h2>
-      <div>代理店ごとの売上シェア</div>
+      <h2>販売経路（件数）</h2>
+      <canvas id="dacChart"></canvas>
+    </div>
+    <div class="chartbox">
+      <h2>代理店シェア（金額）</h2>
       <canvas id="agentChart"></canvas>
+    </div>
+    <div class="chartbox">
+      <h2>代理店シェア（件数）</h2>
+      <canvas id="agentcChart"></canvas>
     </div>
   </div>
   
@@ -426,98 +432,98 @@ $d_a_count = array($d_count, $a_count);
 </main>
 <?php include("footer.php"); ?>
 <script type="text/javascript">
-const ctx = document.getElementById('myChart').getContext('2d');
-const labels = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $month_array)) ?>];
-const data = {
-  labels: labels,
-  datasets: [
-    // 折れ線グラフ（2025年度累計）
-    {
-      label: '<?=$nendo ?>年度累計',
-      data: [<?= implode(',', $sales_subtotal_array) ?>],
-      borderColor: 'rgba(255, 99, 132, 1)',
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-      type: 'line',
-      fill: false,
-      yAxisID: 'y-axis-2'
-    },
-    // 折れ線グラフ（2024年度累計）
-    {
-      label: '<?=$last_nendo ?>年度累計',
-      data: [<?= implode(',', $last_year_sales_subtotal_array) ?>],
-      borderColor: 'rgba(255, 159, 64, 1)',
-      backgroundColor: 'rgba(255, 159, 64, 0.2)',
-      type: 'line',
-      fill: false,
-      yAxisID: 'y-axis-2'
-    },
-    // 棒グラフ（2025年度）
-    {
-      label: '<?=$nendo ?>年度',
-      data: [<?= implode(',', $sales_array) ?>],
-      backgroundColor: 'rgba(0, 246, 143, 0.5)',
-      borderColor: 'rgb(0, 246, 143)',
-      type: 'bar',
-      fill: false,
-      yAxisID: 'y-axis-1'
-    },
-    // 棒グラフ（2024年度）
-    {
-      label: '<?=$last_nendo ?>年度',
-      data: [<?= implode(',', $last_year_sales_array) ?>],
-      backgroundColor: 'rgba(54, 162, 235, 0.5)',
-      borderColor: 'rgb(54, 162, 235)',
-      type: 'bar',
-      fill: false,
-      yAxisID: 'y-axis-1'
-    }
-    
-  ]
-};
-const config = {
-  type: 'bar',
-  data: data,
-  options: {
-    responsive: true,
-    pulugins: {
-      legend: {
-        position: 'top',
+  const ctx = document.getElementById('myChart').getContext('2d');
+  const labels = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $month_array)) ?>];
+  const data = {
+    labels: labels,
+    datasets: [
+      // 折れ線グラフ（2025年度累計）
+      {
+        label: '<?=$nendo ?>年度累計',
+        data: [<?= implode(',', $sales_subtotal_array) ?>],
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        type: 'line',
+        fill: false,
+        yAxisID: 'y-axis-2'
       },
-      title: {
-        display: true,
-        text: '<?=$nendo ?>・<?=$last_nendo ?>年度 売上推移'
+      // 折れ線グラフ（2024年度累計）
+      {
+        label: '<?=$last_nendo ?>年度累計',
+        data: [<?= implode(',', $last_year_sales_subtotal_array) ?>],
+        borderColor: 'rgba(255, 159, 64, 1)',
+        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        type: 'line',
+        fill: false,
+        yAxisID: 'y-axis-2'
+      },
+      // 棒グラフ（2025年度）
+      {
+        label: '<?=$nendo ?>年度',
+        data: [<?= implode(',', $sales_array) ?>],
+        backgroundColor: 'rgba(0, 246, 143, 0.5)',
+        borderColor: 'rgb(0, 246, 143)',
+        type: 'bar',
+        fill: false,
+        yAxisID: 'y-axis-1'
+      },
+      // 棒グラフ（2024年度）
+      {
+        label: '<?=$last_nendo ?>年度',
+        data: [<?= implode(',', $last_year_sales_array) ?>],
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+        borderColor: 'rgb(54, 162, 235)',
+        type: 'bar',
+        fill: false,
+        yAxisID: 'y-axis-1'
       }
-    },
-    scales: {
-      'y-axis-1': {
-        bginAtZero: true,
-        type: 'linear',
-        position: 'left',
+      
+    ]
+  };
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: true,
+      pulugins: {
+        legend: {
+          position: 'top',
+        },
         title: {
           display: true,
-          text: '月次売上'
+          text: '<?=$nendo ?>・<?=$last_nendo ?>年度 売上推移'
         }
       },
-      'y-axis-2': {
-        bginAtZero: true,
-        type: 'linear',
-        position: 'right',
-        title: {
-          display: true,
-          text: '累計売上'
+      scales: {
+        'y-axis-1': {
+          bginAtZero: true,
+          type: 'linear',
+          position: 'left',
+          title: {
+            display: true,
+            text: '月次売上'
+          }
         },
-        grid: {
-          drawOnChartArea: false
-        },
-        title: {
-          display: true,
-          text: '累計売上'
-        }
-      } 
+        'y-axis-2': {
+          bginAtZero: true,
+          type: 'linear',
+          position: 'right',
+          title: {
+            display: true,
+            text: '累計売上'
+          },
+          grid: {
+            drawOnChartArea: false
+          },
+          title: {
+            display: true,
+            text: '累計売上'
+          }
+        } 
+      }
     }
-  }
-};
-new Chart(ctx, config);
+  };
+  new Chart(ctx, config);
 
 </script>
 <script>
@@ -689,6 +695,57 @@ new Chart(ctx, config);
   new Chart(ctx3, daConfig);
 </script>
 <script>
+  // 代理店・直販比率の円グラフ
+  const ctx5 = document.getElementById('dacChart').getContext('2d');
+  const dacData = {
+    labels: ['直販', '代理店'],
+    datasets: [{
+      label: '件数比率',
+      data: [<?= $d_a_count[0] ?>, <?= $d_a_count[1] ?>],
+      backgroundColor: [
+        'rgba(0, 246, 143, 0.8)',
+        'rgba(54, 162, 235, 0.8)'
+      ],
+      borderColor: [
+        'rgba(0, 246, 143, 1)',
+        'rgba(54, 162, 235, 1)'
+      ],
+      borderWidth: 1
+    }]
+  };
+  const dacConfig = {
+    type: 'doughnut',
+    data: dacData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: '代理店・直販比率(件数)'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            return percentage + '%';
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  new Chart(ctx5, dacConfig);
+</script>
+<script>
   // 代理店ごとの売上シェアの円グラフ
   const ctx4 = document.getElementById('agentChart').getContext('2d');
   const agentData = {
@@ -770,6 +827,89 @@ new Chart(ctx, config);
     plugins: [ChartDataLabels]
   };
   new Chart(ctx4, agentConfig);
+</script>
+<script>
+  // 代理店ごとの売上シェアの円グラフ
+  const ctx6 = document.getElementById('agentcChart').getContext('2d');
+  const agentcData = {
+    labels: [<?= implode(',', array_map(function($agent) { return '"' . $agent . '"'; }, $agents)) ?>],
+    datasets: [{
+      label: '代理店売上シェア(件数)',
+      data: [<?= implode(',', $agent_count) ?>],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(0, 246, 143, 0.8)',
+        'rgba(54, 235, 151, 0.8)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(0, 246, 143, 1)', 
+        'rgba(54, 235, 151, 1)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+      ],
+      borderWidth: 1
+    }]
+  };
+  const agentcConfig = {
+    type: 'doughnut',
+    data: agentcData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: '代理店ごとの件数シェア'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            if (isNaN(percentage)) {
+              return ''; // NaNの場合は表示しない
+            }
+            else if (percentage < 3) {
+              return ''; // 3%未満は表示しない
+            }else{
+              return percentage + '%';
+            }
+            
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  new Chart(ctx6, agentcConfig);
 </script>
 
 </body>
