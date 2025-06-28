@@ -334,6 +334,9 @@ function getChartData($nendo){
   $d_a_count = array($d_count, $a_count);
 
    $data=array(
+    'nendo' => $nendo,
+    'last_nendo' => $last_nendo,
+    'months' => $month_array,
     'sales' => $sales_array,
     'last_year_sales' => $last_year_sales_array,
     'sales_subtotal' => $sales_subtotal_array,
