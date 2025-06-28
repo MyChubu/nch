@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
 
 require_once('../../../common/conf.php');
 
@@ -18,22 +18,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$hour = date('H');
+$now = new DateTime();
+$date = $now->format('Y-m-d');
+$w = $now->format('w');
+$wd = $week[$w];
+$hour = (int)$now->format('H');
 
-$date = date('Y-m-d');
-$datetime = date('Y-m-d H:i:s');
-if($hour >= 18){
-  $date = date('Y-m-d', strtotime('+1 day'));
+
+if ($hour >= 18) {
+  $date = $now->modify('+2 day')->format('Y-m-d');
+}else{
+  $date = $now->modify('+1 day')->format('Y-m-d');
 }
 #$date = '2025-03-15';
-$hizuke =date('Y年m月d日 ', strtotime($date));
+$dateObj = clone $now;
+$hizuke = $dateObj->format('Y年m月d日');
 $week = array('日', '月', '火', '水', '木', '金', '土');
-$hizuke .= '（' . $week[date('w', strtotime($date))] . '）';
+$hizuke .= '（' . $week[(int)$dateObj->format('w')] . '）';
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where date = ?  order by start ASC, branch ASC';
+$sql = 'select * from banquet_schedules where date = ? and additional_sales = ?  order by start ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
-$stmt->execute([$date]);
+$stmt->execute([$date, 0]);
 $count = $stmt->rowCount();
 $events=array();
 $events_en=array();
@@ -47,9 +53,9 @@ if($count >0){
     if($row['status'] != 4 && $row['status'] != 5){
       $reservation_id = $row['reservation_id'];
       $branch = $row['branch'];
-      $event_date = date('Y/m/d ', strtotime($row['date']));
-      $event_start = date('H:i', strtotime($row['start']));
-      $event_end = date('H:i', strtotime($row['end']));
+      $event_date = (new DateTime($row['date']))->format('Y/m/d');
+      $event_start = (new DateTime($row['start']))->format('H:i');
+      $event_end = (new DateTime($row['end']))->format('H:i');
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
       $stmt2->execute([$row['room_id']]);
@@ -78,6 +84,9 @@ if($count >0){
       $pic = explode(' ', $pic);
       $agent_id=intval($row['agent_id']);
       $agent_name=mb_convert_kana($row['agent_name'], "KVas");
+      if($agent_name == " ") {
+        $agent_name = "";
+      }
       $agent_group = '';
       $agent_group_short = '';
       $reserver=mb_convert_kana($row['reserver'], "KVas");
@@ -166,12 +175,14 @@ if($count >0){
       if($f_count > 0){
         foreach ($stmt8 as $row8) {
           $item_name = mb_convert_kana($row8['item_name'], "KVas");
+          $short_name = mb_convert_kana($row8['name_short'], "KVas");
           $unit_price = $row8['unit_price'];
           $qty = $row8['qty'];
           $amount_gross = $row8['amount_gross'];
           $amount_net = $row8['amount_net'];
           $drink1[] =array(
             'name' => $item_name,
+            'short_name' => $short_name,
             'unit_price' => $unit_price,
             'qty' => $qty,
             'amount_gross' => $amount_gross,
@@ -187,12 +198,14 @@ if($count >0){
       if($f_count > 0){
         foreach ($stmt8 as $row8) {
           $item_name = mb_convert_kana($row8['item_name'], "KVas");
+          $short_name = mb_convert_kana($row8['name_short'], "KVas");
           $unit_price = $row8['unit_price'];
           $qty = $row8['qty'];
           $amount_gross = $row8['amount_gross'];
           $amount_net = $row8['amount_net'];
           $drink2[] =array(
             'name' => $item_name,
+            'short_name' => $short_name,
             'unit_price' => $unit_price,
             'qty' => $qty,
             'amount_gross' => $amount_gross,
@@ -401,8 +414,7 @@ $data=array(
   'status'=>200,
   'message'=>'OK',
   'date'=>$date,
-  'datetime'=>$datetime,
-  'week'=>$week[date('w', strtotime($date))],
+  'week' => $week[(int)$dateObj->format('w')],
   'hizuke'=>$hizuke,
   'events'=>$events,
   'events_ka'=>$events_ka,

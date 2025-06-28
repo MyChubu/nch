@@ -1,10 +1,10 @@
 window.addEventListener('load', function() {
-  getKaEnData(); //初回表示
+  getKaEnNextData(); //初回表示
   //setInterval(getKaEnData, 300000); // 5分ごとに再描画（300,000ミリ秒）
 });
 
-async function getKaEnData() {
-  const url = 'https://nch.netmedia.works/api/banquet/ka-en/'; // APIのURLを設定
+async function getKaEnNextData() {
+  const url = 'https://nch.netmedia.works/api/banquet/ka-en/next.php'; // APIのURLを設定
   
   let htmlEn = '';
   let htmlKa = '';
@@ -21,7 +21,7 @@ async function getKaEnData() {
     console.log('日付:', jsonData.hizuke); // 日付を出力
     console.log('イベント数:', jsonData.events.length); // イベント数を出力
     document.title = jsonData.hizuke + 'の会議・宴会予定' ; // タイトルに日付を設定
-    document.getElementById("schedate").innerHTML = jsonData.hizuke;
+    document.getElementById("nextSchedate").innerHTML = jsonData.hizuke;
     
     if (jsonData.events_en.length == 0) { // イベントが0件の場合
       htmlEn += '<div class="eventbox">';
@@ -42,7 +42,7 @@ async function getKaEnData() {
       for (let i = 0; i < jsonData.events_en.length; i++) {
         if(jsonData.events_en[i].status != 5){
           
-          htmlEn += '<tr id="e_row_"' + i + '">';
+          htmlEn += '<tr id="n_e_row_"' + i + '">';
           htmlEn += '<td class="event_name">';
           if(jsonData.events_en[i].agent_id > 0){
             let agentName ="";
@@ -117,7 +117,7 @@ async function getKaEnData() {
       for (let i = 0; i < jsonData.events_ka.length; i++) {
         if(jsonData.events_ka[i].status != 5){
           titleLength = jsonData.events_ka[i].event_name.length;
-          htmlKa += '<tr id="k_row_"' + i + '">';
+          htmlKa += '<tr id="n_k_row_"' + i + '">';
           htmlKa += '<td class="event_name">';
           if(jsonData.events_ka[i].agent_id > 0){
             agentName ="";
@@ -157,11 +157,11 @@ async function getKaEnData() {
       htmlKa += '</div>';
     }
 
-    document.getElementById("eventsEn").innerHTML = htmlEn;
-    document.getElementById("eventsKa").innerHTML = htmlKa;
+    document.getElementById("nextEventsEn").innerHTML = htmlEn;
+    document.getElementById("nextEventsKa").innerHTML = htmlKa;
     if (jsonData.events_other.length > 0) {
       htmlOther += '<h2><i class="fa-solid fa-landmark-flag"></i> その他</h2>';
-      htmlOther += '<div id="eventsOther">';
+      htmlOther += '<div id="nextEventsOther">';
       htmlOther += '<table class="event_table"><tr>';
       htmlOther += '<th>イベント名</th>';
       htmlOther += '<th><i class="fa-solid fa-user"></i></th>'; //担当者アイコン
@@ -176,7 +176,7 @@ async function getKaEnData() {
      
         if(jsonData.events_other[i].status != 5){
           titleLength = jsonData.events_other[i].event_name.length;
-          htmlOther += '<tr id="o_row_"' + i + '">';
+          htmlOther += '<tr id="n_o_row_"' + i + '">';
           htmlOther += '<td class="event_name">';
           if(jsonData.events_other[i].agent_id > 0){
             agentName ="";
@@ -214,7 +214,7 @@ async function getKaEnData() {
         }
       }
       htmlOther += '</table></div>';
-      document.getElementById("eventsOther").innerHTML = htmlOther;
+      document.getElementById("nextEventsOther").innerHTML = htmlOther;
     }
 
   }
@@ -223,8 +223,8 @@ async function getKaEnData() {
     htmlEn = '<div class="eventbox">';
     htmlEn += '<div class="signage-content">データ受信に失敗しました <i class="fa-regular fa-face-sad-tear"></i></div>';
     htmlEn += '</div>';
-    document.getElementById("eventsEn").innerHTML = htmlEn;
-    document.getElementById("eventsKa").innerHTML = htmlEn;
+    document.getElementById("nextEventsEn").innerHTML = htmlEn;
+    document.getElementById("nextEventsKa").innerHTML = htmlEn;
   }
   
 }

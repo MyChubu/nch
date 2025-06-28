@@ -5,15 +5,27 @@ require_once('functions/admin_banquet_chart.php');
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $week = array('日', '月', '火', '水', '木', '金', '土');
-$date = date('Y-m-d');
-$w = date('w');
-$wd= $week[$w];
-$h= date('H');
-if($h < 18){
- $sche_title = '本日のスケジュール';
-}else{
-  $sche_title = '明日のスケジュール';
+
+$now = new DateTime();
+$date = $now->format('Y-m-d');
+$w = $now->format('w');
+$wd = $week[$w];
+$h = (int)$now->format('H');
+
+if ($h < 18) {
+    $sche_title = '本日のスケジュール';
+    $offset = '+1 day';
+    $next_sche_title = '明日のスケジュール';
+} else {
+    $sche_title = '明日のスケジュール';
+    $offset = '+2 day';
+    $next_sche_title = '明後日のスケジュール';
 }
+
+$next_day = (clone $now)->modify($offset);
+$next_date = $next_day->format('Y-m-d');
+$next_w = $next_day->format('w');
+$next_wd = $week[$next_w];
 
 
 $sql="SELECT MAX(`date`) as `max_date`, MIN(`date`) as `min_date` FROM `banquet_schedules`";
@@ -90,6 +102,7 @@ $agents = $chartdata['agents'];
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="js/admin_banquet.js"></script>
   <script src="js/getKaEnData.js"></script>
+  <script src="js/getKaEnNextData.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -126,9 +139,18 @@ $agents = $chartdata['agents'];
           <div id="eventsOther"></div>
         </div>
       </div>
-      <div class="top_signage">
-
+      <div class="top_shcedule">
+        <h2><?=$next_sche_title ?></h2>
+        <div id="banquet-next-schedule">
+          <div id="nextSchedate"></div>
+          <h2><i class="fa-solid fa-champagne-glasses"></i> 宴会</h2>
+          <div id="nextEventsEn"></div>
+          <h2><i class="fa-solid fa-users"></i> 会議</h2>
+          <div id="nextEventsKa"></div>
+          <div id="nextEventsOther"></div>
+        </div>
       </div>
+ 
     </div>
 
     <div>
