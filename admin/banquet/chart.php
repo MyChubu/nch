@@ -40,7 +40,12 @@ $agent_sales = $chartdata['agent_sales'];
 $agent_count = $chartdata['agent_count'];
 $agents = $chartdata['agents'];
 $category_sales = $chartdata['category_sales'];
-var_dump($category_sales); // デバッグ用
+$category_subtotals = $chartdata['category_subtotals'];
+$category_counts = $chartdata['category_counts'];
+$category_s = $chartdata['category_s'];
+
+var_dump($chartdata);
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">

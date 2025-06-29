@@ -334,8 +334,11 @@ function getChartData($nendo){
   $d_a_count = array($d_count, $a_count);
 
   //売上カテゴリー別
+  $category_s = array();
+  $category_subtotals = array();
   $category_sales = array();
-  $category_sales_counts = array();
+  $category_counts = array();
+  
   $sql = "SELECT 
     `sales`.`ym`,
     `sales`.`sales_category_id`,
@@ -372,7 +375,7 @@ function getChartData($nendo){
   if($count > 0) {
     foreach($results as $result) {
       $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
-      $category_sales[] = array(
+      $category_s[] = array(
         'ym' => $result['ym'],
         'tuki' => $tuki,
         'sales_category_id' => $result['sales_category_id'],
@@ -387,6 +390,19 @@ function getChartData($nendo){
     }
   }
   for($i = 0; $i < 12; $i++) {
+    $tuki = $month_array[$i];
+    for($c=1; $c<=6; $c++){
+      $cat='cat_' . $c;
+      $category_sales[$cat] = array();
+      $category_subtotals[$cat] = array();
+      $category_counts[$cat] = array();
+      foreach($category_s as $sale){
+        $category_sales[$cat][$i] = 0;
+        if($sale['tuki'] == $tuki && $sale['sales_category_id'] == $c){
+          $category_sales[$cat][$i] = $sale['net'];
+        }
+      }
+    }
   }
 
 
@@ -416,6 +432,9 @@ function getChartData($nendo){
     'd_a' => $d_a,
     'd_a_count' => $d_a_count,
     'category_sales' => $category_sales,
+    'category_subtotals' => $category_subtotals,
+    'category_counts' => $category_counts,
+    'category_s' => $category_s
   );
   return $data;
 }
