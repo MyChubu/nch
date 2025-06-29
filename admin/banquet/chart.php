@@ -44,7 +44,6 @@ $category_subtotals = $chartdata['category_subtotals'];
 $category_counts = $chartdata['category_counts'];
 $category_s = $chartdata['category_s'];
 
-var_dump($chartdata);
 
 ?>
 <!DOCTYPE html>

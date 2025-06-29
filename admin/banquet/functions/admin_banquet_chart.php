@@ -338,7 +338,7 @@ function getChartData($nendo){
   $category_subtotals = array();
   $category_sales = array();
   $category_counts = array();
-  
+  $category_amounts = array();
   $sql = "SELECT 
     `sales`.`ym`,
     `sales`.`sales_category_id`,
@@ -389,18 +389,28 @@ function getChartData($nendo){
       );
     }
   }
-  for($i = 0; $i < 12; $i++) {
-    $tuki = $month_array[$i];
-    for($c=1; $c<=6; $c++){
-      $cat='cat_' . $c;
+  for($c=1; $c<=6; $c++){
+    $cat='cat_' . $c;
+    if(!isset($category_sales[$cat])){
       $category_sales[$cat] = array();
       $category_subtotals[$cat] = array();
       $category_counts[$cat] = array();
+      $category_amounts[$cat] = 0;
+    }
+    for($i = 0; $i < 12; $i++) {
+      $tuki = $month_array[$i];
       foreach($category_s as $sale){
-        $category_sales[$cat][$i] = 0;
-        if($sale['tuki'] == $tuki && $sale['sales_category_id'] == $c){
-          $category_sales[$cat][$i] = $sale['net'];
+        if(!isset($category_sales[$cat][$i])){
+          $category_sales[$cat][$i] = 0;
+          $category_subtotals[$cat][$i] = 0;
+          $category_counts[$cat][$i] = 0;
         }
+        if($sale['tuki'] == $tuki && $sale['sales_category_id'] == $c){
+          $category_amounrts[$cat] += $sale['net'];
+          $category_sales[$cat][$i] = $sale['net'];
+          $category_counts[$cat][$i] = $sale['count'];
+        }
+        $category_subtotals[$cat][$i] = $category_amounrts[$cat];
       }
     }
   }

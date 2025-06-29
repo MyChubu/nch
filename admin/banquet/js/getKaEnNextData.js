@@ -20,7 +20,6 @@ async function getKaEnNextData() {
     console.log('オブジェクト形式に変換したJSONデータ:', jsonData); // パースされたJSONデータを出力
     console.log('日付:', jsonData.hizuke); // 日付を出力
     console.log('イベント数:', jsonData.events.length); // イベント数を出力
-    document.title = jsonData.hizuke + 'の会議・宴会予定' ; // タイトルに日付を設定
     document.getElementById("nextSchedate").innerHTML = jsonData.hizuke;
     
     if (jsonData.events_en.length == 0) { // イベントが0件の場合
