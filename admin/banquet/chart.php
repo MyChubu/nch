@@ -39,6 +39,8 @@ $d_a_count = $chartdata['d_a_count'];
 $agent_sales = $chartdata['agent_sales'];
 $agent_count = $chartdata['agent_count'];
 $agents = $chartdata['agents'];
+$category_sales = $chartdata['category_sales'];
+var_dump($category_sales); // デバッグ用
 ?>
 <!DOCTYPE html>
 <html lang="ja">

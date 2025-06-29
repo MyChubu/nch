@@ -333,7 +333,69 @@ function getChartData($nendo){
   $d_a=array($direct, $agent);
   $d_a_count = array($d_count, $a_count);
 
-   $data=array(
+  //売上カテゴリー別
+  $category_sales = array();
+  $category_sales_counts = array();
+  $sql = "SELECT 
+    `sales`.`ym`,
+    `sales`.`sales_category_id`,
+    `sales`.`sales_category_name`,
+    COUNT(`reservation_id`) AS `count`,
+    SUM(`sales`.`additional_sales`) AS `additional_sales`,
+    SUM(`subtotal`) AS `subtotal`,
+    SUM(`gross`) AS `gross`,
+    SUM(`net`) AS `net`
+  FROM(
+    SELECT 
+      `ym`,
+      `sales_category_id`,
+      `sales_category_name`,
+      `reservation_id`,
+      `additional_sales`,
+      SUM(`subtotal`) AS `subtotal`,
+      SUM(`gross`) AS `gross`,
+      SUM(`net`) AS `net`
+    FROM `view_daily_subtotal`
+    WHERE `date` BETWEEN :first_day AND :last_day
+    AND `sales_category_id` IS NOT NULL
+    GROUP BY `ym`,`sales_category_id`,`sales_category_name`,`reservation_id`
+    ORDER BY `sales_category_id`,`ym`
+  ) AS `sales`
+  GROUP BY `ym`,`sales_category_id`,`sales_category_name`
+  ORDER BY `sales_category_id`,`ym`";
+  $stmt = $dbh->prepare($sql);
+  $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
+  $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
+  $stmt->execute();
+  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $count = $stmt->rowCount();
+  if($count > 0) {
+    foreach($results as $result) {
+      $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
+      $category_sales[] = array(
+        'ym' => $result['ym'],
+        'tuki' => $tuki,
+        'sales_category_id' => $result['sales_category_id'],
+        'sales_category_name' => $result['sales_category_name'],
+        'count' => $result['count'] - $result['additional_sales'],
+        'original_count' => $result['count'],
+        'additional_sales' => $result['additional_sales'],
+        'subtotal' => $result['subtotal'],
+        'gross' => $result['gross'],
+        'net' => $result['net']
+      );
+    }
+  }
+  for($i = 0; $i < 12; $i++) {
+  }
+
+
+
+
+
+
+
+  $data=array(
     'nendo' => $nendo,
     'last_nendo' => $last_nendo,
     'months' => $month_array,
@@ -352,7 +414,8 @@ function getChartData($nendo){
     'agent_sales' => $agent_sales,
     'agent_count' => $agent_count,
     'd_a' => $d_a,
-    'd_a_count' => $d_a_count
+    'd_a_count' => $d_a_count,
+    'category_sales' => $category_sales,
   );
   return $data;
 }
