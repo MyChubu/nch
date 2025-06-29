@@ -71,11 +71,17 @@ $category_s = $chartdata['category_s'];
       gap: 10px;
     }
     .chartbox {
-      width: calc(48% - 10px)  ;
+      width: calc(100% - 10px)  ;
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .cb_half {
+      width: calc(48% - 10px);
+    }
+    .cb_quarter {
+      width: calc(24% - 10px);
     }
   </style>
 </head>
@@ -97,19 +103,19 @@ $category_s = $chartdata['category_s'];
   </div>
 
   <div class="pie_charts">
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>販売経路（金額）</h2>
       <canvas id="daChart"></canvas>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>販売経路（件数）</h2>
       <canvas id="dacChart"></canvas>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>代理店シェア（金額）</h2>
       <canvas id="agentChart"></canvas>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>代理店シェア（件数）</h2>
       <canvas id="agentcChart"></canvas>
     </div>
