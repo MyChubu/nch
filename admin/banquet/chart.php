@@ -101,6 +101,17 @@ $category_s = $chartdata['category_s'];
     <div>税・サービス料抜(単位：千円)</div>
 
   </div>
+  
+  <div class="pie_charts">
+    <div class="chartbox cb_half">
+      <h2>カテゴリー別（金額）</h2>
+      <canvas id="catSalesChart"></canvas>
+    </div>
+    <div class="chartbox cb_half">
+      <h2>カテゴリー別（件数）</h2>
+      <canvas id="catCountChart"></canvas>
+    </div>
+  </div>
 
   <div class="pie_charts">
     <div class="chartbox cb_quarter">
