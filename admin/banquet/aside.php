@@ -14,10 +14,13 @@
     </li>
     <li><i class="fa-solid fa-clipboard-list"></i><a href="../banquet/ka_en_list.php">本日の予定</a></li>
   </ul>
+  <!--
   <h3>お知らせ</h3>
   <ul>
     <li><i class="fa-solid fa-bell"></i><a href="../banquet/info.php">お知らせ一覧</a></li>
     <li><i class="fa-solid fa-plus"></i><a href="../banquet/info_entry.php">お知らせ登録</a></li>
+  </ul>
+  -->
   <h3>売上</h3>
   <ul>
     <li><i class="fa-solid fa-calculator"></i><a href="../banquet/salesyear.php">年間累計</a></li>

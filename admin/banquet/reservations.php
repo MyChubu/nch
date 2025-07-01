@@ -171,9 +171,9 @@ if($count > 0){
                 <td>
                   <?php 
                   if($reservation['agent_id'] > 0){
-                    if($reservation['agent_name2'] != ""){
+                    if($reservation['agent_name2'] != "" && $reservation['agent_name2'] != " "){
                        echo htmlspecialchars(cleanLanternName2($reservation['agent_name2'],30));
-                    } elseif($reservation['reserver'] != ""){ 
+                    } elseif($reservation['reserver'] != "" && $reservation['reserver'] != " "){ 
                       echo htmlspecialchars(cleanLanternName2($reservation['reserver'],30));
                     }else {
                       echo htmlspecialchars(cleanLanternName2($reservation['agent_name'],30));
