@@ -43,7 +43,8 @@ $category_sales = $chartdata['category_sales'];
 $category_subtotals = $chartdata['category_subtotals'];
 $category_counts = $chartdata['category_counts'];
 $category_s = $chartdata['category_s'];
-
+$category_total_sales = $chartdata['category_total_sales'];
+$category_total_counts = $chartdata['category_total_counts'];
 
 ?>
 <!DOCTYPE html>
@@ -83,6 +84,16 @@ $category_s = $chartdata['category_s'];
     .cb_quarter {
       width: calc(24% - 10px);
     }
+    @media screen and (max-width:1370px) {
+      
+      .cb_half {
+        width: calc(100% - 10px);
+      }
+      .cb_quarter {
+        width: calc(48% - 10px);
+      }
+      
+    }
   </style>
 </head>
 <body>
@@ -92,13 +103,13 @@ $category_s = $chartdata['category_s'];
   <div>
     <h2>売上推移</h2>
     <canvas id="myChart"></canvas>
-    <div>税・サービス料抜(単位：千円)</div>
+    <div class="text_right">税・サービス料抜(単位：千円)</div>
   </div>
 
   <div>
     <h2>売上推移2</h2>
     <canvas id="myChart2"></canvas>
-    <div>税・サービス料抜(単位：千円)</div>
+    <div class="text_right">税・サービス料抜(単位：千円)</div>
 
   </div>
   
@@ -106,10 +117,22 @@ $category_s = $chartdata['category_s'];
     <div class="chartbox cb_half">
       <h2>カテゴリー別（金額）</h2>
       <canvas id="catSalesChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
     </div>
     <div class="chartbox cb_half">
       <h2>カテゴリー別（件数）</h2>
       <canvas id="catCountChart"></canvas>
+    </div>
+  </div>
+  <div class="pie_charts">
+    <div class="chartbox cb_quarter">
+      <h2>カテゴリー別 売上比率</h2>
+      <canvas id="catSalesDoughnutChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+    <div class="chartbox cb_quarter">
+      <h2>カテゴリー別 件数比率</h2>
+      <canvas id="catCountDoughnutChart"></canvas>
     </div>
   </div>
 
@@ -117,6 +140,7 @@ $category_s = $chartdata['category_s'];
     <div class="chartbox cb_quarter">
       <h2>販売経路（金額）</h2>
       <canvas id="daChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
     </div>
     <div class="chartbox cb_quarter">
       <h2>販売経路（件数）</h2>
@@ -125,6 +149,7 @@ $category_s = $chartdata['category_s'];
     <div class="chartbox cb_quarter">
       <h2>代理店シェア（金額）</h2>
       <canvas id="agentChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
     </div>
     <div class="chartbox cb_quarter">
       <h2>代理店シェア（件数）</h2>
@@ -355,7 +380,7 @@ $category_s = $chartdata['category_s'];
     labels: ['直販', '代理店'],
     datasets: [{
       label: '売上比率',
-      data: [<?= $d_a[0] ?>, <?= $d_a[1] ?>],
+      data: [<?= $d_a[0] ?>, <?= $d_a[1] ?>].map(v => Math.round(v / 1000)),
       backgroundColor: [
         'rgba(0, 246, 143, 0.8)',
         'rgba(54, 162, 235, 0.8)'
@@ -457,7 +482,7 @@ $category_s = $chartdata['category_s'];
     labels: [<?= implode(',', array_map(function($agent) { return '"' . $agent . '"'; }, $agents)) ?>],
     datasets: [{
       label: '代理店売上シェア',
-      data: [<?= implode(',', $agent_sales) ?>],
+      data: [<?= implode(',', $agent_sales) ?>].map(v => Math.round(v / 1000)),
       backgroundColor: [
         'rgba(255, 99, 132, 0.8)',
         'rgba(54, 162, 235, 0.8)',
@@ -615,6 +640,384 @@ $category_s = $chartdata['category_s'];
     plugins: [ChartDataLabels]
   };
   new Chart(ctx6, agentcConfig);
+</script>
+<script>
+  const ctx7 = document.getElementById('catSalesChart').getContext('2d');
+
+  const labels7 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
+  const catSalesData = {
+    labels: labels7,
+    datasets: [
+      {
+        label: '会',
+        data: [<?= implode(',', $category_sales['cat_1']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 赤
+        stack: '売上'
+      },
+      {
+        label: '宴',
+        data: [<?= implode(',', $category_sales['cat_2']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 青
+        stack: '売上'
+      },
+      {
+        label: '食',
+        data: [<?= implode(',', $category_sales['cat_3']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(75, 192, 192, 0.7)', // 緑
+        stack: '売上'
+      },
+      {
+        label: '会/宴',
+        data: [<?= implode(',', $category_sales['cat_4']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 206, 86, 0.7)', // 黄
+        stack: '売上'
+      },
+      {
+        label: '会/食',
+        data: [<?= implode(',', $category_sales['cat_5']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(153, 102, 255, 0.7)', // 紫
+        stack: '売上'
+      },
+      {
+        label: '会/宴/食',
+        data: [<?= implode(',', $category_sales['cat_6']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 159, 64, 0.7)', // オレンジ
+        stack: '売上'
+      }
+    ]
+  };
+
+  const catSalesConfig = {
+    type: 'bar',
+    data: catSalesData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'カテゴリ別 売上（積み上げグラフ）'
+        }
+      },
+      scales: {
+        x: {
+          stacked: true
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '売上金額'
+          }
+        }
+      }
+    },
+    plugins: [{
+      id: 'totalLabelPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea: { top }, data, scales: { x, y } } = chart;
+        const totals = [];
+
+        // 合計を計算
+        data.datasets.forEach((ds, dsIndex) => {
+          ds.data.forEach((v, i) => {
+            totals[i] = (totals[i] || 0) + v;
+          });
+        });
+
+        // 合計ラベルを描画
+        totals.forEach((total, i) => {
+          const xPos = x.getPixelForValue(i);
+          const yPos = y.getPixelForValue(total);
+
+          ctx.save();
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.fillText(total.toLocaleString() , xPos, yPos - 5);
+          ctx.restore();
+        });
+      }
+    }]
+  };
+
+  new Chart(ctx7, catSalesConfig);
+</script>
+<script>
+  const ctx8 = document.getElementById('catCountChart').getContext('2d');
+
+  const labels8 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
+  const catCountData = {
+    labels: labels8,
+    datasets: [
+      {
+        label: '会',
+        data: [<?= implode(',', $category_counts['cat_1']) ?>],
+        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 赤
+        stack: '売上'
+      },
+      {
+        label: '宴',
+        data: [<?= implode(',', $category_counts['cat_2']) ?>],
+        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 青
+        stack: '売上'
+      },
+      {
+        label: '食',
+        data: [<?= implode(',', $category_counts['cat_3']) ?>],
+        backgroundColor: 'rgba(75, 192, 192, 0.7)', // 緑
+        stack: '売上'
+      },
+      {
+        label: '会/宴',
+        data: [<?= implode(',', $category_counts['cat_4']) ?>],
+        backgroundColor: 'rgba(255, 206, 86, 0.7)', // 黄
+        stack: '売上'
+      },
+      {
+        label: '会/食',
+        data: [<?= implode(',', $category_counts['cat_5']) ?>],
+        backgroundColor: 'rgba(153, 102, 255, 0.7)', // 紫
+        stack: '売上'
+      },
+      {
+        label: '会/宴/食',
+        data: [<?= implode(',', $category_counts['cat_6']) ?>],
+        backgroundColor: 'rgba(255, 159, 64, 0.7)', // オレンジ
+        stack: '売上'
+      }
+    ]
+  };
+
+  const catCountConfig = {
+    type: 'bar',
+    data: catCountData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'カテゴリ別 件数（積み上げグラフ）'
+        }
+      },
+      scales: {
+        x: {
+          stacked: true
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '受注件数'
+          }
+        }
+      }
+    },
+    plugins: [{
+      id: 'totalLabelPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea: { top }, data, scales: { x, y } } = chart;
+        const totals = [];
+
+        // 合計を計算
+        data.datasets.forEach((ds, dsIndex) => {
+          ds.data.forEach((v, i) => {
+            totals[i] = (totals[i] || 0) + v;
+          });
+        });
+
+        // 合計ラベルを描画
+        totals.forEach((total, i) => {
+          const xPos = x.getPixelForValue(i);
+          const yPos = y.getPixelForValue(total);
+
+          ctx.save();
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.fillText(total.toLocaleString() , xPos, yPos - 5);
+          ctx.restore();
+        });
+      }
+    }]
+  };
+
+  new Chart(ctx8, catCountConfig);
+</script>
+<script>
+  // カテゴリごとの売上シェアの円グラフ
+  const ctx9 = document.getElementById('catSalesDoughnutChart').getContext('2d');
+  
+  const catSlalesDoughData = {
+    labels: ['会', '宴', '食', '会/宴', '会/食', '会/宴/食'],
+    datasets: [{
+      label: 'カテゴリー売上シェア',
+      data: [<?= implode(',', $category_total_sales) ?>].map(v => Math.round(v / 1000)),
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(0, 246, 143, 0.8)',
+        'rgba(54, 235, 151, 0.8)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(0, 246, 143, 1)', 
+        'rgba(54, 235, 151, 1)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+      ],
+      borderWidth: 1
+    }]
+  };
+  const catSlalesDoughConfig = {
+    type: 'doughnut',
+    data: catSlalesDoughData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'カテゴリー売上シェア'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            if (isNaN(percentage)) {
+              return ''; // NaNの場合は表示しない
+            }
+            else if (percentage < 3) {
+              return ''; // 3%未満は表示しない
+            }else{
+              return percentage + '%';
+            }
+            
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  new Chart(ctx9, catSlalesDoughConfig);
+</script>
+<script>
+  // カテゴリごとの売上シェアの円グラフ
+  const ctx10 = document.getElementById('catCountDoughnutChart').getContext('2d');
+  
+  const catCountsDoughData = {
+    labels: ['会', '宴', '食', '会/宴', '会/食', '会/宴/食'],
+    datasets: [{
+      label: 'カテゴリー売上シェア',
+      data: [<?= implode(',', $category_total_counts) ?>],
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(0, 246, 143, 0.8)',
+        'rgba(54, 235, 151, 0.8)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(255, 206, 86, 0.5)',
+        'rgba(75, 192, 192, 0.5)',
+        'rgba(153, 102, 255, 0.5)',
+        'rgba(255, 159, 64, 0.5)',
+      ],
+      borderColor: [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(0, 246, 143, 1)', 
+        'rgba(54, 235, 151, 1)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+      ],
+      borderWidth: 1
+    }]
+  };
+  const catCountsDoughConfig = {
+    type: 'doughnut',
+    data: catCountsDoughData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'カテゴリー件数シェア'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const data = context.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = (value / total * 100).toFixed(1);
+            if (isNaN(percentage)) {
+              return ''; // NaNの場合は表示しない
+            }
+            else if (percentage < 3) {
+              return ''; // 3%未満は表示しない
+            }else{
+              return percentage + '%';
+            }
+            
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  };
+  new Chart(ctx10, catCountsDoughConfig);
 </script>
 
 </body>

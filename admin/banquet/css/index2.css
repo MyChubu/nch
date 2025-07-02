@@ -44,3 +44,13 @@
 .cb_quarter {
   width: calc(24% - 10px);
 }
+@media screen and (max-width: 1370px) {
+  
+  .cb_half {
+    width: calc(100% - 10px);
+  }
+  .cb_quarter {
+    width: calc(48% - 10px);
+  } 
+  
+}

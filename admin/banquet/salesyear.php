@@ -659,7 +659,7 @@ FROM(
       <?php endif; ?>
     </div>
 
-    <div>
+    <div id="sales_category">
       <h2>カテゴリー別</h2>
       <?php if(sizeof($sales_category_sales) > 0): ?>
         <?php
