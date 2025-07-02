@@ -395,7 +395,8 @@ function getChartData($nendo){
       $category_sales[$cat] = array();
       $category_subtotals[$cat] = array();
       $category_counts[$cat] = array();
-      $category_amounts[$cat] = 0;
+      $category_total_sales[$cat] = 0;
+      $category_total_counts[$cat] = 0;
     }
     for($i = 0; $i < 12; $i++) {
       $tuki = $month_array[$i];
@@ -409,17 +410,14 @@ function getChartData($nendo){
           $category_amounts[$cat] += $sale['net'];
           $category_sales[$cat][$i] = $sale['net'];
           $category_counts[$cat][$i] = $sale['count'];
+          $category_total_sales[$cat] += $category_sales[$cat][$i];
+          $category_total_counts[$cat] += $category_counts[$cat][$i];
         }
         $category_subtotals[$cat][$i] = $category_amounts[$cat];
+        
       }
     }
   }
-
-
-
-
-
-
 
   $data=array(
     'nendo' => $nendo,
@@ -444,7 +442,9 @@ function getChartData($nendo){
     'category_sales' => $category_sales,
     'category_subtotals' => $category_subtotals,
     'category_counts' => $category_counts,
-    'category_s' => $category_s
+    'category_s' => $category_s,
+    'category_total_sales' => $category_total_sales,
+    'category_total_counts' => $category_total_counts
   );
   return $data;
 }

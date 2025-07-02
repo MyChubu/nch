@@ -342,3 +342,21 @@ span.additional_sales {
   width: 1.5em;
   text-align: center;
 }
+.text_left {
+  text-align: left;
+  font-size: 0.8em;
+  color: #555;
+  margin-top: 10px;
+}
+.text_right {
+  text-align: right;
+  font-size: 0.8em;
+  color: #555;
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 1370px) {
+  html{
+    font-size: 0.8em !important;
+  }
+}
