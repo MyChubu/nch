@@ -33,6 +33,7 @@ async function getKaEnData() {
       htmlEn += '<th><i class="fa-solid fa-utensils"></i></th>'; //料理アイコン
       htmlEn += '<th><i class="fa-solid fa-people-group"></i></th>'; //人数（グループ）アイコン
       htmlEn += '<th><i class="fa-solid fa-flag-checkered"></i></th>'; //目的（チェッカーフラッグ）アイコン
+      htmlEn += '<th><i class="fa-solid fa-wine-glass"></i></th>'; //グラスアイコン
       htmlEn += '<th><i class="fa-solid fa-display"></i></th>'; //ディスプレイアイコン
       htmlEn += '</tr>';
       for (let i = 0; i < jsonData.events_en.length; i++) {
@@ -78,6 +79,17 @@ async function getKaEnData() {
           htmlEn += '</td>';
           htmlEn += '<td class="people">' + jsonData.events_en[i].people + '</td>';
           htmlEn += '<td class="purpose">' + jsonData.events_en[i].purpose_short + '</td>';
+          htmlEn += '<td class="drink">';
+          if(jsonData.events_en[i].drink1.length > 0){
+            for (let j = 0; j < jsonData.events_en[i].drink1.length; j++) {
+              let dc = jsonData.events_en[i].drink1[j].short_name;
+              let dcp = dc.split('-');
+              htmlEn += "<div><span class='dc dc-"+ dcp[1] + "'>" + dcp[1] + "</span></div>";
+            }
+          }else{
+            htmlEn += '-';
+          }
+          htmlEn += '</td>';
           htmlEn += '<td class="ds">';
           if(jsonData.events_en[i].enable == 1){
             htmlEn += '<i class="fa-solid fa-square-check"></i>';
@@ -306,7 +318,16 @@ async function getKaEnNextData() {
           htmlEn += '</td>';
           htmlEn += '<td class="people">' + jsonData.events_en[i].people + '</td>';
           htmlEn += '<td class="purpose">' + jsonData.events_en[i].purpose_short + '</td>';
-          htmlEn += '<td class="drink">-';
+          htmlEn += '<td class="drink">';
+          if(jsonData.events_en[i].drink1.length > 0){
+            for (let j = 0; j < jsonData.events_en[i].drink1.length; j++) {
+              let dc = jsonData.events_en[i].drink1[j].short_name;
+              let dcp = dc.split('-');
+              htmlEn += "<div><span class='dc dc-"+ dcp[1] + "'>" + dcp[1] + "</span></div>";
+            }
+          }else{
+            htmlEn += '-';
+          }
           htmlEn += '</td>';
           htmlEn += '<td class="ds">';
           if(jsonData.events_en[i].enable == 1){

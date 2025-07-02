@@ -105,9 +105,9 @@ $category_total_counts = $chartdata['category_total_counts'];
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="js/admin_banquet.js"></script>
-  <script src="js/getKaEnData.js"></script>
-  <script src="js/getKaEnNextData.js"></script>
-  
+  <!--<script src="js/getKaEnData.js"></script>-->
+  <!--<script src="js/getKaEnNextData.js"></script>-->
+  <script src="js/getIndexKaEnData.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -235,16 +235,7 @@ $category_total_counts = $chartdata['category_total_counts'];
   const data = {
     labels: labels,
     datasets: [
-      // 折れ線グラフ（2025年度累計）
-      {
-        label: '<?=$nendo ?>年度累計',
-        data: [<?= implode(',', $sales_subtotal_array) ?>],
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        type: 'line',
-        fill: false,
-        yAxisID: 'y-axis-2'
-      },
+      
       // 折れ線グラフ（2024年度累計）
       {
         label: '<?=$last_nendo ?>年度累計',
@@ -255,15 +246,15 @@ $category_total_counts = $chartdata['category_total_counts'];
         fill: false,
         yAxisID: 'y-axis-2'
       },
-      // 棒グラフ（2025年度）
+      // 折れ線グラフ（2025年度累計）
       {
-        label: '<?=$nendo ?>年度',
-        data: [<?= implode(',', $sales_array) ?>],
-        backgroundColor: 'rgba(0, 246, 143, 0.5)',
-        borderColor: 'rgb(0, 246, 143)',
-        type: 'bar',
+        label: '<?=$nendo ?>年度累計',
+        data: [<?= implode(',', $sales_subtotal_array) ?>],
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        type: 'line',
         fill: false,
-        yAxisID: 'y-axis-1'
+        yAxisID: 'y-axis-2'
       },
       // 棒グラフ（2024年度）
       {
@@ -271,6 +262,16 @@ $category_total_counts = $chartdata['category_total_counts'];
         data: [<?= implode(',', $last_year_sales_array) ?>],
         backgroundColor: 'rgba(54, 162, 235, 0.5)',
         borderColor: 'rgb(54, 162, 235)',
+        type: 'bar',
+        fill: false,
+        yAxisID: 'y-axis-1'
+      },
+      // 棒グラフ（2025年度）
+      {
+        label: '<?=$nendo ?>年度',
+        data: [<?= implode(',', $sales_array) ?>],
+        backgroundColor: 'rgba(0, 246, 143, 0.5)',
+        borderColor: 'rgb(0, 246, 143)',
         type: 'bar',
         fill: false,
         yAxisID: 'y-axis-1'
@@ -329,6 +330,16 @@ $category_total_counts = $chartdata['category_total_counts'];
     const data2 = {
       labels: labels2,
       datasets: [
+        // 折れ線グラフ（2024 累計小計）
+        {
+          label: '<?=$last_nendo ?> 累計',
+          data: [<?= implode(',', $last_nendo_subtotal) ?>],
+          borderColor: 'rgba(255, 99, 132, 0.8)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          type: 'line',
+          fill: false,
+          yAxisID: 'y-right'
+        },
         // 折れ線グラフ（2025 subtotal）
         {
           label: '<?=$nendo ?> 累計',
@@ -349,18 +360,15 @@ $category_total_counts = $chartdata['category_total_counts'];
           fill: false,
           yAxisID: 'y-right'
         },
-        // 折れ線グラフ（2024 累計小計）
+        // 2024棒グラフ
         {
-          label: '<?=$last_nendo ?> 累計',
-          data: [<?= implode(',', $last_nendo_subtotal) ?>],
-          borderColor: 'rgba(255, 99, 132, 0.8)',
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          type: 'line',
-          fill: false,
-          yAxisID: 'y-right'
+          label: '<?=$last_nendo ?> 実績',
+          data: [<?= implode(',', $last_determined_sales) ?>],
+          backgroundColor: 'rgba(255, 99, 132, 0.4)',
+          stack: '<?=$last_nendo ?>',
+          yAxisID: 'y-left'
         },
-
-
+        
         // 2025棒グラフ
         {
           label: '<?=$nendo ?> 決定',
@@ -381,14 +389,6 @@ $category_total_counts = $chartdata['category_total_counts'];
           data: [<?= implode(',', $this_other_sales) ?>],
           backgroundColor: 'rgba(54, 235, 151, 0.5)',
           stack: '<?=$nendo ?>',
-          yAxisID: 'y-left'
-        },
-        // 2024棒グラフ
-        {
-          label: '<?=$last_nendo ?> 実績',
-          data: [<?= implode(',', $last_determined_sales) ?>],
-          backgroundColor: 'rgba(255, 99, 132, 0.4)',
-          stack: '<?=$last_nendo ?>',
           yAxisID: 'y-left'
         }
       ]
@@ -928,8 +928,8 @@ $category_total_counts = $chartdata['category_total_counts'];
       backgroundColor: [
         'rgba(255, 99, 132, 0.8)',
         'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
         'rgba(75, 192, 192, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
         'rgba(153, 102, 255, 0.8)',
         'rgba(255, 159, 64, 0.8)',
         'rgba(0, 246, 143, 0.8)',
@@ -944,8 +944,8 @@ $category_total_counts = $chartdata['category_total_counts'];
       borderColor: [
         'rgba(255, 99, 132, 1)',
         'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
+        'rgba(255, 206, 86, 1)',
         'rgba(153, 102, 255, 1)',
         'rgba(255, 159, 64, 1)',
         'rgba(0, 246, 143, 1)', 
@@ -1012,8 +1012,8 @@ $category_total_counts = $chartdata['category_total_counts'];
       backgroundColor: [
         'rgba(255, 99, 132, 0.8)',
         'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
         'rgba(75, 192, 192, 0.8)',
+        'rgba(255, 206, 86, 0.8)',
         'rgba(153, 102, 255, 0.8)',
         'rgba(255, 159, 64, 0.8)',
         'rgba(0, 246, 143, 0.8)',
@@ -1028,8 +1028,8 @@ $category_total_counts = $chartdata['category_total_counts'];
       borderColor: [
         'rgba(255, 99, 132, 1)',
         'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
+        'rgba(255, 206, 86, 1)',
         'rgba(153, 102, 255, 1)',
         'rgba(255, 159, 64, 1)',
         'rgba(0, 246, 143, 1)', 

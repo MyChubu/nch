@@ -359,4 +359,9 @@ span.additional_sales {
   html{
     font-size: 0.8em !important;
   }
+  #eventsEn, #eventsKa,#eventsOther,
+  #nextEventsEn, #nextEventsKa,#nextEventsOther
+  {
+    font-size: 0.6em !important;
+  }
 }
