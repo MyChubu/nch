@@ -115,6 +115,7 @@ if($count > 0) {
   <title><?=$agent_name ?> 販売実績（<?=$nendo ?>年度）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/form.css">
   <link rel="stylesheet" href="css/defect_list.css">
   <link rel="stylesheet" href="css/table_sort.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>

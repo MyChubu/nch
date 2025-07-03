@@ -107,6 +107,11 @@ aside.sidebar{
     text-align: center;
     border: 1px solid #CCC;
 }
+.event_table th{
+    background-color: #979797;
+    color: #FFF;
+    font-weight: 700;
+}
 tr.event_tr_0{
     background-color: #979797;
 }
