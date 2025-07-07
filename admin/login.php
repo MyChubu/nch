@@ -45,6 +45,7 @@ require_once('../common/conf.php');
       width: 100%;
       padding: 10px;
       background-color: #28a745;
+      font-size: 18px;
       color: white;
       border: none;
       border-radius: 5px;
