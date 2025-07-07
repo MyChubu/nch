@@ -42,6 +42,92 @@
 .cb_quarter {
   width: calc(24% - 10px);
 }
+header.header1{
+  width: 100%;
+  height: 50px;
+  background-color: #004d80;
+
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding: 0;
+}
+.gnavi__wrap{
+  width: 100%;
+  height: 50px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+.gnavi__lists {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.gnavi__list{
+  width: 150px;
+  height: 50px;
+  background-color: #3492d1;
+  list-style: none;
+
+}
+.dropdown__lists {
+  transform: scaleY(0);/*デフォルトでは非表示の状態にしておく*/
+  transform-origin: center top;/*変形を適応する基準をtopとする*/
+  transition: all .3s;/*表示の変化を0.3秒に指定*/
+  width: 200px;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  list-style: none;
+}
+.gnavi__list:hover .dropdown__lists {
+  transform: scaleY(1);/*Gナビメニューにホバーしたら表示*/
+}
+.dropdown__list {
+  background-color: #004d80;
+  height: 60px;
+  transition: all .3s;
+  position: relative;
+}
+.dropdown__list:not(:first-child)::before{
+  content: "";
+  width: 100%;
+  height: 1px;
+  background-color: #3492d1;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.dropdown__list:hover {
+  background-color: #003558;
+}
+.dropdown__list a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  position: relative;
+}
+.dropdown__list a::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  transform: rotate(135deg);
+  position: absolute;
+  right: 15px;
+  top: calc(50% - 5px);
+}
+
 @media screen and (max-width: 1370px) {
   
   .cb_half {
