@@ -18,7 +18,7 @@ if  (!empty($pw)) {
   <h1>パスワードハッシュ</h1>
   <form action="" method="post">
     <label for="password">パスワード:</label>
-    <input type="password" id="password" name="password" required>
+    <input type="text" id="password" name="password" required>
     <button type="submit">ハッシュ生成</button>
   </form>
   
