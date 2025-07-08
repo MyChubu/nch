@@ -24,7 +24,7 @@ if ($user && password_verify($pass, $user['password'])) {
     $_SESSION['name'] = $user['name'];
     $_SESSION['mail'] = $user['mail'];
 
-    header('Location: ./banquet/index2.php');
+    header('Location: ./banquet/');
 } else {
     header('Location: login.php?error=1');
 }
