@@ -43,4 +43,8 @@
     <li><i class="fa-solid fa-file-csv"></i><a href="../banquet/csvupload.php">CSVデータアップロード</a></li>
     <li><i class="fa-solid fa-money-bill"></i><a href="../banquet/csv_charge_upload.php">料金CSVアップロード</a></li>
   </ul>
+  <h3>メンテナンス</h3>
+  <ul>
+    <li><i class="fa-solid fa-gear"></i><a href="../banquet/edit_master.php">マスター編集</a></li>
+  </ul>
 </aside>

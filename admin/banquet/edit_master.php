@@ -22,12 +22,6 @@ if (empty($user_id) || empty($user_name)) {
 }
 $user_mail = $_SESSION['mail'];
 require_once('functions/admin_banquet.php');
-
-$sql = "SELECT * FROM banquet_items ORDER BY banquet_item_group ASC, item_id ASC";
-$stmt = $dbh->prepare($sql);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -36,7 +30,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
-  <title>アイテム設定</title>
+  <title>マスター編集</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/edit_master.css">
@@ -58,45 +52,18 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
   <div>
-    <h1>アイテム設定</h1>
-    <table class="form_table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>区分</th>
-          <th>区分内ID</th>
-          <th>名称</th>
-          <th>略称</th>
-          <th>食事</th>
-          <th>飲み放題</th>
-          <th>バイオーダー</th>
-          <th>使用</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($results as $item): ?>
-        <tr>
-          <td><?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['banquet_item_group'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['item_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['name_short'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td>
-            <input type="checkbox" name="meal" value="1" <?= $item['meal'] ? 'checked' : '' ?> disabled>
-          </td>
-          <td>
-            <input type="checkbox" name="drink1" value="1" <?= $item['drink1'] ? 'checked' : '' ?> disabled>
-          </td>
-          <td>
-            <input type="checkbox" name="drink2" value="1" <?= $item['drink2'] ? 'checked' : '' ?> disabled>
-          </td>
-          <td>
-            <input type="checkbox" name="enable" value="1" <?= $item['enable'] ? 'checked' : '' ?> disabled>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
+    <h1>マスター編集</h1>
+    <div class="master_list_wrapper">
+      
+      <div class="master_list_item"><a href="edit_agents.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;エージェント</a></div>
+      <div class="master_list_item"><a href="edit_categories.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;カテゴリー</a></div>
+      <div class="master_list_item"><a href="edit_items.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;アイテム</a></div>
+      <div class="master_list_item"><a href="edit_packages.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;パッケージ</a></div>
+      <div class="master_list_item"><a href="edit_purposes.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;使用目的</a></div>
+      <div class="master_list_item"><a href="edit_rooms.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;宴会場</a></div>
+      <div class="master_list_item"><a href="edit_sales_dept.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;売上部門</a></div>
+     
+    </div>
   </div>
 
 

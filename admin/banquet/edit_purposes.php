@@ -50,7 +50,7 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>使用目的設定</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/defect_list.css">
+  <link rel="stylesheet" href="css/edit_master.css">
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
@@ -81,13 +81,20 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
       </thead>
       <tbody>
+        <?php $i=0; ?>
         <?php foreach ($results as $purp): ?>
         <tr>
-          <td><?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <select name="category_id" disabled>
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_name]" value="<?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_short]" value="<?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+         </td>
+          <td>
+            <select name="value[<?=$i ?>$i][banquet_category_id]" disabled>
               <option value="">選択してください</option>
               <?php foreach ($categories as $category): ?>
               <option value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['banquet_category_id'] == $category['banquet_category_id'] ? 'selected' : '' ?>>
@@ -97,7 +104,7 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </select>
           </td>
           <td>
-            <select name="summary_id" disabled>
+            <select name="value[<?=$i ?>][summary_category]" disabled>
               <option value="">選択してください</option>
               <?php foreach ($summaries as $summary): ?>
               <option value="<?= htmlspecialchars($summary['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['summary_category'] == $summary['banquet_category_id'] ? 'selected' : '' ?>>
@@ -107,6 +114,8 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </select>
           </td>
         </tr>
+        <input type="hidden" name="value[<?=$i ?>][orginal_purpose_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>">
+        <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>
