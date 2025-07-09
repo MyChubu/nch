@@ -272,6 +272,16 @@ header.header1{
   list-style: none;
 
 }
+.gnavi__list a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 50px;
+  text-decoration: none;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+}
 .dropdown__lists {
   transform: scaleY(0);/*デフォルトでは非表示の状態にしておく*/
   transform-origin: center top;/*変形を適応する基準をtopとする*/
@@ -281,6 +291,7 @@ header.header1{
   top: 50px;
   right: 0;
   list-style: none;
+  z-index: 1000;;
 }
 .gnavi__list:hover .dropdown__lists {
   transform: scaleY(1);/*Gナビメニューにホバーしたら表示*/

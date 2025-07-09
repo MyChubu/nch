@@ -9,7 +9,7 @@ session_destroy();//セッションを破壊
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="10; URL=login.php">
+  <meta http-equiv="refresh" content="5; URL=login.php">
   <title>ログアウト</title>
   <style>
     body {

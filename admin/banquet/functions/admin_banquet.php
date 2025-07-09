@@ -469,7 +469,7 @@ function getDetail2($reservation_id) {
     reservation_date,
     MIN(date) AS start_date,
     MAX(date) AS end_date,
-    status,
+    MIN(status) AS status,
     pic,
     pic_id,
     agent_id,
