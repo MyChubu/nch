@@ -73,7 +73,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($results as $agent): ?>
         <tr>
           <td>
-            <input type="text" class="master_edit" name="value[<?=$i ?>[agent_id]" value="<?= htmlspecialchars($agent['agent_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][agent_id]" value="<?= htmlspecialchars($agent['agent_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
           </td>
           <td>
             <input type="text" class="master_edit" name="value[<?=$i ?>][agent_group]" value="<?= htmlspecialchars($agent['agent_group'], ENT_QUOTES, 'UTF-8') ?>" disabled>

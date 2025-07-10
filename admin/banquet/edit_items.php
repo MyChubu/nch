@@ -43,7 +43,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <script src="js/edit_common.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -59,6 +59,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>アイテム設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
@@ -74,26 +75,37 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
       </thead>
       <tbody>
+        <?php $i = 0; ?>
         <?php foreach ($results as $item): ?>
         <tr>
           <td><?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['banquet_item_group'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['item_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['name_short'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <input type="checkbox" name="meal" value="1" <?= $item['meal'] ? 'checked' : '' ?> disabled>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][banquet_item_group]" value="<?= htmlspecialchars($item['banquet_item_group'], ENT_QUOTES, 'UTF-8') ?>" disabled>
           </td>
           <td>
-            <input type="checkbox" name="drink1" value="1" <?= $item['drink1'] ? 'checked' : '' ?> disabled>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][item_id]" value="<?= htmlspecialchars($item['item_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>  
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][name]" value="<?= htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
           </td>
           <td>
-            <input type="checkbox" name="drink2" value="1" <?= $item['drink2'] ? 'checked' : '' ?> disabled>
+          <input type="text" class="master_edit" name="value[<?=$i ?>][name_short]" value="<?= htmlspecialchars($item['name_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>  
+          <td>
+            <input type="checkbox" class="master_edit" name="value[<?=$i ?>][meal]" value="1" <?= $item['meal'] ? 'checked' : '' ?> disabled>
           </td>
           <td>
-            <input type="checkbox" name="enable" value="1" <?= $item['enable'] ? 'checked' : '' ?> disabled>
+            <input type="checkbox" class="master_edit" name="value[<?=$i ?>][drink1]" value="1" <?= $item['drink1'] ? 'checked' : '' ?> disabled>
           </td>
+          <td>
+            <input type="checkbox" class="master_edit" name="value[<?=$i ?>][drink2]" value="1" <?= $item['drink2'] ? 'checked' : '' ?> disabled>
+          </td>
+          <td>
+            <input type="checkbox" class="master_edit" name="value[<?=$i ?>][enable]" value="1" <?= $item['enable'] ? 'checked' : '' ?> disabled>
+          </td>
+          <input type="hidden" name="value[<?=$i ?>][id]" value="<?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
+        <?= $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>
