@@ -43,7 +43,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <script src="js/edit_common.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -59,6 +59,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>エージェント設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
@@ -68,12 +69,21 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
       </thead>
       <tbody>
+        <?php $i= 0; ?>
         <?php foreach ($results as $agent): ?>
         <tr>
-          <td><?= htmlspecialchars($agent['agent_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($agent['agent_group'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($agent['agent_group_short'], ENT_QUOTES, 'UTF-8') ?></td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>[agent_id]" value="<?= htmlspecialchars($agent['agent_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][agent_group]" value="<?= htmlspecialchars($agent['agent_group'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][agent_group_short]" value="<?= htmlspecialchars($agent['agent_group_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>  
+          <input type="hidden" name="value[<?=$i ?>][a_id]" value="<?= htmlspecialchars($agent['agent_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
+        <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>

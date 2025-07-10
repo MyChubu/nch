@@ -43,7 +43,8 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <script src="js/edit_common.js"></script>
+  <script src="js/edit_categories.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -59,6 +60,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>カテゴリー設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
@@ -68,12 +70,21 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
       </thead>
       <tbody>
+        <?php $i = 0; ?>
         <?php foreach ($results as $category): ?>
         <tr>
-          <td><?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($category['banquet_category_short'], ENT_QUOTES, 'UTF-8') ?></td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][banquet_category_id]" value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][banquet_category_name]" value="<?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>  
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][banquet_category_short]" value="<?= htmlspecialchars($category['banquet_category_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <input type="hidden" name="value[<?= $i ?>][c_id]" value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
+        <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>

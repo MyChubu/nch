@@ -22,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('../functions/update_purpose.php', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Content-Type": "application/json; charset=UTF-8",
       },
       body: JSON.stringify(data)
     })

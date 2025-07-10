@@ -48,7 +48,8 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <script src="js/edit_common.js"></script>
+  <script src="js/edit_sales_dept.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -64,6 +65,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>売上部門設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
@@ -74,14 +76,21 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
       </thead>
       <tbody>
+        <?php $i= 0; ?>
         <?php foreach ($results as $dept): ?>
         <tr>
-          <td><?= htmlspecialchars($dept['sales_dept_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($dept['sales_dept_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($dept['sales_dept_short'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <select name="category_id" disabled>
-              <option value="">選択してください</option>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][sales_dept_id]" value="<?= htmlspecialchars($dept['sales_dept_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][sales_dept_name]" value="<?= htmlspecialchars($dept['sales_dept_name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>  
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][sales_dept_short]" value="<?= htmlspecialchars($dept['sales_dept_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <select class="master_edit" name="category_id" disabled>
+              <option value="">選択</option>
               <?php foreach ($categories as $category): ?>
                 <option value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" 
                   <?= $dept['category_id'] == $category['banquet_category_id'] ? 'selected' : '' ?>>
@@ -90,7 +99,9 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php endforeach; ?>
             </select>
           </td>
+          <input type="hidden" name="value[<?= $i ?>][sd_id]" value="<?= htmlspecialchars($dept['sales_dept_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
+        <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>

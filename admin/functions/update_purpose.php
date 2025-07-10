@@ -4,10 +4,10 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // ▼ DB接続
-require_once('../common/conf.php');
+require_once('../../common/conf.php');
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+#$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // ▼ JSONの受け取り
 $input = file_get_contents('php://input');

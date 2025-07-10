@@ -43,7 +43,8 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <script src="js/edit_common.js"></script>
+  <script src="js/edit_rooms.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -59,34 +60,56 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>宴会場設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
-          <th>Room ID</th>
+          <th class="cell_w80">Room ID</th>
           <th>名称</th>
           <th>英名</th>
-          <th>階</th>
-          <th>使用</th>
-          <th>カレンダー</th>
-          <th>表示順</th>
+          <th class="cell_w60">階</th>
+          <th class="cell_w60">使用</th>
+          <th class="cell_w60">カレンダー</th>
+          <th class="cell_w80">表示順</th>
         </tr>
       </thead>
       <tbody>
+        <?php $i = 0; ?>
         <?php foreach ($results as $room): ?>
         <tr>
-          <td><?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($room['name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($room['name_en'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($room['floor'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <input type="checkbox" name="status" value="1" <?= $room['status'] ? 'checked' : '' ?> disabled>
+            <input type="text" name="value[<?=$i ?>][banquet_room_id]" value="<?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
           </td>
           <td>
-            <input type="checkbox" name="cal" value="1" <?= $room['cal'] ? 'checked' : '' ?> disabled>
+            <input type="text" name="value[<?=$i ?>][name]" value="<?= htmlspecialchars($room['name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
           </td>
           <td>
-            <input type="number" name="order" value="<?= htmlspecialchars($room['order'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <input type="text" name="value[<?=$i ?>][name_en]" value="<?= htmlspecialchars($room['name_en'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
           </td>
+          <td>
+            <select name="value[<?=$i ?>][floor]" class="master_edit" disabled>
+              <?php for ($f = 0; $f <= 8; $f++):
+                if($f==0){
+                  $flr = 'B1';
+                }else{
+                  $flr = $f. 'F';
+                }
+                ?>
+              <option value="<?= $flr ?>" <?= $room['floor'] == $flr ? 'selected' : '' ?>><?= $flr ?></option>
+              <?php endfor; ?>
+            </select>
+          </td>
+
+          <td>
+            <input type="checkbox" class="master_edit" name="status" value="1" <?= $room['status'] ? 'checked' : '' ?> disabled>
+          </td>
+          <td>
+            <input type="checkbox" class="master_edit" name="cal" value="1" <?= $room['cal'] ? 'checked' : '' ?> disabled>
+          </td>
+          <td>
+            <input type="number" class="master_edit" name="order" value="<?= htmlspecialchars($room['order'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <input type="hidden" name="value[<?=$i ?>][r_id]" value="<?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
         <?php endforeach; ?>
       </tbody>

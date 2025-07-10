@@ -54,6 +54,7 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
+  <script src="js/edit_common.js"></script>
   <script src="js/edit_purposes.js"></script>
 </head>
 <body>
@@ -70,6 +71,7 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>使用目的設定</h1>
+    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
@@ -85,21 +87,20 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($results as $purp): ?>
         <tr id="purp_<?=$i ?>">
           <td>
-            <select name="value[<?=$i ?>][banquet_purpose_id]" class="master_edit purpose_id" >
-              <option value="">↓↓↓</option>
+            <select name="value[<?=$i ?>][banquet_purpose_id]" class="master_edit purpose_id" disabled>
               <?php for($s=0; $s<100; $s++): ?>
               <option value="<?=$s ?>" <?= $s==$purp['banquet_purpose_id']  ? 'selected' : '' ?>><?=$s ?></option>
               <?php endfor; ?>
             </select>
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_purpose_name]" value="<?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_name"  >
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_name]" value="<?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_name" disabled>
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_purpose_short]" value="<?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_short"  >
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_short]" value="<?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_short"  disabled>
          </td>
           <td>
-            <select name="value[<?=$i ?>][banquet_category_id]" class="master_edit purpose_cat" >
+            <select name="value[<?=$i ?>][banquet_category_id]" class="master_edit purpose_cat" disabled>
               <option value="">↓選択</option>
               <?php foreach ($categories as $category): ?>
               <option value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['banquet_category_id'] == $category['banquet_category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?></option>
@@ -107,15 +108,15 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </select>
           </td>
           <td>
-            <select name="value[<?=$i ?>][summary_category]" class="master_edit summary_cat" >
+            <select name="value[<?=$i ?>][summary_category]" class="master_edit summary_cat" disabled>
               <option value="">↓選択</option>
               <?php foreach ($summaries as $summary): ?>
               <option value="<?= htmlspecialchars($summary['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['summary_category'] == $summary['banquet_category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($summary['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?></option>
               <?php endforeach; ?>
             </select>
           </td>
+          <input type="hidden" name="value[<?=$i ?>][pur_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
-        <input type="hidden" name="value[<?=$i ?>][pur_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>">
         <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
