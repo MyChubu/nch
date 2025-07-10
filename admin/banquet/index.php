@@ -126,7 +126,7 @@ $category_total_counts = $chartdata['category_total_counts'];
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script src="js/admin_banquet.js"></script>
+  
   <!--<script src="js/getKaEnData.js"></script>-->
   <!--<script src="js/getKaEnNextData.js"></script>-->
   <script src="js/getIndexKaEnData.js"></script>

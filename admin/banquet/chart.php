@@ -86,8 +86,6 @@ $category_total_counts = $chartdata['category_total_counts'];
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
-  <!--<script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>-->
-  <!--<script src="js/admin_banquet.js"></script>-->
   <style>
     .pie_charts {
       display: flex;

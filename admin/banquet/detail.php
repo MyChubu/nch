@@ -49,7 +49,7 @@ $tax_amount = $array['tax_amount'];
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <script src="js/admin_banquet.js"></script>
+  
 </head>
 <body>
 <?php include("header.php"); ?>

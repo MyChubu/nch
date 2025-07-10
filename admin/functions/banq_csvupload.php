@@ -60,8 +60,7 @@ if (is_uploaded_file($temp_file)) {
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="../banquet/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <!--<script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>-->
-  <!--<script src="js/admin_banquet.js"></script>-->
+
 </head>
 <body>
 <?php include("../banquet/header.php"); ?>

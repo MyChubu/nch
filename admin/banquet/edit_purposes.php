@@ -54,7 +54,7 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <script src="js/admin_banquet.js"></script>
+  <script src="js/edit_purposes.js"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -73,9 +73,9 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <table class="form_table">
       <thead>
         <tr>
-          <th>目的ID</th>
+          <th class="cell_w40">ID</th>
           <th>名称</th>
-          <th>略称</th>
+          <th class="cell_w80">略称</th>
           <th>デジサイ分類</th>
           <th>二分類</th>
         </tr>
@@ -83,38 +83,39 @@ $summaries = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <tbody>
         <?php $i=0; ?>
         <?php foreach ($results as $purp): ?>
-        <tr>
+        <tr id="purp_<?=$i ?>">
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_purpose_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <select name="value[<?=$i ?>][banquet_purpose_id]" class="master_edit purpose_id" >
+              <option value="">↓↓↓</option>
+              <?php for($s=0; $s<100; $s++): ?>
+              <option value="<?=$s ?>" <?= $s==$purp['banquet_purpose_id']  ? 'selected' : '' ?>><?=$s ?></option>
+              <?php endfor; ?>
+            </select>
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_purpose_name]" value="<?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_name]" value="<?= htmlspecialchars($purp['banquet_purpose_name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_name"  >
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_purpose_short]" value="<?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <input type="text" name="value[<?=$i ?>][banquet_purpose_short]" value="<?= htmlspecialchars($purp['banquet_purpose_short'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit purpose_short"  >
          </td>
           <td>
-            <select name="value[<?=$i ?>$i][banquet_category_id]" disabled>
-              <option value="">選択してください</option>
+            <select name="value[<?=$i ?>][banquet_category_id]" class="master_edit purpose_cat" >
+              <option value="">↓選択</option>
               <?php foreach ($categories as $category): ?>
-              <option value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['banquet_category_id'] == $category['banquet_category_id'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?>
-              </option>
+              <option value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['banquet_category_id'] == $category['banquet_category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?></option>
               <?php endforeach; ?>
             </select>
           </td>
           <td>
-            <select name="value[<?=$i ?>][summary_category]" disabled>
-              <option value="">選択してください</option>
+            <select name="value[<?=$i ?>][summary_category]" class="master_edit summary_cat" >
+              <option value="">↓選択</option>
               <?php foreach ($summaries as $summary): ?>
-              <option value="<?= htmlspecialchars($summary['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['summary_category'] == $summary['banquet_category_id'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($summary['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?>
-              </option>
+              <option value="<?= htmlspecialchars($summary['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $purp['summary_category'] == $summary['banquet_category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($summary['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?></option>
               <?php endforeach; ?>
             </select>
           </td>
         </tr>
-        <input type="hidden" name="value[<?=$i ?>][orginal_purpose_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="value[<?=$i ?>][pur_id]" value="<?= htmlspecialchars($purp['banquet_purpose_id'], ENT_QUOTES, 'UTF-8') ?>">
         <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>

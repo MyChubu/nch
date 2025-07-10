@@ -42,6 +42,21 @@ input[type="datetime-local"]{
   box-sizing: border-box;
   background-color: #FFF;
 }
+
+input[type="text"].master_edit,
+input[type="number"].master_edit,
+input[type="email"].master_edit,
+input[type="password"].master_edit,
+select.master_edit,
+textarea.master_edit,
+input[type="date"].master_edit,
+input[type="time"].master_edit,
+input[type='month'].master_edit,
+input[type="datetime-local"].master_edit{
+  padding: 3px;
+}
+
+
 select#level{
   width: 200px;
 }
