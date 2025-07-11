@@ -116,6 +116,59 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </tbody>
     </table>
   </div>
+  <div>
+    <h2>宴会場追加</h2>
+    <form id="add_room_form" action="edit_rooms.php" method="post">
+      <table class="form_table">
+        <tr>
+          <th class="cell_w80">Room ID</th>
+          <th>名称</th>
+          <th>英名</th>
+          <th class="cell_w60">階</th>
+          <th class="cell_w60">使用</th>
+          <th class="cell_w60">カレンダー</th>  
+          <th class="cell_w80">表示順</th>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" name="new_room_id" value="" class="master_add" placeholder="000" required>
+          </td>
+          <td>
+            <input type="text" name="new_name" value="" class="master_add" placeholder="うめ" required>
+          </td>
+          <td>
+            <input type="text" name="new_name_en" value="" class="master_add" placeholder="Ume">
+          </td>
+          <td>
+            <select name="new_floor" class="master_add">
+              <?php for ($f = 0; $f <= 8; $f++):
+                if($f==0){
+                  $flr = 'B1';
+                }else{
+                  $flr = $f. 'F';
+                }
+                ?>
+              <option value="<?= $flr ?>"><?= $flr ?></option>
+              <?php endfor; ?>
+            </select>
+          </td>
+          <td>
+            <input type="checkbox" class="master_add" name="new_status" value="1" checked>
+          </td>
+          <td>
+            <input type="checkbox" class="master_add" name="new_cal" value="1" checked>
+          </td>
+          <td>
+            <input type="number" class="master_add" name="new_order" value="40" min="1" max="100" required>
+          </td>
+        </tr>
+      </table>
+      <div class="form_button">
+        <button type="submit" class="btn btn-primary">追加</button> 
+        <button type="reset" class="btn btn-secondary">リセット</button>
+      </div>
+    </form>
+  </div>
 
 
 </div>
