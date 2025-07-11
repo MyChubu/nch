@@ -59,6 +59,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>パッケージ設定</h1>
+    <div>NEHOPSのマスターデータに合わせてください。</div>
     <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
@@ -74,14 +75,22 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php $i = 0; ?>
         <?php foreach ($results as $item): ?>
         <tr>
-          <td><?= htmlspecialchars($item['package_category'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['package_id'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['package_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($item['package_name_short'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <input type="checkbox" name="value[<?=$i ?>][enable]" value="1" <?= $item['enable'] ? 'checked' : '' ?> disabled>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][package_category]" value="<?= htmlspecialchars($item['package_category'], ENT_QUOTES, 'UTF-8') ?>" <?= $item['enable'] ? '' : 'disabled' ?>>
           </td>
-          
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][package_id]" value="<?= htmlspecialchars($item['package_id'], ENT_QUOTES, 'UTF-8') ?>" <?= $item['enable'] ? '' : 'disabled' ?>>
+          </td>  
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][package_name]" value="<?= htmlspecialchars($item['package_name'], ENT_QUOTES, 'UTF-8') ?>" <?= $item['enable'] ? '' : 'disabled' ?>>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?=$i ?>][package_name_short]" value="<?= htmlspecialchars($item['package_name_short'], ENT_QUOTES, 'UTF-8') ?>" <?= $item['enable'] ? '' : 'disabled' ?>>
+          </td>  
+          <td>
+            <input type="checkbox" class="master_edit" name="value[<?=$i ?>][enable]" value="1" <?= $item['enable'] ? 'checked' : '' ?> disabled>
+          </td>
+          <input type="hidden" name="value[<?=$i ?>][id]" value="<?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
         <?php $i++; ?>
         <?php endforeach; ?>

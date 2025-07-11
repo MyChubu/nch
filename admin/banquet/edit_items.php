@@ -59,6 +59,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <div>
     <h1>アイテム設定</h1>
+    <div>NEHOPSのマスターデータに合わせてください。</div>
     <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
     <table class="form_table">
       <thead>
@@ -105,7 +106,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </td>
           <input type="hidden" name="value[<?=$i ?>][id]" value="<?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
-        <?= $i++; ?>
+        <?php $i++; ?>
         <?php endforeach; ?>
       </tbody>
     </table>

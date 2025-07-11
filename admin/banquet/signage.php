@@ -70,8 +70,10 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
       </div>
     </div>
     <div id="controller_right">
-      <div id="disp_signage">表示切替</div>
-      <div id="preview"><a href="../../banquet/preview.php?event_date=<?= $date ?>" target="_blank">プレビュー</a></div>
+      <div class="signage_control">
+        <div id="disp_signage">表示切替</div>
+        <div id="preview"><a href="../../banquet/preview.php?event_date=<?= $date ?>" target="_blank">プレビュー</a></div>
+      </div>
     </div>
     
   </div>

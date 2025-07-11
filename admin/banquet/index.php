@@ -132,7 +132,7 @@ $category_total_counts = $chartdata['category_total_counts'];
   <script src="js/getIndexKaEnData.js"></script>
 </head>
 <body>
-<?php include("header2.php"); ?>
+<?php include("header.php"); ?>
 <main>
   <div class="wrapper">
     <div id="controller">

@@ -49,3 +49,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const table = document.querySelector('.form_table');
+
+  // すべての select.purpose_id に change イベントをセット
+  const updateSelectOptions = () => {
+    const allSelects = table.querySelectorAll('select.purpose_id');
+
+    // 現在選ばれている value を収集
+    const selectedValues = Array.from(allSelects)
+      .map(select => select.value)
+      .filter(val => val !== "");
+
+    // 各 select の option を更新
+    allSelects.forEach(select => {
+      const currentValue = select.value;
+
+      Array.from(select.options).forEach(option => {
+        const val = option.value;
+
+        // 「↓↓↓」など空文字は無効にしない
+        if (val === "") {
+          option.disabled = false;
+          return;
+        }
+
+        // 他の select ですでに選ばれている番号なら disabled
+        if (val !== currentValue && selectedValues.includes(val)) {
+          option.disabled = true;
+        } else {
+          option.disabled = false;
+        }
+      });
+    });
+  };
+
+  // 初期状態で一度実行
+  updateSelectOptions();
+
+  // 各 select にイベントリスナー追加
+  table.addEventListener('change', (event) => {
+    if (event.target.matches('select.purpose_id')) {
+      updateSelectOptions();
+    }
+  });
+});

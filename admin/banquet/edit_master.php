@@ -53,6 +53,7 @@ require_once('functions/admin_banquet.php');
   </div>
   <div>
     <h1>マスター編集</h1>
+    <div>NEHOPSのマスターデータに合わせてください。</div>
     <div class="master_list_wrapper">
       
       <div class="master_list_item"><a href="edit_agents.php"><i class="fa-solid fa-web-awesome"></i>&nbsp;エージェント</a></div>
