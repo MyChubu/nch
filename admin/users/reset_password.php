@@ -58,7 +58,7 @@ $stmt->execute();
 mb_language("Japanese");
 mb_internal_encoding("UTF-8");
 $subject = 'パスワードリセットのお知らせ';
-$message = "ユーザー名: $name\nメールアドレス: $mail\n新しいパスワード: $newPw\n\nこのパスワードは次回ログイン時に変更が必要です。\n\nログインURL: https://nch.netmedia.works/admin/login.php\n\nこのメールは自動送信されています。返信はできませんのでご了承ください。";
+$message = "ユーザー名: $name\nメールアドレス: $mail\n新しいパスワード: $newPw\n\nこのパスワードは次回ログイン時に変更が必要です。\n\nログインURL: ". SITE_URL ."/login.php\n\nこのメールは自動送信されています。返信はできませんのでご了承ください。";
 $headers = "From:noreply@nagoyacrown.co.jp\r\n";
 mb_send_mail($mail, $subject, $message, $headers);
 if(!empty($stmt->errorInfo()[2])) {

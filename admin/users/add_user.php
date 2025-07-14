@@ -84,7 +84,7 @@ if (empty($value['name']) || empty($value['mail']) || empty($value['pic_id'])) {
       $body .= "ユーザー名: {$value['name']}\n";
       $body .= "メールアドレス: {$value['mail']}\n";
       $body .= "パスワード: {$newPw}\n\n";
-      $body .= "ログインURL: " . SITE_URL . "/admin/login.php\n";
+      $body .= "ログインURL: " . SITE_URL . "/login.php\n";
       $body .= "ログイン後、パスワードの変更をお勧めします。\n";
       $body .= "このメールは自動送信されています。";
       $headers = "From:noreply@nagoyacrown.co.jp\r\n";
