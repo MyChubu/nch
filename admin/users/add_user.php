@@ -86,8 +86,9 @@ if (empty($value['name']) || empty($value['mail']) || empty($value['pic_id'])) {
     $body .= "ログインURL: " . SITE_URL . "/admin/login.php\n";
     $body .= "ログイン後、パスワードの変更をお勧めします。\n";
     $body .= "このメールは自動送信されています。";
+    $headers = "From:noreply@nagoyacrown.co.jp\r\n";
 
-    if (mb_send_mail($value['mail'], $subject, $body)) {
+    if (mb_send_mail($value['mail'], $subject, $body, $headers)) {
       header('Location: edit.php?id=' . $lastInsertId . '&success=1');
       exit;
     } else {
