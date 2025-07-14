@@ -78,7 +78,7 @@ $status = $account['status'];
           <td>
             <label for="status1">有効</label>
             <input type="hidden" name="status" value="0">
-            <input type="checkbox" id="status1" name="status" value="1" <?= $status==1 ? 'checked' : '' ?>>  
+            <input type="checkbox" id="status1" name="status" value="1" <?= $status==1 ? 'checked' : '' ?> <?= $user_id == $id ? 'disabled' : '' ?>>  
           </td>
         </tr>
         <tr>
