@@ -184,7 +184,7 @@ if($count > 0){
               <tr>
                 <td><?= htmlspecialchars($reservation['reservation_date']) ?> (<?= htmlspecialchars($dayName) ?>)</td>
                 <td><?= htmlspecialchars($days) ?></td>
-                <td><?= htmlspecialchars($reservation['reservation_id']) ?></td>
+                <td><a href="connection_list.php?resid=<?=htmlspecialchars($reservation['reservation_id']) ?>"><?= htmlspecialchars($reservation['reservation_id']) ?></a></td>
                 <td><?= htmlspecialchars(cleanLanternName($reservation['reservation_name'],20)) ?></td>
                 <td>
                   <?= $reservation['agent_id']>0 ? $reservation['agent_short']:"直販" ?>
