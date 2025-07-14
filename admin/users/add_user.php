@@ -76,27 +76,25 @@ if (empty($value['name']) || empty($value['mail']) || empty($value['pic_id'])) {
     // 自動採番されたIDを取得
     $lastInsertId = $dbh->lastInsertId();
     // メール送信処理
-    mb_language("Japanese");
-    mb_internal_encoding("UTF-8");
-    $subject = '新規ユーザー登録完了のお知らせ';
-    $body = "以下の内容で新規ユーザー登録が完了しました。\n\n";
-    $body .= "ユーザー名: {$value['name']}\n";
-    $body .= "メールアドレス: {$value['mail']}\n";
-    $body .= "パスワード: {$newPw}\n\n";
-    $body .= "ログインURL: " . SITE_URL . "/admin/login.php\n";
-    $body .= "ログイン後、パスワードの変更をお勧めします。\n";
-    $body .= "このメールは自動送信されています。";
-    $headers = "From:noreply@nagoyacrown.co.jp\r\n";
-
-    if (mb_send_mail($value['mail'], $subject, $body, $headers)) {
-      header('Location: edit.php?id=' . $lastInsertId . '&success=1');
-      exit;
-    } else {
-      header('Location: add.php?error=5');
-      exit;
+    if($value['status'] == 1) {
+      mb_language("Japanese");
+      mb_internal_encoding("UTF-8");
+      $subject = '新規ユーザー登録完了のお知らせ';
+      $body = "以下の内容で新規ユーザー登録が完了しました。\n\n";
+      $body .= "ユーザー名: {$value['name']}\n";
+      $body .= "メールアドレス: {$value['mail']}\n";
+      $body .= "パスワード: {$newPw}\n\n";
+      $body .= "ログインURL: " . SITE_URL . "/admin/login.php\n";
+      $body .= "ログイン後、パスワードの変更をお勧めします。\n";
+      $body .= "このメールは自動送信されています。";
+      $headers = "From:noreply@nagoyacrown.co.jp\r\n";
+      mb_send_mail($value['mail'], $subject, $body, $headers);
     }
+
+    header('Location: edit.php?id=' . $lastInsertId . '&success=1');
+    exit;
   } else {
-    header('Location: add.php?error=2');
+    header('Location: add.php?error=5');
     exit;
   }
 }
