@@ -62,7 +62,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div>
     <h1>パッケージ設定</h1>
     <div>NEHOPSのマスターデータに合わせてください。</div>
-    <div><label><input type="checkbox" id="toggleEdit" name="editable"> 編集する</label></div>
+    <div><label><input type="checkbox" id="toggleEdit"  name="editable" <?=$admin!=1?'disabled':''?>> 編集する</label></div>
     <table class="form_table">
       <thead>
         <tr>
