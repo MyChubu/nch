@@ -21,6 +21,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 
 require_once('functions/admin_banquet.php');
 $week = array('日', '月', '火', '水', '木', '金', '土');

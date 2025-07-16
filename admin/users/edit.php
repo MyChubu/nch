@@ -21,6 +21,11 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
+  header('Location: ../i'); // 管理者権限がない場合
+  exit;
+}
 
 $id = $_REQUEST['id'] ?? '';
 if (empty($id)) {
@@ -79,6 +84,14 @@ $status = $account['status'];
             <label for="status1">有効</label>
             <input type="hidden" name="status" value="0">
             <input type="checkbox" id="status1" name="status" value="1" <?= $status==1 ? 'checked' : '' ?> <?= $user_id == $id ? 'disabled' : '' ?>>  
+          </td>
+        </tr>
+        <tr>
+          <th>管理者</th>
+          <td>
+            <label for="admin1">はい</label>
+            <input type="hidden" name="admin" value="0">
+            <input type="checkbox" id="admin1" name="admin" value="1" <?= $account['admin'] == 1 ? 'checked' : '' ?> <?= $user_id == $id ? 'disabled' : '' ?>>
           </td>
         </tr>
         <tr>

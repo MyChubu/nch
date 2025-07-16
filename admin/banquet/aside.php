@@ -46,5 +46,8 @@
   <h3>メンテナンス</h3>
   <ul>
     <li><i class="fa-solid fa-gear"></i><a href="../banquet/edit_master.php">マスター編集</a></li>
+    <?php if($admin == 1): ?>
+    <li><i class="fa-solid fa-users"></i><a href="../users/">ユーザー管理</a></li>
+    <?php endif; ?>
   </ul>
 </aside>

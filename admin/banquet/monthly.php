@@ -27,6 +27,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 require_once('functions/admin_banquet.php');
 
 $users= array();

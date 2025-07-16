@@ -21,6 +21,11 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
+  header('Location: ../'); // 管理者権限がない場合
+  exit;
+}
 
 $koumoku = array('name', 'mail', 'pic_id', 'status');
 foreach ($koumoku as $key) { 

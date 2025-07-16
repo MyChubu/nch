@@ -22,6 +22,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 
 $new_file_name = "charge_".date("YmdHis").".csv";
 if(defined('DATA_DIR')==false){

@@ -21,6 +21,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 $error = '';
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

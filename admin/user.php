@@ -21,6 +21,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
 $name= $result['name'];

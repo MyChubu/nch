@@ -21,6 +21,7 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
 require_once('functions/admin_banquet.php');
 
 $sql = "SELECT * FROM banquet_rooms ORDER BY `order` ASC, banquet_room_id ASC";

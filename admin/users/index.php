@@ -21,6 +21,11 @@ if (empty($user_id) || empty($user_name)) {
   }
 }
 $user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
+  header('Location: ../'); // 管理者権限がない場合
+  exit;
+}
 
 $sql = "SELECT * FROM users order by status DESC, user_id ASC";
 $stmt = $dbh->prepare($sql);
@@ -45,6 +50,7 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <th>ユーザー名</th>
       <th>メールアドレス</th>
       <th>NEHOPS ID</th>
+      <th>管理者</th>
       <th>ステータス</th>
       <th>操作</th>
     </tr>
@@ -56,6 +62,7 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <td><?php echo htmlspecialchars($account['name'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($account['mail'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($account['pic_id'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td><?php echo $account['admin'] ? 'はい' : 'いいえ'; ?></td>
         <td><?php echo $account['status'] ? '有効' : '無効'; ?></td>
         <td>
           <a href="edit.php?id=<?php echo $account['user_id']; ?>">詳細・編集</a>

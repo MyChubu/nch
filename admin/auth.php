@@ -23,6 +23,8 @@ if ($user && password_verify($pass, $user['password'])) {
     $_SESSION['id'] = $user['user_id'];
     $_SESSION['name'] = $user['name'];
     $_SESSION['mail'] = $user['mail'];
+    $_SESSION['admin'] = $user['admin'];
+    $_SESSION['pic_id'] = $user['pic_id'];
 
     header('Location: ./banquet/');
 } else {
