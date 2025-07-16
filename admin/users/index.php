@@ -96,6 +96,13 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
       text-decoration: none;
       color: #000;
     }
+    .text_green {
+      color: green;
+      font-size:1.2em;
+    }
+    .text_gray {
+      color: lightgray;
+    }
   </style>
 </head>
 <body>
@@ -120,8 +127,8 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <td><?php echo htmlspecialchars($account['name'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($account['mail'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td class="text_center"><?php echo htmlspecialchars($account['pic_id'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="text_center"><?php echo $account['admin'] ? '<i class="fa-solid fa-square-check"></i>' : ''; ?></td>
-        <td class="text_center"><?php echo $account['status'] ? '<i class="fa-solid fa-square-check"></i>' : '<i class="fa-solid fa-square-xmark"></i>'; ?></td>
+        <td class="text_center"><?php echo $account['admin'] ? '<span class="text_green"><i class="fa-solid fa-square-check"></i></span>' : ''; ?></td>
+        <td class="text_center"><?php echo $account['status'] ? '<span class="text_green"><i class="fa-solid fa-square-check"></i></span>' : '<span class="text_gray"><i class="fa-solid fa-square-xmark"></i></span>'; ?></td>
         <td class="flex">
           <a href="edit.php?id=<?php echo $account['user_id']; ?>">詳細・編集</a>
         </td>
