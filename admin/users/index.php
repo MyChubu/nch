@@ -40,11 +40,68 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/jpeg" href="../../images/nch_mark.jpg">
   <title>ユーザーアカウント管理</title>
+  <link href="https://use.fontawesome.com/releases/v6.2.0/css/all.css" rel="stylesheet">
+  <style>
+    body { 
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4; 
+    }
+    h1 { color: #333; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+    
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+    td {
+      text-align: left;
+    }
+    td.text_center {
+      text-align: center;
+    }
+    td.flex{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    td a{
+      display: block;
+      padding: 4px 8px;
+      background-color: #dadada;
+      border-radius: 4px;
+      color: #333;
+      text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    td a:hover {
+      background-color: #c0c0c0;
+      text-decoration: none;
+      color: #000;
+    }
+  </style>
 </head>
 <body>
 <h1>ユーザーアカウント管理</h1>
 <div>
-<table border="1">
+<table class="">
   <thead>
     <tr>
       <th>ユーザーID</th>
@@ -59,13 +116,13 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <tbody>
     <?php foreach ($accounts as $account): ?>
       <tr>
-        <td><?php echo htmlspecialchars($account['user_id'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text_center"><?php echo htmlspecialchars($account['user_id'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($account['name'], ENT_QUOTES, 'UTF-8'); ?></td>
         <td><?php echo htmlspecialchars($account['mail'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($account['pic_id'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo $account['admin'] ? 'はい' : 'いいえ'; ?></td>
-        <td><?php echo $account['status'] ? '有効' : '無効'; ?></td>
-        <td>
+        <td class="text_center"><?php echo htmlspecialchars($account['pic_id'], ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text_center"><?php echo $account['admin'] ? '<i class="fa-solid fa-square-check"></i>' : ''; ?></td>
+        <td class="text_center"><?php echo $account['status'] ? '<i class="fa-solid fa-square-check"></i>' : '<i class="fa-solid fa-square-xmark"></i>'; ?></td>
+        <td class="flex">
           <a href="edit.php?id=<?php echo $account['user_id']; ?>">詳細・編集</a>
         </td>
       </tr>
