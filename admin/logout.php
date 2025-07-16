@@ -11,6 +11,7 @@ session_destroy();//セッションを破壊
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="5; URL=login.php">
   <title>ログアウト</title>
+    <link rel="icon" type="image/jpeg" href="./images/nch_mark.jpg">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,12 +33,19 @@ session_destroy();//セッションを破壊
     a:hover {
       text-decoration: underline;
     }
+    .logout_logo {
+      display: block;
+      margin: 20px auto;
+      width: 250px; /* Adjust as needed */
+      height: auto; /* Maintain aspect ratio */
+    }
   </style>
 </head>
 <body>
   <div>
     <p>ログアウトしました</p>
     <p><a href="login.php">ログインへ</a></p>
+    <img src="./images/nch_logo.png" alt="Nagoya Crown Hotel" class="logout_logo">
   </div>
 </body>
 </html>

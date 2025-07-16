@@ -94,6 +94,7 @@ if($p_count > 0){
   <meta http-equiv="refresh" content="300">
   <meta name="robots" content="noindex, nofollow">
   <title>お知らせ一覧</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>

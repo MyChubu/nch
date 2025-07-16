@@ -45,6 +45,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
   <title>デジサイ表示設定（<?=$date ?>）</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/form.css">

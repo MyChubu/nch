@@ -73,6 +73,7 @@ if($count > 0){
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="60">
   <title>デジサイ用CSVアップロード</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link href="https://use.fontawesome.com/releases/v6.2.0/css/all.css" rel="stylesheet">

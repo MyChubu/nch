@@ -38,6 +38,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
   <title>宴会場設定</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/edit_master.css">

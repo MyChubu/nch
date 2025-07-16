@@ -40,6 +40,7 @@ $sys_id = $result['pic_id'];
     <meta http-equiv="refresh" content="3; url=./banquet/">
   <?php endif; ?>
   <title>ユーザー情報</title>
+    <link rel="icon" type="image/jpeg" href="./images/nch_mark.jpg">
    <style>
     body {
       font-family: Arial, sans-serif;

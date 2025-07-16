@@ -8,6 +8,7 @@ require_once('../common/conf.php');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ログイン</title>
+  <link rel="icon" type="image/jpeg" href="./images/nch_mark.jpg">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,6 +28,8 @@ require_once('../common/conf.php');
     }
     h1 {
       text-align: center;
+      margin: 0 auto;
+      padding: 0;
     }
     label {
       display: block;
@@ -59,11 +62,18 @@ require_once('../common/conf.php');
       text-align: center;
       margin-top: 10px;
     }
+    .login_logo {
+      display: block;
+      margin: 0 auto;
+      width: 100px; /* Adjust as needed */
+      height: auto; /* Maintain aspect ratio */
+    }
   </style>
 </head>
 <body>
   <div class="login-container">
     <form action="auth.php" method="post" id="loginForm" enqtype="application/x-www-form-urlencoded">
+      <img src="./images/nch_mark.jpg" alt="NCHマーク" class="login_logo">
       <h1>ログイン</h1>
       <label for="username">ユーザー名:</label>
       <input type="email" id="username" name="username" required autofocus autocomplete="username" placeholder="メールアドレス">

@@ -53,6 +53,7 @@ $defects = getDefectList($ym);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>あやしいデータリスト（<?=$this_month ?>以降）</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/form.css">

@@ -120,6 +120,7 @@ $category_total_counts = $chartdata['category_total_counts'];
   <meta http-equiv="refresh" content="300">
   <meta name="robots" content="noindex, nofollow">
   <title>会議・宴会サマリー</title>
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/index2.css">

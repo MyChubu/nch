@@ -49,6 +49,7 @@ $status = $account['status'];
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ユーザー編集（<?=$account['name'] ?>）</title>
+  <link rel="icon" type="image/jpeg" href="../../images/nch_mark.jpg">
 </head>
 <body>
   <div>

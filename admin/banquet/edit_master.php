@@ -30,6 +30,7 @@ require_once('functions/admin_banquet.php');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Pragma" content="no-cache">
+  <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <meta http-equiv="Cache-Control" content="no-cache">
   <title>マスター編集</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
