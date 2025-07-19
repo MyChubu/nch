@@ -7,7 +7,9 @@ if(defined('CSV_DATA_PATH') == false) {
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
-$sql = 'select * from csvs where status = 2 and csv_kind = 3 order by csv_id asc';
+$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 3 ORDER BY csv_id ASC LIMIT 1';
+// サーバ性能上、1回につき1件にした
+#$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 3 ORDER BY csv_id ASC ';
 $res = $dbh->query($sql);
 $count = $res->rowCount();
 
