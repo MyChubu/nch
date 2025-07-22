@@ -8,7 +8,9 @@ if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
 
-$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC';
+$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC LIMIT 1'; 
+// サーバ性能上、1回につき1件にした
+#$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC ';
 $res = $dbh->query($sql);
 $count = $res->rowCount();
 
