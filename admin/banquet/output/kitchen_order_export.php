@@ -208,7 +208,7 @@ if ($dcount > 0) {
         $sheet->setCellValue("B$rowIndex", $result['event_name']);
         $sheet->setCellValue("C$rowIndex", $result['pic']);
         $sheet->setCellValue("D$rowIndex", $result['room_name']);
-        $timeObj = DateTime::createFromFormat('H:i:s', $result['start']);
+        $timeObj = DateTime::createFromFormat('Y-m-d H:i:s', $result['start']);
         $sheet->setCellValue("E$rowIndex", $timeObj ? $timeObj->format('H:i') : '');
 
         $meal_name = '';
