@@ -50,4 +50,8 @@
     <li><i class="fa-solid fa-users"></i><a href="../users/">ユーザー管理</a></li>
     <?php endif; ?>
   </ul>
+  <h3>マニュアル</h3>
+  <ul>
+    <li><i class="fa-solid fa-book"></i><a href="../../wiki/doku.php?id=web%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0" target="_blank">オンラインマニュアル</a></li>
+  </ul>
 </aside>

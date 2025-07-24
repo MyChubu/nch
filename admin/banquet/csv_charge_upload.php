@@ -125,6 +125,7 @@ if($count > 0){
       <?php else: ?>
         <div>CSVファイルがありません。</div>
       <?php endif; ?>
+      <div><i class="fa-solid fa-book"></i><a href="../../wiki/doku.php?id=csv%E3%81%AE%E3%83%87%E3%83%BC%E3%82%BF%E5%85%A5%E5%8A%9B" target="_blank">オンラインマニュアル（CSVアップロード）</a></div>
     </div>
   </div>
   <?php include("aside.php"); ?>
