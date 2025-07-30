@@ -77,7 +77,7 @@ if(!empty($stmt->errorInfo()[2])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <mete http-equiv="refresh" content="3; url=edit.php?id=<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>">
+  <mete http-equiv="refresh" content="3; url=edit.php?id=<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>&success=3">
   <title>パスワードリセット</title>
 </head>
 <body>

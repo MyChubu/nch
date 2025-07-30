@@ -8,4 +8,7 @@
   define('DSN', 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset='.DB_CHARSET);
   define('SITE_URL', 'https://nch.netmedia.works/admin');
   define('PASSWORD_KEY', 'nagoyacrown');
+
+
+
 ?>

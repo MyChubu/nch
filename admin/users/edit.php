@@ -49,6 +49,14 @@ if ($error == 3) {
 } elseif ($error == 4) {
   $message = '<p class="text_error">NEHOPS IDが既に登録されています。</p>';
 }
+$success = isset($_GET['success']) ? $_GET['success'] : '';
+if ($success == 1) {
+  $message = '<p class="text_success">ユーザー情報を更新しました。</p>';
+} elseif ($success == 2) {
+  $message = '<p class="text_success">ユーザーを追加しました。</p>';
+} elseif ($success == 3) {
+  $message = '<p class="text_success">パスワードをリセットしました。新しいパスワードはメールで送信されました。</p>';
+}
   
 ?>
 <!DOCTYPE html>

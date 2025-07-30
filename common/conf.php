@@ -1,14 +1,11 @@
 <?php
-# DB開発環境
-  define('DB_HOST', 'mysql323.phy.lolipop.lan');
-  define('DB_USER', 'LA06926062');
+# DB
+  define('DB_HOST', 'mysql3107.db.sakura.ne.jp');
+  define('DB_USER', 'salmonbadger2_nchsignage');
   define('DB_PASS', 'nagoyacrown6633');
-  define('DB_NAME', 'LA06926062-nch');
+  define('DB_NAME', 'salmonbadger2_nchsignage');
   define('DB_CHARSET', 'utf8');
   define('DSN', 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset='.DB_CHARSET);
-  define('SITE_URL', 'https://nch.netmedia.works/admin');
-  define('PASSWORD_KEY', 'nagoyacrown');
-
-
+  define('SITE_URL', 'https://nch.nagoyacrown.co.jp/admin');
 
 ?>

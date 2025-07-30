@@ -1,0 +1,5 @@
+     AddHandler application/x-httpd-php .php
+     Action php-cgi /php.cgi
+     <FilesMatch \.php$>
+         SetHandler php-cgi
+     </FilesMatch>

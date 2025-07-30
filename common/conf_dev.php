@@ -1,12 +1,11 @@
 <?php
 # DB開発環境(conf_dev.php)
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'nagoyacrown');
-define('DB_CHARSET', 'utf8');
-define('DSN', 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset='.DB_CHARSET);
-define('SITE_URL', 'http://localhost/nagouyacrown/admin');
-define('PASSWORD_KEY', 'nagoyacrown');
-define('DATA_DIR', $_SERVER['DOCUMENT_ROOT'].'/nagoyacrown/data/');
+  define('DB_HOST', 'mysql323.phy.lolipop.lan');
+  define('DB_USER', 'LA06926062');
+  define('DB_PASS', 'nagoyacrown6633');
+  define('DB_NAME', 'LA06926062-nch');
+  define('DB_CHARSET', 'utf8');
+  define('DSN', 'mysql:dbname='.DB_NAME.';host='.DB_HOST.';charset='.DB_CHARSET);
+  define('SITE_URL', 'https://nch.netmedia.works/admin');
+  define('PASSWORD_KEY', 'nagoyacrown');
 ?>
