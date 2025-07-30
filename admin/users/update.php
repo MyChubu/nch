@@ -23,7 +23,7 @@ if (empty($user_id) || empty($user_name)) {
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
 if (!isset($_SESSION['admin']) || $_SESSION['admin'] != 1) {
-  header('Location: ../i'); // 管理者権限がない場合
+  header('Location: ../'); // 管理者権限がない場合
   exit;
 }
 
@@ -50,6 +50,19 @@ foreach ($koumoku as $key) {
     }
     if($key == 'admin') {
       $value[$key] = $_POST[$key] ? 1 : 0; // チェックボックスの値を0または1に変換
+    }
+    if($key == 'mail') {
+      $value[$key] = filter_var($value[$key], FILTER_SANITIZE_EMAIL); // メールアドレスのサニタイズ
+      //メールの重複チェック
+      $sql = "SELECT * FROM users WHERE mail = :mail AND user_id != :user_id AND status = 1";
+      $stmt = $dbh->prepare($sql);
+      $stmt->bindParam(':mail', $value[$key], PDO::PARAM_STR);
+      $stmt->bindParam(':user_id', $id, PDO::PARAM_INT);
+      $stmt->execute();
+      if ($stmt->rowCount() > 0) {
+        header('Location: edit.php?id=' . $id . '&error=3');
+        exit;
+      }
     }
   }
 }
