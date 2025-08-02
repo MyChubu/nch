@@ -389,6 +389,15 @@ aside.sidebar ul{
 aside.sidebar ul li i{
   margin-right: 8px;
 }
+aside.sidebar ul li a,
+aside.sidebar ul li a:visited{
+  color: #f6f6f6;
+  text-decoration: none;
+}
+aside.sidebar ul li a:hover{
+  color:#fff;
+  font-weight:700;
+}
 
 .footer_logo{
   width: 200px;
