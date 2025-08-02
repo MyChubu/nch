@@ -1,5 +1,0 @@
-AuthUserFile /home/users/0/chu.jp-mychubu/web/nch.netmedia.works/admin/.htpasswd
-AuthGroupFile /dev/null
-AuthName "Staff Only"
-AuthType Basic
-require valid-user

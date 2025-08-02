@@ -83,5 +83,6 @@ if(!empty($stmt->errorInfo()[2])) {
 <body>
   <p><?= htmlspecialchars($mes, ENT_QUOTES, 'UTF-8'); ?></p>
   <p>3秒後にユーザー編集画面に戻ります。</p>
+  <p>戻らない場合は<a href="edit.php?id=<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8') ?>&success=3">こちら</a>をクリックしてください。</p>
 </body>
 </html>

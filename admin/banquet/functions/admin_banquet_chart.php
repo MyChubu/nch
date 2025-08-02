@@ -408,8 +408,8 @@ function getChartData($nendo){
         }
         if($sale['tuki'] == $tuki && $sale['sales_category_id'] == $c){
           $category_amounts[$cat] += $sale['net'];
-          $category_sales[$cat][$i] = $sale['net'];
-          $category_counts[$cat][$i] = $sale['count'];
+          $category_sales[$cat][$i] += $sale['net'];
+          $category_counts[$cat][$i] += $sale['count'];
           $category_total_sales[$cat] += $category_sales[$cat][$i];
           $category_total_counts[$cat] += $category_counts[$cat][$i];
         }
