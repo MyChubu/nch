@@ -3,7 +3,7 @@ window.addEventListener('load', function() {
 });
 
 async function getKaEnData() {
-  const url = 'https://nch.netmedia.works/api/banquet/ka-en/'; // APIのURLを設定
+  const url = 'https://nch.nagoyacrown.co.jp/api/banquet/ka-en/'; // APIのURLを設定
   let htmlEn = '';
   let htmlKa = '';
   let htmlOther = '';

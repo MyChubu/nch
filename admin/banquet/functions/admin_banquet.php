@@ -82,7 +82,7 @@ function getKaEnList($date){
   $week = array('日', '月', '火', '水', '木', '金', '土'); // 曜日配列
 
   // 指定日の宴会スケジュールを取得
-  $sql = 'select * from banquet_schedules where date = ? order by start ASC, branch ASC';
+  $sql = 'select * from banquet_schedules where date = ? order by start ASC, reservation_id ASC, branch ASC';
   $stmt = $dbh->prepare($sql);
   $stmt->execute([$date]);
   $count = $stmt->rowCount();
