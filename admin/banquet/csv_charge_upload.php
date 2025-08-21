@@ -22,7 +22,7 @@ if (empty($user_id) || empty($user_name)) {
 }
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
-$sql="select * from csvs where csv_kind = 3 order by csv_id desc limit 10";
+$sql="select * from csvs where csv_kind = 3 order by csv_id desc limit 50";
 $res = $dbh->query($sql);
 $count = $res->rowCount();
 $csvs=array();
