@@ -140,7 +140,7 @@ $dbh = null;
     <form  enctype="multipart/form-data" id="schedate_change">
       <select name="nendo" id="nendo">
         <option value=""></option>
-        <?php for($i = 2024; $i<= date('Y') + 1; $i++): ?>
+        <?php for($i = 2024; $i<= date('Y') + 3; $i++): ?>
           <option value="<?=$i ?>" <?=($nendo == $i)?"selected":"" ?>><?=$i ?></option>
         <?php endfor; ?>
       </select>年度
