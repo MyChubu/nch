@@ -30,11 +30,15 @@ $wd= $week[$w];
 
 $ym=$_REQUEST['ym'] ?? date('Y-m');
 $mon = $_REQUEST['mon'] ?? 3;
-$cxl = $_REQUEST['cxl'] ?? 0;
 
-if($cxl == 1){
-  $status_arr = "(1,2,5)";
-}else {
+
+$sts = $_REQUEST['sts'] ?? 'all';
+
+if($sts == 'final'){
+  $status_arr = "(1)";
+}elseif($sts == 'tentative') {
+  $status_arr = "(2)";
+}else{
   $status_arr = "(1,2)";
 }
 
@@ -134,9 +138,12 @@ if($count > 0){
           <option value="6" <?= $mon == 6 ? 'selected' : '' ?>>6ヶ月</option>
           <option value="12" <?= $mon == 12 ? 'selected' : '' ?>>1年</option>
         </select>
-        <label for="cxl">
-       <!-- <input type="checkbox" name="cxl" id="cxl" value="1" <?= $cxl == 1 ? 'checked' : '' ?>>
-        キャンセルを含む</label>-->
+        
+        <select name="sts" id="sts">
+          <option value="all" <?= $sts == 'all' ? 'selected' : '' ?>>すべて</option>
+          <option value="final" <?= $sts == 'final' ? 'selected' : '' ?>>決定のみ</option>
+          <option value="tentative" <?= $sts == 'tentative' ? 'selected' : '' ?>>仮予約のみ</option>
+        </select>
         <button type="submit">表示</button>
       </form>
     </div>
