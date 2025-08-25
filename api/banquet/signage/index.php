@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $date = date('Y-m-d');
 $now = date('Y-m-d H:i:s');
 $hour = date('H');
-if($hour >= 21){
+if($hour >= 22){
   $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
 }
 
