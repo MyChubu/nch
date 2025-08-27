@@ -76,7 +76,6 @@ $sql ="SELECT
     `reserver`,
     `pic`,
     `reservation_date`,
-    `due_date`,
     `sales_category_id`,
     MIN(`start`) as `start`, 
     MAX(`end`) as `end`, 
@@ -223,12 +222,7 @@ if($count > 0){
                 <td class="cell_w30"><?= htmlspecialchars($reservation['people']) ?></td>
                 <td class="cell_w100"><?= number_format($reservation['net']) ?></td>
                 <td class="cell_w100"><?= number_format($reservation['gross']) ?></td>
-                <td class="cell_w100">
-                  <?php if ($reservation['status'] != 1): ?>
-                    
-                    <?= htmlspecialchars($reservation['due_date']) ?>
-                  <?php endif; ?>
-                </td>
+                <td class="cell_w100"></td>
               </tr>
             <?php endforeach; ?>
           </tbody>

@@ -319,9 +319,11 @@ function getConnectionList($reservation_id){
       $dateObj = new DateTime($row['date']);
       $startObj = new DateTime($row['start']);
       $endObj = new DateTime($row['end']);
+      $dueObj = new DateTime($row['due_date']);
       $event_date = $dateObj->format('Y/m/d');
       $event_start = $startObj->format('H:i');
       $event_end = $endObj->format('H:i');
+      $due_date = $dueObj->format('Y/m/d');
 
       // 会場（部屋）情報の取得
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
@@ -341,6 +343,7 @@ function getConnectionList($reservation_id){
         'date' => $event_date . '(' . $week[(int)$dateObj->format('w')] . ')',
         'start' => $event_start,
         'end' => $event_end,
+        'due_date' => $due_date,
         'room_name' => $row['room_name'],
         'floor' => $floor,
         'status' => $row['status'],
@@ -470,6 +473,7 @@ function getDetail2($reservation_id) {
     MIN(date) AS start_date,
     MAX(date) AS end_date,
     MIN(status) AS status,
+    due_date,
     pic,
     pic_id,
     agent_id,
@@ -509,6 +513,7 @@ function getDetail2($reservation_id) {
       'people' => $data['people'], // 人数
       'event_date' => $event_date, // イベント日付
       'status' => $data['status'], // ステータスコード
+      'due_date' => $data['due_date'], // 仮予約期限
       'pic' => $data['pic'], // 担当者名（全角変換）
       'pic_id' => $data['pic_id'], // 担当者ID
       'agent_id' => $data['agent_id'], // エージェントID

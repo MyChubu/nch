@@ -1,10 +1,4 @@
 <?php
-// 予約自体は有効で。一部の会場（枝番）がキャンセルされたときの料金明細の処理方法の検討用
-// CSVの期間に更新されなかった予約はキャンセル扱いにする（対応済み）
-// キャンセル扱いになったものに紐づいている料金明細（banquet_chaerges）は削除する ← 若干問題あり
-// キャンセル扱いになったもので、同じ予約番号で他の枝番が有効なものについて、キャンセルに紐づいている料金明細の削除を行う
-// 全ての枝番がキャンセルになった場合は、処理を行わない
-
 require_once('../common/conf.php');
 
 if(defined('CSV_DATA_PATH') == false) {
@@ -14,7 +8,9 @@ if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
 
-$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC';
+$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC LIMIT 1'; 
+// サーバ性能上、1回につき1件にした
+#$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 2 ORDER BY csv_id ASC ';
 $res = $dbh->query($sql);
 $count = $res->rowCount();
 
@@ -302,9 +298,6 @@ if ($count > 0) {
         foreach($stmt as $value){
           $schedule_id = $value['banquet_schedule_id'];
           $status = $value['status'];
-          $reservation_id = $value['reservation_id'];
-          $branch = $value['branch'];
-          
           // **ステータスが5以外の場合、ステータスを5(キャンセル)に変更**
           // **デジサイ表示なしに変更**
           if($status !=5){

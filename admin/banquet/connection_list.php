@@ -93,7 +93,12 @@ $subtotal_amount = $array['subtotal_amount'];
           </tr>
           <tr>
             <th><i class="fa-solid fa-signal"></i></th>
-            <td><?=statusletter($detail['status']) ?></td>
+            <td>
+              <?=statusletter($detail['status']) ?>
+              <? if ($detail['status'] != 1): ?>
+                （<?=$detail['due_date'] ?> まで）
+              <? endif; ?>
+            </td>
           </tr>
           <tr>
             <th><i class="fa-solid fa-user"></i></th>
