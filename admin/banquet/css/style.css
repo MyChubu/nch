@@ -415,6 +415,10 @@ aside.sidebar ul li a:hover{
 .cell_w90{ width: 90px; }
 .cell_w100{ width: 100px; }
 
+.text_red{ color: red;}
+
+.text_bold{ font-weight: 700; }
+
 span.sales-cat{
   display: inline-block;
   width: 18px;

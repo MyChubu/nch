@@ -118,13 +118,13 @@ if($count > 0){
   </title>
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/form.css">
-  <link rel="stylesheet" href="css/reservations.css">
+  <link rel="stylesheet" href="css/style.css?<?=date('YmdHis') ?>">
+  <link rel="stylesheet" href="css/form.css?<?=date('YmdHis') ?>">
+  <link rel="stylesheet" href="css/reservations.css?<?=date('YmdHis') ?>">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
   
-  <link rel="stylesheet" href="css/table_sort.css">
+  <link rel="stylesheet" href="css/table_sort.css?<?=date('YmdHis') ?>">
   <script src="js/table_sort.js"></script>
 </head>
 <body>
@@ -225,8 +225,11 @@ if($count > 0){
                 <td class="cell_w100"><?= number_format($reservation['gross']) ?></td>
                 <td class="cell_w100">
                   <?php if ($reservation['status'] != 1): ?>
-                    
-                    <?= htmlspecialchars($reservation['due_date']) ?>
+                    <?php if($date > $reservation['due_date']): ?>
+                      <span class="text_red text_bold"><?= htmlspecialchars($reservation['due_date']) ?></span>
+                    <?php else: ?>
+                      <?= htmlspecialchars($reservation['due_date']) ?>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </td>
               </tr>
