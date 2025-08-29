@@ -101,9 +101,6 @@ if($count > 0){
   $reservations = [];
 }
 
-#var_dump($reservations);
-
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -149,6 +146,7 @@ if($count > 0){
         </select>
         <button type="submit">表示</button>
       </form>
+      <div id="download"><a href="output/reservations-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
     </div>
     <div>
       <h1>会議・宴会予約リスト</h1>
