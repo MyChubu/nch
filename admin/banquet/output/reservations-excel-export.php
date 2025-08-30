@@ -77,6 +77,12 @@ $stmt->execute();
 // rowCount() は SELECT では信用できないため、直接 fetchAll
 $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$sql='select * from `banquet_categories` order by `banquet_category_id`';
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+var_dump($categories);
+
 // ===== Excel 生成 =====
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
@@ -84,8 +90,8 @@ $sheet->setTitle('Reservations');
 
 // ヘッダ
 $header = [
-  '予約日','予約ID','予約名','ステータス','ステータス名','エージェント名',
-  'エージェント名2','予約者','PIC','売上カテゴリID',
+  '予約日','予約ID','予約名','ステータス','ステータス名','販売',
+  '代理店名','予約者','担当','カテゴリー',
   '人数','売上（税抜）','売上（税込）','期限日'
 ];
 $sheet->fromArray($header, null, 'A1');
@@ -98,29 +104,26 @@ $row = 2;
 if (!empty($reservations)) {
   foreach ($reservations as $r) {
     // 日付/日時は Excel シリアルに変換しておく
-    $kDate = $r['reservation_date'] ? ExcelDate::stringToExcel($r['reservation_date']) : null;
-    $lDate = $r['due_date']         ? ExcelDate::stringToExcel($r['due_date'])         : null;
-    $nDate = $r['start']            ? ExcelDate::stringToExcel($r['start'])            : null;
-    $oDate = $r['end']              ? ExcelDate::stringToExcel($r['end'])              : null;
+    $rsvDate = $r['reservation_date'] ? ExcelDate::stringToExcel($r['reservation_date']) : null;
+    $dueDate = $r['due_date']         ? ExcelDate::stringToExcel($r['due_date'])         : null;
 
-    if ($kDate !== null) { $sheet->setCellValue('A'.$row, $kDate); }
-    $sheet->getStyle("A{$row}")->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+    if ($rsvDate !== null) { $sheet->setCellValue('A'.$row, $rsvDate); }
+    $sheet->getStyle("A{$row}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
     $sheet->setCellValue('B'.$row, $r['reservation_id']);
     $sheet->setCellValue('C'.$row, $r['reservation_name']);
     $sheet->setCellValue('D'.$row, $r['status']);
     $sheet->setCellValue('E'.$row, $r['status_name']);
-    $sheet->setCellValue('F'.$row, $r['agent_short']);
+    if($r['agent_id'] > 0){
+      $sheet->setCellValue('F'.$row, $r['agent_short']);
+    }else{
+      $sheet->setCellValue('F'.$row, '直販');
+    }
+    
     $sheet->setCellValue('G'.$row, $r['agent_name2']);
     $sheet->setCellValue('H'.$row, $r['reserver']);
     $sheet->setCellValue('I'.$row, $r['pic']);
-
-    // 期限日（yyyy-mm-dd）
     
-    
-
-    $sheet->setCellValue('J'.$row, $r['sales_category_id']);
-
-
+    $sheet->setCellValue('J'.$row, $categories[$r['sales_category_id']-1]['banquet_category_short']);
     // 人数（整数）
     $sheet->setCellValue('K'.$row, is_null($r['people']) ? null : (int)$r['people']);
     $sheet->getStyle("K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -129,8 +132,8 @@ if (!empty($reservations)) {
     $sheet->setCellValue('L'.$row, is_null($r['gross']) ? null : (float)$r['gross']);
     $sheet->setCellValue('M'.$row, is_null($r['net'])   ? null : (float)$r['net']);
     $sheet->getStyle("L{$row}:M{$row}")->getNumberFormat()->setFormatCode('#,##0');
-    if ($lDate !== null) { $sheet->setCellValue('N'.$row, $lDate); }
-    $sheet->getStyle("N{$row}")->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+    if ($dueDate !== null) { $sheet->setCellValue('N'.$row, $dueDate); }
+    $sheet->getStyle("N{$row}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
     $row++;
   }
 } else {

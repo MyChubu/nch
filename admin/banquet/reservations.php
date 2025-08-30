@@ -129,7 +129,7 @@ if($count > 0){
 <main>
   <div class="wrapper">
     <div id="controller">
-      <form  method="get" enqtype="application/x-www-form-urlencoded">
+      <form method="get" enqtype="application/x-www-form-urlencoded" style="width: 100%;">
         <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required> から
         <select name="mon" id="mon">
           <option value="1" <?= $mon == 1 ? 'selected' : '' ?>>1ヶ月</option>
@@ -146,7 +146,9 @@ if($count > 0){
         </select>
         <button type="submit">表示</button>
       </form>
-      <div id="download"><a href="output/reservations-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
+      <div id="controller_date">
+        <div id="download"><a href="output/reservations-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
+      </div>
     </div>
     <div>
       <h1>会議・宴会予約リスト</h1>
