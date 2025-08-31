@@ -7,13 +7,16 @@
 require_once('../../../common/conf.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
+
 // PhpSpreadsheet 読み込み
 require_once ('../../../phpspreadsheet/vendor/autoload.php');
-use PhpOffice\PhpSpreadsheet\Spreadsheet; // ← 追加
+use PhpOffice\PhpSpreadsheet\Spreadsheet; 
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Color; 
+
 
 $ym  = $_REQUEST['ym']  ?? date('Y-m');
 $mon = (int)($_REQUEST['mon'] ?? 3);
@@ -81,23 +84,24 @@ $sql='select * from `banquet_categories` order by `banquet_category_id`';
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-var_dump($categories);
 
 // ===== Excel 生成 =====
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
-$sheet->setTitle('Reservations');
+$sheet->setTitle('受注リスト');
 
 // ヘッダ
 $header = [
-  '予約日','予約ID','予約名','ステータス','ステータス名','販売',
-  '代理店名','予約者','担当','カテゴリー',
-  '人数','売上（税抜）','売上（税込）','期限日'
+  '予約日','予約ID','予約名','ステータスID','ステータス名','販売',
+  '代理店名','担当','カテゴリー',
+  '人数','売上（税込）','売上（税サ抜）','期限日'
 ];
 $sheet->fromArray($header, null, 'A1');
+// ヘッダなどの直後でOK
+$todaySerial = ExcelDate::PHPToExcel(new DateTime('today', new DateTimeZone('Asia/Tokyo')));
 
 // 見栄え（ヘッダ太字・固定・オートフィットは最後に）
-$sheet->getStyle('A1:R1')->getFont()->setBold(true);
+$sheet->getStyle('A1:M1')->getFont()->setBold(true);
 $sheet->freezePane('A2');
 
 $row = 2;
@@ -118,22 +122,35 @@ if (!empty($reservations)) {
     }else{
       $sheet->setCellValue('F'.$row, '直販');
     }
-    
-    $sheet->setCellValue('G'.$row, $r['agent_name2']);
-    $sheet->setCellValue('H'.$row, $r['reserver']);
-    $sheet->setCellValue('I'.$row, $r['pic']);
-    
-    $sheet->setCellValue('J'.$row, $categories[$r['sales_category_id']-1]['banquet_category_short']);
+    if($r['agent_id'] > 0) {
+      if(!empty($r['agent_name2'])){
+        $sheet->setCellValueExplicit('G'.$row, $r['agent_name2'], DataType::TYPE_STRING);
+      }else{
+        $sheet->setCellValue('G'.$row, $r['reserver']);
+      }
+    }else{
+      $sheet->setCellValue('G'.$row, '');
+    }
+    $sheet->setCellValue('H'.$row, $r['pic']);
+
+    $sheet->setCellValue('I'.$row, $categories[$r['sales_category_id']-1]['banquet_category_short']);
     // 人数（整数）
-    $sheet->setCellValue('K'.$row, is_null($r['people']) ? null : (int)$r['people']);
-    $sheet->getStyle("K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+    $sheet->setCellValue('J'.$row, is_null($r['people']) ? null : (int)$r['people']);
+    $sheet->getStyle("J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
     // 金額（カンマ区切り。通貨記号は環境依存なので数値書式のみ）
-    $sheet->setCellValue('L'.$row, is_null($r['gross']) ? null : (float)$r['gross']);
-    $sheet->setCellValue('M'.$row, is_null($r['net'])   ? null : (float)$r['net']);
-    $sheet->getStyle("L{$row}:M{$row}")->getNumberFormat()->setFormatCode('#,##0');
-    if ($dueDate !== null) { $sheet->setCellValue('N'.$row, $dueDate); }
-    $sheet->getStyle("N{$row}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
+    $sheet->setCellValue('K'.$row, is_null($r['gross']) ? null : (float)$r['gross']);
+    $sheet->setCellValue('L'.$row, is_null($r['net'])   ? null : (float)$r['net']);
+    $sheet->getStyle("K{$row}:L{$row}")->getNumberFormat()->setFormatCode('#,##0');
+    if ($dueDate !== null) {
+      $sheet->setCellValue('M'.$row, $dueDate);
+      $sheet->getStyle("M{$row}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
+
+      // 期限切れなら赤文字
+      if ($dueDate < $todaySerial) {
+        $sheet->getStyle("M{$row}")->getFont()->getColor()->setARGB(Color::COLOR_RED);
+      }
+    }
     $row++;
   }
 } else {
@@ -142,8 +159,33 @@ if (!empty($reservations)) {
 }
 
 // 列幅オートフィット
-foreach (range('A', 'N') as $col) {
-  $sheet->getColumnDimension($col)->setAutoSize(true);
+#foreach (range('A', 'M') as $col) {
+#  $sheet->getColumnDimension($col)->setAutoSize(true);
+#}
+
+//（任意）日本語フォントにそろえると体感に近い幅になります
+$spreadsheet->getDefaultStyle()->getFont()->setName('Yu Gothic')->setSize(11);
+
+$endRow = $row - 1;
+$cols   = range('A','N');
+
+foreach ($cols as $col) {
+    // ヘッダ文字列から開始
+    $max = mb_strwidth((string)$sheet->getCell($col.'1')->getValue());
+
+    // データ部は“表示値”を使う（数値のカンマ区切りや日付書式を反映）
+    for ($r = 2; $r <= $endRow; $r++) {
+        $cell = $sheet->getCell("{$col}{$r}");
+        // getFormattedValue() は数式/書式適用後の表示文字列を返します
+        $text = (string)$cell->getFormattedValue();
+        $w = mb_strwidth($text);   // 全角は幅2でカウント
+        if ($w > $max) $max = $w;
+    }
+
+    // 余白(+2) と最小/最大幅のガード
+    $width = min(max($max + 2, 8), 60);
+    $sheet->getColumnDimension($col)->setAutoSize(false);
+    $sheet->getColumnDimension($col)->setWidth($width);
 }
 
 // ダウンロード出力（余分な出力を殺してからヘッダ送出）
