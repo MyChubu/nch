@@ -25,5 +25,5 @@ GROUP BY
   `pic`,
   `nehops_created`
 ORDER BY
-  `reservation_date`,
+  `nehops_created`,
   `reservation_id`

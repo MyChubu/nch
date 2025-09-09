@@ -1,4 +1,3 @@
-CREATE VIEW `pre_monthly_reservation_subtotal` AS
 select `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`status` AS `status`,
 `S`.`status_name` AS `status_name`,
@@ -7,12 +6,19 @@ select `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`reservation_date` AS `reservation_date`,
 `S`.`branch` AS `branch`,
 count(`S`.`reservation_id`) AS `count`,
+`S`.`additional_sales` AS `additional_sales`,
+date_format(`S`.`reservation_date`,
+'%Y-%m') AS `ym`,
 `S`.`date` AS `date`,
 `S`.`room_id` AS `room_id`,
 `R`.`name` AS `room_name`,
+`S`.`start` AS `start`,
+`S`.`end` AS `end`,
 `S`.`due_date` AS `due_date`,
-`S`.`nehops_created` AS `nehops_created`,
 `S`.`cancel_date` AS `cancel_date`,
+`S`.`nehops_d_created` AS `d_created`,
+`S`.`nehops_d_decided` AS `d_decided`,
+`S`.`nehops_d_tentative` AS `d_tentative`,
 max(`S`.`people`) AS `people`,
 sum((`C`.`unit_price` * `C`.`qty`)) AS `subtotal`,
 sum(`C`.`amount_gross`) AS `gross`,
@@ -74,12 +80,14 @@ sum(((`C`.`amount_gross` - `C`.`service_fee`) - `C`.`tax`)) AS `ex-ts`,
 )
 where (
   (`S`.`banquet_schedule_id` is not null) 
-  and (`S`.`status` not in (3,4)) 
+  and (`S`.`additional_sales` = 0)
+  and (`S`.`status` not in (3.4)) 
   and (`S`.`purpose_id` not in (0,88,94)) 
-  and `S`.`additional_sales` = 0
   and (`S`.`reservation_name` <> '朝食会場')
 ) 
 group by `S`.`date`,
 `P`.`banquet_category_id`,
-`S`.`room_id` order by `S`.`date`,
-`P`.`banquet_category_id`
+`S`.`room_id`
+order by `S`.`date`,
+`P`.`banquet_category_id`,
+`S`.`start`

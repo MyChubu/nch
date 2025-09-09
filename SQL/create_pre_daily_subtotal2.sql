@@ -15,6 +15,10 @@ date_format(`S`.`reservation_date`,
 `S`.`start` AS `start`,
 `S`.`end` AS `end`,
 `S`.`due_date` AS `due_date`,
+`S`.`cancel_date` AS `cancel_date`,
+`S`.`nehops_d_created` AS `d_created`,
+`S`.`nehops_d_decided` AS `d_decided`,
+`S`.`nehops_d_tentative` AS `d_tentative`,
 max(`S`.`people`) AS `people`,
 sum((`C`.`unit_price` * `C`.`qty`)) AS `subtotal`,
 sum(`C`.`amount_gross`) AS `gross`,
@@ -82,6 +86,7 @@ where (
 ) 
 group by `S`.`date`,
 `P`.`banquet_category_id`,
-`S`.`room_id` order by `S`.`date`,
+`S`.`room_id`
+order by `S`.`date`,
 `P`.`banquet_category_id`,
 `S`.`start`

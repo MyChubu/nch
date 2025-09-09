@@ -3,13 +3,15 @@ with `ranked_reservations` as (
   select 
     `pre_monthly_reservation_subtotal`.`sche_id` AS `sche_id`,
     `pre_monthly_reservation_subtotal`.`status` AS `status`,
-    `pre_monthly_reservation_subtotal`.`status` AS `status_name`,
+    `pre_monthly_reservation_subtotal`.`status_name` AS `status_name`,
     `pre_monthly_reservation_subtotal`.`reservation_id` AS `reservation_id`,
     `pre_monthly_reservation_subtotal`.`reservation_name` AS `reservation_name`,
     `pre_monthly_reservation_subtotal`.`reservation_date` AS `reservation_date`,
     `pre_monthly_reservation_subtotal`.`cancel_date` AS `cancel_date`,
     `pre_monthly_reservation_subtotal`.`due_date` AS `due_date`,
-    `pre_monthly_reservation_subtotal`.`nehops_created` AS `nehops_created`,
+    `pre_monthly_reservation_subtotal`.`d_created` AS `d_created`,
+    `pre_monthly_reservation_subtotal`.`d_decided` AS `d_decided`,
+    `pre_monthly_reservation_subtotal`.`d_tentative` AS `d_tentative`,
     `pre_monthly_reservation_subtotal`.`branch` AS `branch`,
     `pre_monthly_reservation_subtotal`.`count` AS `count`,
     `pre_monthly_reservation_subtotal`.`date` AS `date`,
@@ -56,7 +58,9 @@ select
   `t2`.`reservation_date` AS `reservation_date`,
   `t2`.`cancel_date` AS `cancel_date`,
   `t2`.`due_date` AS `due_date`,
-  `t2`.`nehops_created` AS `nehops_created`,
+  `t2`.`d_created` AS `d_created`,
+  `t2`.`d_decided` AS `d_decided`,
+  `t2`.`d_tentative` AS `d_tentative`,
   `t2`.`branch` AS `branch`,
   `t2`.`reservation_name` AS `reservation_name`,
   `t2`.`room_name` AS `room_name`,
@@ -86,7 +90,7 @@ select
   `t2`.`agent_name2` AS `agent_name2`,
   `t2`.`reserver` AS `reserver` 
 from (
-  `pre_daily_subtotal2` `t1` join (
+  `pre_monthly_reservation_subtotal` `t1` join (
     select `ranked_reservations`.`sche_id` AS `sche_id`,
       `ranked_reservations`.`status` AS `status`,
       `ranked_reservations`.`status_name` AS `status_name`,
@@ -95,7 +99,9 @@ from (
       `ranked_reservations`.`reservation_date` AS `reservation_date`,
       `ranked_reservations`.`cancel_date` AS `cancel_date`,
       `ranked_reservations`.`due_date` AS `due_date`,
-      `ranked_reservations`.`nehops_created` AS `nehops_created`,
+      `ranked_reservations`.`d_created` AS `d_created`,
+      `ranked_reservations`.`d_decided` AS `d_decided`,
+      `ranked_reservations`.`d_tentative` AS `d_tentative`,
       `ranked_reservations`.`branch` AS `branch`,
       `ranked_reservations`.`count` AS `count`,
       `ranked_reservations`.`date` AS `date`,
