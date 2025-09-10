@@ -6,6 +6,7 @@
 ?>
 <?php
 require_once('../../common/conf.php');
+require_once('functions/admin_banquet.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
 session_start();
@@ -37,10 +38,9 @@ $wd= $week[$w];
 $ym=$_REQUEST['ym'] ?? date('Y-m');
 
 $sd = $ym . '-01';
-$sdt = $ym . '-01 00:00:00.000000';
 $ed = (new DateTime($sd))->modify('last day of +0 month')->format('Y-m-d');
-$edt = (new DateTime($ed))->format('Y-m-d 23:59:59.999999');
 
+$year_mon = (new DateTime($sd))->format('Y年m月');
 
 $finals= array();
 $tentatives= array();
@@ -56,6 +56,8 @@ $sql ="SELECT
   `sales_category_name`,
   `agent_id`,
   `agent_name`,
+  `agent_short`,
+  `agent_name2`,
   MAX(`people`) AS `people`,
   SUM(`gross`) AS `gross`,
   SUM(`net`) AS `net`,
@@ -77,6 +79,7 @@ GROUP BY
   `sales_category_name`,
   `agent_id`,
   `agent_name`,
+  `agent_short`,
   `pic_id`,
   `pic`,
   `d_created`,
@@ -98,15 +101,7 @@ if($count > 0){
 
   foreach($rsvs as $rsv) {
     $rsv['orig_status'] = $rsv['status'];
-    if($rsv['orig_status'] ==1){
-      $rsv['orig_status_name'] = '決';
-    }elseif($rsv['orig_status'] ==2){
-      $rsv['orig_status_name'] = '仮';
-    }elseif($rsv['orig_status'] ==5){
-      $rsv['orig_status_name'] = 'C';
-    }else{
-      $rsv['orig_status_name'] = '';
-    }
+    $rsv['orig_status_name'] = rsvOneLetter($rsv['orig_status']);
     if($rsv['status'] ==1 && $rsv['d_decided'] > $ed){
       $rsv['status'] = 2;
       $rsv['status_name'] = '仮予約';
@@ -115,7 +110,13 @@ if($count > 0){
       $rsv['status'] = 2;
       $rsv['status_name'] = '仮予約';
     }
-
+    if($rsv['status'] ==2 && $rsv['d_decided']){
+      if($rsv['d_decided'] <= $ed){
+        $rsv['status'] = 1;
+        $rsv['status_name'] = '決定予約';
+      }
+      
+    }
     if($rsv['status'] == 1){
       $finals[] = $rsv;
     }elseif($rsv['status'] == 2){
@@ -123,6 +124,22 @@ if($count > 0){
     }elseif($rsv['status'] == 5){
       $cancelleds[] = $rsv;
     }
+  }
+}
+
+function rsvOneLetter($s){
+  if($s ==1){
+    return '決';
+  }elseif($s ==2){
+    return '仮';
+  }elseif($s ==3){
+    return '営';
+  }elseif($s ==4){
+    return '待';
+  }elseif($s ==5){
+    return 'C';
+  }else{
+    return '他';
   }
 }
 
@@ -136,7 +153,7 @@ if($count > 0){
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Cache-Control" content="no-cache">
   <title>
-    会議・宴会予約リスト
+    新規獲得リスト（<?= $year_mon ?>）
   </title>
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
@@ -161,26 +178,25 @@ if($count > 0){
       <!--<div id="download"><a href="output/reservations-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>-->
     </div>
     <div>
-      <h1>会議・宴会予約リスト</h1>
-      <p>本日は<?= $date ?>（<?= $wd ?>）です。</p>
-
+      <h1>新規獲得リスト（<?= $year_mon ?>）</h1>
+      <p><?= $year_mon ?>に新規獲得した予約のリストです。</p>
+      <p>「最終」欄は本日（<?= $date ?>）の予約状況を示しています。</p>
     </div>
     <div>
       <h2>決定予約</h2>
+      <p><?= $year_mon ?>に獲得し同月中に「決定」したもの</p>
       <?php if(sizeof($finals) > 0): ?>
         <table class="">
           <thead>
             <tr>
               <th>実施日</th>
-              <th>ステータス</th>
-              <th>ステータス名</th>
+              <th>Sts</th>
               <th>予約名</th>
-              <th>エージェントID</th>
-              <th>エージェント名</th>
+              <th>販売</th>
+              <th>エージェント</th>
               <th>人数</th>
               <th>売上</th>
               <th>ネット</th>
-              <th>担当ID</th>
               <th>担当名</th>
               <th>予約ID</th>
               <th>仮期限</th>
@@ -195,19 +211,18 @@ if($count > 0){
             <?php foreach($finals as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= htmlspecialchars($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['status_name']) ?></td>
-              <td><?= htmlspecialchars($rsv['reservation_name']) ?></td>
+              <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_id']) ?>
+                  <?= htmlspecialchars($rsv['agent_short']) ?>
                 <?php else: ?>
-                  &nbsp;
+                  直販
                 <?php endif; ?>
               </td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_name']) ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -233,8 +248,7 @@ if($count > 0){
                   0
                 <?php endif; ?>
               </td>
-              <td><?= htmlspecialchars($rsv['pic_id']) ?></td>
-              <td><?= htmlspecialchars($rsv['pic']) ?></td>
+              <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
               <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
               <td>
                 <?php if($rsv['due_date']): ?>
@@ -284,20 +298,19 @@ if($count > 0){
     </div>
     <div>
       <h2>仮予約</h2>
+      <p><?= $year_mon ?>に獲得し同月中は「仮予約」だったもの</p>
       <?php if(sizeof($tentatives) > 0): ?>
         <table class="">
           <thead>
             <tr>
               <th>実施日</th>
-              <th>ステータス</th>
-              <th>ステータス名</th>
+              <th>Sts</th>
               <th>予約名</th>
-              <th>エージェントID</th>
-              <th>エージェント名</th>
+              <th>販売</th>
+              <th>エージェント</th>
               <th>人数</th>
               <th>売上</th>
               <th>ネット</th>
-              <th>担当ID</th>
               <th>担当名</th>
               <th>予約ID</th>
               <th>仮期限</th>
@@ -312,19 +325,18 @@ if($count > 0){
             <?php foreach($tentatives as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= htmlspecialchars($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['status_name']) ?></td>
-              <td><?= htmlspecialchars($rsv['reservation_name']) ?></td>
+              <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_id']) ?>
+                  <?= htmlspecialchars($rsv['agent_short']) ?>
                 <?php else: ?>
-                  &nbsp;
+                  直販
                 <?php endif; ?>
               </td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_name']) ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -332,6 +344,8 @@ if($count > 0){
               <td class="num">
                 <?php if($rsv['people']): ?>
                   <?= htmlspecialchars($rsv['people']) ?>
+                <?php else: ?>
+                  &nbsp;
                 <?php endif; ?>
               </td>
               <td class="num">
@@ -348,8 +362,7 @@ if($count > 0){
                   0
                 <?php endif; ?>
               </td>
-              <td><?= htmlspecialchars($rsv['pic_id']) ?></td>
-              <td><?= htmlspecialchars($rsv['pic']) ?></td>
+              <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
               <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
               <td>
                 <?php if($rsv['due_date']): ?>
@@ -399,20 +412,19 @@ if($count > 0){
     </div>
     <div>
       <h2>キャンセル</h2>
+      <p><?= $year_mon ?>に獲得し同月中に「キャンセル」になったもの</p>
       <?php if(sizeof($cancelleds) > 0): ?>
         <table class="">
           <thead>
             <tr>
               <th>実施日</th>
-              <th>ステータス</th>
-              <th>ステータス名</th>
+              <th>Sts</th>
               <th>予約名</th>
-              <th>エージェントID</th>
-              <th>エージェント名</th>
+              <th>販売</th>
+              <th>エージェント</th>
               <th>人数</th>
               <th>売上</th>
               <th>ネット</th>
-              <th>担当ID</th>
               <th>担当名</th>
               <th>予約ID</th>
               <th>仮期限</th>
@@ -427,19 +439,18 @@ if($count > 0){
             <?php foreach($cancelleds as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= htmlspecialchars($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['status_name']) ?></td>
-              <td><?= htmlspecialchars($rsv['reservation_name']) ?></td>
+              <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_id']) ?>
+                  <?= htmlspecialchars($rsv['agent_short']) ?>
                 <?php else: ?>
-                  &nbsp;
+                  直販
                 <?php endif; ?>
               </td>
               <td>
                 <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_name']) ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -465,8 +476,7 @@ if($count > 0){
                   0
                 <?php endif; ?>
               </td>
-              <td><?= htmlspecialchars($rsv['pic_id']) ?></td>
-              <td><?= htmlspecialchars($rsv['pic']) ?></td>
+              <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
               <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
               <td>
                 <?php if($rsv['due_date']): ?>
@@ -505,6 +515,7 @@ if($count > 0){
               </td>
               <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
+              </td>
             </tr>
             <?php endforeach; ?>
           </tbody>
