@@ -249,7 +249,7 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
+              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
               <td>
                 <?php if($rsv['due_date']): ?>
                   <?= htmlspecialchars($rsv['due_date']) ?>
