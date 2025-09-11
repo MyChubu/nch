@@ -51,7 +51,8 @@ SELECT
   AG.`agent_group`                                  AS `agent_name`,
   AG.`agent_group_short`                            AS `agent_short`,
   S.`agent_name`                                    AS `agent_name2`,
-  S.`reserver`                                      AS `reserver`
+  S.`reserver`                                      AS `reserver`,
+   S.`memo` AS `memo`
 
 FROM `salmonbadger2_nchsignage`.`banquet_schedules` AS S
 LEFT JOIN `salmonbadger2_nchsignage`.`banquet_charges`   AS C
