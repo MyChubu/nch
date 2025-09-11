@@ -77,7 +77,7 @@ WHERE
   S.`banquet_schedule_id` IS NOT NULL
   AND S.`additional_sales` = 0
   AND S.`status` NOT IN (3, 4)             -- ← 3.4 は誤記と判断
-  AND S.`purpose_id` NOT IN (0, 88, 94)
+  AND S.`purpose_id` NOT IN ( 88, 94)
   AND S.`reservation_name` <> '朝食会場'
 
 -- スケジュール行ごとに束ねる
