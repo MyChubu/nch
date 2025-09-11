@@ -67,7 +67,8 @@ $sql ="SELECT
   `d_decided`,
   `d_tentative`,
   `due_date`,
-  `cancel_date`
+  `cancel_date`,
+  `memo`
 FROM `view_monthly_new_reservation2` WHERE `reservation_date` >= :sd AND `d_created` BETWEEN :sdt AND :edt
 GROUP BY
   `reservation_id`,
@@ -204,6 +205,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+              <th>メモ</th>
               <th>最終</th>
             </tr>
           </thead>
@@ -283,6 +285,12 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td>
+                <?php if($rsv['memo']): ?>
+                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
             </tr>
@@ -315,6 +323,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+              <th>メモ</th>
               <th>最終</th>
             </tr>
           </thead>
@@ -394,6 +403,12 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td>
+                <?php if($rsv['memo']): ?>
+                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
             </tr>
@@ -426,6 +441,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+              <th>メモ</th>
               <th>最終</th>
             </tr>
           </thead>
@@ -504,6 +520,12 @@ function rsvOneLetter($s){
                   &nbsp;
                 <?php endif; ?>
               </td>
+              <td>
+                <?php if($rsv['memo']): ?>
+                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
               <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
