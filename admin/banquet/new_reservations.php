@@ -68,7 +68,7 @@ $sql ="SELECT
   `d_tentative`,
   `due_date`,
   `cancel_date`
-FROM `view_monthly_new_reservation` WHERE `reservation_date` >= :sd AND `d_created` BETWEEN :sdt AND :edt
+FROM `view_monthly_new_reservation2` WHERE `reservation_date` >= :sd AND `d_created` BETWEEN :sdt AND :edt
 GROUP BY
   `reservation_id`,
   `reservation_date`,
@@ -190,15 +190,15 @@ function rsvOneLetter($s){
           <thead>
             <tr>
               <th>実施日</th>
-              <th>Sts</th>
+              <th>状態</th>
+              <th>種類</th>
               <th>予約名</th>
               <th>販売</th>
-              <th>エージェント</th>
               <th>人数</th>
-              <th>売上</th>
-              <th>ネット</th>
+              <th>金額</th>
               <th>担当名</th>
               <th>予約ID</th>
+              <th>代理店名</th>
               <th>仮期限</th>
               <th>予約登録</th>
               <th>仮予約日</th>
@@ -212,17 +212,10 @@ function rsvOneLetter($s){
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
               <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_short']) ?>
-                <?php else: ?>
-                  直販
-                <?php endif; ?>
-              </td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
+              <td><?php if($rsv['agent_id']): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -235,13 +228,6 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td class="num">
-                <?php if($rsv['gross']): ?>
-                  <?= number_format($rsv['gross']) ?>
-                <?php else: ?>
-                  0
-                <?php endif; ?>
-              </td>
-              <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
                   <?php else: ?>
@@ -250,6 +236,17 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
               <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td>
+                <?php if($rsv['agent_id']): ?>
+                  <?php if($rsv['agent_id'] == 2999): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],10)) ?>
+                  <?php else: ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
+                  <?php endif; ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
               <td>
                 <?php if($rsv['due_date']): ?>
                   <?= htmlspecialchars($rsv['due_date']) ?>
@@ -304,15 +301,15 @@ function rsvOneLetter($s){
           <thead>
             <tr>
               <th>実施日</th>
-              <th>Sts</th>
+              <th>状態</th>
+              <th>種類</th>
               <th>予約名</th>
               <th>販売</th>
-              <th>エージェント</th>
               <th>人数</th>
-              <th>売上</th>
-              <th>ネット</th>
+              <th>金額</th>
               <th>担当名</th>
               <th>予約ID</th>
+              <th>代理店名</th>
               <th>仮期限</th>
               <th>予約登録</th>
               <th>仮予約日</th>
@@ -326,17 +323,10 @@ function rsvOneLetter($s){
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
               <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_short']) ?>
-                <?php else: ?>
-                  直販
-                <?php endif; ?>
-              </td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
+              <td><?php if($rsv['agent_id']): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -349,13 +339,6 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td class="num">
-                <?php if($rsv['gross']): ?>
-                  <?= number_format($rsv['gross']) ?>
-                <?php else: ?>
-                  0
-                <?php endif; ?>
-              </td>
-              <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
                   <?php else: ?>
@@ -363,7 +346,18 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
+              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td>
+                <?php if($rsv['agent_id']): ?>
+                  <?php if($rsv['agent_id'] == 2999): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],10)) ?>
+                  <?php else: ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
+                  <?php endif; ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
               <td>
                 <?php if($rsv['due_date']): ?>
                   <?= htmlspecialchars($rsv['due_date']) ?>
@@ -418,15 +412,15 @@ function rsvOneLetter($s){
           <thead>
             <tr>
               <th>実施日</th>
-              <th>Sts</th>
+              <th>状態</th>
+              <th>種類</th>
               <th>予約名</th>
               <th>販売</th>
-              <th>エージェント</th>
               <th>人数</th>
-              <th>売上</th>
-              <th>ネット</th>
+              <th>金額</th>
               <th>担当名</th>
               <th>予約ID</th>
+              <th>代理店名</th>
               <th>仮期限</th>
               <th>予約登録</th>
               <th>仮予約日</th>
@@ -440,17 +434,10 @@ function rsvOneLetter($s){
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
               <td><?= rsvOneLetter($rsv['status']) ?></td>
+              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars($rsv['agent_short']) ?>
-                <?php else: ?>
-                  直販
-                <?php endif; ?>
-              </td>
-              <td>
-                <?php if($rsv['agent_id']): ?>
-                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],20)) ?>
+              <td><?php if($rsv['agent_id']): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -463,13 +450,6 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td class="num">
-                <?php if($rsv['gross']): ?>
-                  <?= number_format($rsv['gross']) ?>
-                <?php else: ?>
-                  0
-                <?php endif; ?>
-              </td>
-              <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
                   <?php else: ?>
@@ -477,7 +457,18 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><?= htmlspecialchars($rsv['reservation_id']) ?></td>
+              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td>
+                <?php if($rsv['agent_id']): ?>
+                  <?php if($rsv['agent_id'] == 2999): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],10)) ?>
+                  <?php else: ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
+                  <?php endif; ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
               <td>
                 <?php if($rsv['due_date']): ?>
                   <?= htmlspecialchars($rsv['due_date']) ?>

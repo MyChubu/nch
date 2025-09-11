@@ -474,6 +474,10 @@ function getDetail2($reservation_id) {
     MAX(date) AS end_date,
     MIN(status) AS status,
     due_date,
+    cancel_date,
+    nehops_d_created,
+    nehops_d_decided,
+    nehops_d_tentative,
     pic,
     pic_id,
     agent_id,
@@ -501,6 +505,37 @@ function getDetail2($reservation_id) {
                     $end_date->format('Y/m/d') . '(' . $week[(int)$end_date->format('w')] . ')';
     }
 
+    if($data['due_date'] != '0000-00-00' or $data['due_date'] != ''){
+      $due_date = new DateTime($data['due_date']);
+      $due_date = $due_date->format('Y/m/d');
+    } else {
+      $due_date = '';
+    }
+    if($data['cancel_date'] != '0000-00-00' && $data['cancel_date'] != '' && $data['cancel_date'] != null){
+      $cancel_date = new DateTime($data['cancel_date']);
+      $cancel_date = $cancel_date->format('Y/m/d');
+    } else {
+      $cancel_date = '';
+    }
+    if($data['nehops_d_created'] != '0000-00-00' && $data['nehops_d_created'] != '' && $data['nehops_d_created'] != null){
+      $nehops_d_c = new DateTime($data['nehops_d_created']);
+      $nehops_d_created = $nehops_d_c->format('Y/m/d');
+    } else {
+      $nehops_d_created = '';
+    } 
+    if($data['nehops_d_decided'] != '0000-00-00' && $data['nehops_d_decided'] != '' && $data['nehops_d_decided'] != null){
+      $nehops_d_d = new DateTime($data['nehops_d_decided']);
+      $nehops_d_decided = $nehops_d_d->format('Y/m/d');
+    } else {
+      $nehops_d_decided = '';
+    }
+    if($data['nehops_d_tentative'] != '0000-00-00' && $data['nehops_d_tentative'] != '' && $data['nehops_d_tentative'] != null){
+      $nehops_d_t = new DateTime($data['nehops_d_tentative']);
+      $nehops_d_tentative = $nehops_d_t->format('Y/m/d');
+    } else {
+      $nehops_d_tentative = '';
+    } 
+
     $sql2 = 'SELECT * FROM banquet_sales_dept WHERE sales_dept_id = ?';
     $stmt2 = $dbh->prepare($sql2);
     $stmt2->execute([$data['sales_dept_id']]);
@@ -513,7 +548,11 @@ function getDetail2($reservation_id) {
       'people' => $data['people'], // 人数
       'event_date' => $event_date, // イベント日付
       'status' => $data['status'], // ステータスコード
-      'due_date' => $data['due_date'], // 仮予約期限
+      'due_date' => $due_date, // 仮予約期限
+      'cancel_date' => $cancel_date, // キャンセル日
+      'nehops_d_created' => $nehops_d_created, // NEHOPS登録日
+      'nehops_d_decided' => $nehops_d_decided, // NEHOPS決定日
+      'nehops_d_tentative' => $nehops_d_tentative, // NEHOPS仮予約日
       'pic' => $data['pic'], // 担当者名（全角変換）
       'pic_id' => $data['pic_id'], // 担当者ID
       'agent_id' => $data['agent_id'], // エージェントID

@@ -118,6 +118,22 @@ $subtotal_amount = $array['subtotal_amount'];
             <th>利用種類</th>
             <td><?=salescatletter($detail['sales_category_id']) ?></td>
           </tr>
+          <tr>
+            <th>システム登録日</th>
+            <td><?=$detail['nehops_d_created']!="" ? $detail['nehops_d_created'] : "-" ?></td>
+          </tr>
+          <tr>
+            <th>仮予約登録</th>
+            <td><?=$detail['nehops_d_tentative']!="" ? $detail['nehops_d_tentative'] : "-" ?></td>
+          </tr>
+          <tr>
+            <th>キャンセル日</th>
+            <td><?=$detail['cancel_date']!="" ? $detail['cancel_date'] : "-" ?></td>
+          </tr>
+          <tr>
+            <th>決定登録</th>
+            <td><?=$detail['nehops_d_decided']!="" ? $detail['nehops_d_decided'] : "-" ?></td>
+          </tr>
       </table>
     </div>
     <?php endif; ?>
