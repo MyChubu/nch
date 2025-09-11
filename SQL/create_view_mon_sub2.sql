@@ -24,7 +24,7 @@ WITH ranked_reservations AS (
     p.`service_fee`,
     p.`tax`,
     p.`discount`,
-    p.`ex-ts`              AS `ex_ts`,             -- 以降扱いやすい別名に
+    p.`ex_ts`              AS `ex_ts`,             -- 以降扱いやすい別名に
     p.`purpose_id`,
     p.`purpose_name`,
     p.`purpose_short`,
@@ -42,6 +42,7 @@ WITH ranked_reservations AS (
     p.`agent_short`,
     p.`agent_name2`,
     p.`reserver`,
+    p.`memo`,
     ROW_NUMBER() OVER (
       PARTITION BY p.`date`, p.`room_id`
       ORDER BY p.`gross` DESC
@@ -69,7 +70,7 @@ agg AS (
     SUM(t1.`service_fee`)  AS `service_fee`,
     SUM(t1.`tax`)          AS `tax`,
     SUM(t1.`discount`)     AS `discount`,
-    SUM(t1.`ex-ts`)        AS `ex_ts`
+    SUM(t1.`ex_ts`)        AS `ex_ts`
   FROM `salmonbadger2_nchsignage`.`pre_monthly_reservation_subtotal2` AS t1
   GROUP BY
     t1.`status`, t1.`date`, t1.`room_id`, t1.`reservation_id`
@@ -118,7 +119,8 @@ SELECT
   tr.`agent_name`,
   tr.`agent_short`,
   tr.`agent_name2`,
-  tr.`reserver`
+  tr.`reserver`,
+  tr.`memo`
 FROM agg AS a
 JOIN top_res AS tr
   ON  tr.`date` = a.`date`
