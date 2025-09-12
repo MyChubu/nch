@@ -173,7 +173,7 @@ function rsvOneLetter($s){
         <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required>
         <button type="submit">表示</button>
       </form>
-      <!--<div id="download"><a href="output/reservations-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>-->
+      <div id="download"><a href="output/newrsv-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
     </div>
     <div>
       <h1>新規獲得リスト（<?= $year_mon ?>）</h1>
