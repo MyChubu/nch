@@ -50,8 +50,7 @@ $sql ="SELECT
   `reservation_id`,
   `reservation_date`,
   `reservation_name`,
-  `status`,
-  `status_name`,
+  MIN(`status`) AS `status`,
   `sales_category_id`,
   `sales_category_name`,
   `agent_id`,
@@ -74,8 +73,6 @@ GROUP BY
   `reservation_id`,
   `reservation_date`,
   `reservation_name`,
-  `status`,
-  `status_name`,
   `sales_category_id`,
   `sales_category_name`,
   `agent_id`,
@@ -105,16 +102,16 @@ if($count > 0){
     $rsv['orig_status_name'] = rsvOneLetter($rsv['orig_status']);
     if($rsv['status'] ==1 && $rsv['d_decided'] > $ed){
       $rsv['status'] = 2;
-      $rsv['status_name'] = '仮予約';
+      $rsv['status_name'] = '仮';
     }
     if($rsv['status'] ==5 && $rsv['cancel_date'] > $ed){
       $rsv['status'] = 2;
-      $rsv['status_name'] = '仮予約';
+      $rsv['status_name'] = '仮';
     }
     if($rsv['status'] ==2 && $rsv['d_decided']){
       if($rsv['d_decided'] <= $ed){
         $rsv['status'] = 1;
-        $rsv['status_name'] = '決定予約';
+        $rsv['status_name'] = '決';
       }
       
     }
