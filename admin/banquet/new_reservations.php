@@ -202,7 +202,11 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+<<<<<<< Updated upstream
               <th>メモ</th>
+=======
+              <th>memo</th>
+>>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -281,6 +285,7 @@ function rsvOneLetter($s){
                   &nbsp;
                 <?php endif; ?>
               </td>
+              <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
                 <?php if($rsv['memo']): ?>
                   <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
@@ -320,7 +325,11 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+<<<<<<< Updated upstream
               <th>メモ</th>
+=======
+              <th>memo</th>
+>>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -399,6 +408,7 @@ function rsvOneLetter($s){
                   &nbsp;
                 <?php endif; ?>
               </td>
+              <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
                 <?php if($rsv['memo']): ?>
                   <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
@@ -438,7 +448,11 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
+<<<<<<< Updated upstream
               <th>メモ</th>
+=======
+              <th>memo</th>
+>>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -517,6 +531,7 @@ function rsvOneLetter($s){
                   &nbsp;
                 <?php endif; ?>
               </td>
+              <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
                 <?php if($rsv['memo']): ?>
                   <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
