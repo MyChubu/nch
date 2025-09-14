@@ -17,6 +17,9 @@ $ym = $_GET['ym'] ?? date('Y-m');
 $sd = $ym . '-01';
 $ed = (new DateTime($sd))->modify('last day of +0 month')->format('Y-m-d');
 
+$cxl=$_GET['cxl'] ?? 'off'; // キャンセル表示
+
+
 function rsvOneLetter($s) {
   return match($s) {
     1 => '決', 2 => '仮', 3 => '営', 4 => '待', 5 => 'C', default => '他'
@@ -84,12 +87,13 @@ foreach (fetchReservations($dbh, $sd, $ed) as $rsv) {
   if ($rsv['status'] == 2 && $rsv['d_decided'] && $rsv['d_decided'] <= $ed) $rsv['status'] = 1;
   $rsv['status_name'] = rsvOneLetter($rsv['status']);
 
-  match($rsv['status']) {
-    1 => $finals[] = $rsv,
-    2 => $tentatives[] = $rsv,
-    5 => $cancelleds[] = $rsv,
-    default => null
-  };
+  if($rsv['status'] == 1){
+    $finals[] = $rsv;
+  }elseif($rsv['status'] == 2){
+    $tentatives[] = $rsv;
+  }elseif($rsv['status'] == 5 && $rsv['reservation_name'] != '倉庫'){
+    $cancelleds[] = $rsv;
+  }
 }
 
 $spreadsheet = new Spreadsheet();
@@ -214,7 +218,9 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
 $row = 1;
 $row = writeSection($sheet, '決定予約', $finals, $headers, $row);
 $row = writeSection($sheet, '仮予約', $tentatives, $headers, $row);
-$row = writeSection($sheet, 'キャンセル', $cancelleds, $headers, $row);
+if($cxl === 'on'){
+  $row = writeSection($sheet, 'キャンセル', $cancelleds, $headers, $row);
+}
 
 foreach (['B','C','F','H','Q'] as $col) {
   $sheet->getStyle($col . '1:' . $col . $sheet->getHighestRow())
@@ -234,7 +240,7 @@ $sheet->getColumnDimension('F')->setWidth(5);  // 人数
 $sheet->getColumnDimension('G')->setWidth(12); // 金額
 $sheet->getColumnDimension('H')->setWidth(12); // 担当名
 $sheet->getColumnDimension('I')->setWidth(10); // 予約ID
-$sheet->getColumnDimension('J')->setWidth(18); // 代理店名
+$sheet->getColumnDimension('J')->setWidth(40); // 代理店名
 $sheet->getColumnDimension('K')->setWidth(12); // 仮期限
 $sheet->getColumnDimension('L')->setWidth(12); // 予約登録
 $sheet->getColumnDimension('M')->setWidth(12); // 仮予約日

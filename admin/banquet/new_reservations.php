@@ -119,7 +119,7 @@ if($count > 0){
       $finals[] = $rsv;
     }elseif($rsv['status'] == 2){
       $tentatives[] = $rsv;
-    }elseif($rsv['status'] == 5){
+    }elseif($rsv['status'] == 5 && $rsv['reservation_name'] != '倉庫'){
       $cancelleds[] = $rsv;
     }
   }
@@ -202,11 +202,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
-<<<<<<< Updated upstream
-              <th>メモ</th>
-=======
               <th>memo</th>
->>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -287,12 +283,6 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
-                <?php if($rsv['memo']): ?>
-                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
-                <?php else: ?>
-                  &nbsp;
-                <?php endif; ?>
-              <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
             </tr>
@@ -325,11 +315,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
-<<<<<<< Updated upstream
-              <th>メモ</th>
-=======
               <th>memo</th>
->>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -410,12 +396,6 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
-                <?php if($rsv['memo']): ?>
-                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
-                <?php else: ?>
-                  &nbsp;
-                <?php endif; ?>
-              <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
             </tr>
@@ -448,11 +428,7 @@ function rsvOneLetter($s){
               <th>仮予約日</th>
               <th>キャンセル日</th>
               <th>決定日</th>
-<<<<<<< Updated upstream
-              <th>メモ</th>
-=======
               <th>memo</th>
->>>>>>> Stashed changes
               <th>最終</th>
             </tr>
           </thead>
@@ -532,12 +508,6 @@ function rsvOneLetter($s){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
-              <td>
-                <?php if($rsv['memo']): ?>
-                  <?= nl2br(htmlspecialchars($rsv['memo'])) ?>
-                <?php else: ?>
-                  &nbsp;
-                <?php endif; ?>
               <td>
                 <?= htmlspecialchars($rsv['orig_status_name']) ?>
               </td>
