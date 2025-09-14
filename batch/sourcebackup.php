@@ -2,7 +2,7 @@
 // 圧縮したいディレクトリのパス
 $filePath = '../../nchbackup/source/'; // ファイルを保存するディレクトリ
 $fileName = 'nch_'.date('ymd_His').'.zip';
-$sourcePath = '../../nch.nagoyacrown.co.jp/'; // 圧縮したい元のディレクトリ
+$sourcePath = '../../nch.nagoyacrown/'; // 圧縮したい元のディレクトリ
 $zipFilePath = $filePath.$fileName; // 出力するZIPファイル名
 
 // ZipArchive クラスのインスタンス作成
