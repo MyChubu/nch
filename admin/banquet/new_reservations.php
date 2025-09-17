@@ -169,11 +169,18 @@ function rsvOneLetter($s){
 <main>
   <div class="wrapper">
     <div id="controller">
-      <form  method="get" enqtype="application/x-www-form-urlencoded">
-        <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required>
-        <button type="submit">表示</button>
-      </form>
-      <div id="download"><a href="output/newrsv-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
+      <div id="controller_left">
+        <form  method="get" enqtype="application/x-www-form-urlencoded">
+          <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required>
+          <button type="submit">表示</button>
+        </form>
+        </div>
+      <div id="controller_right2">
+        <div id="download"><a href="output/newrsv-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
+        <div class="post-button" data-ym="<?=$ym ?>" data-mode="reload"><i class="fa-solid fa-file-excel"></i>Excel</div>
+        <label><input type="checkbox" name="cxl" id="cxl">キャンセルも出力</label>
+        <form id="postForm" method="POST"></form>
+      </div>
     </div>
     <div>
       <h1>新規獲得リスト（<?= $year_mon ?>）</h1>
@@ -183,6 +190,8 @@ function rsvOneLetter($s){
     <div>
       <h2>決定予約</h2>
       <p><?= $year_mon ?>に獲得し同月中に「決定」したもの</p>
+      <?php $people_total = 0; ?>
+      <?php $net_total = 0; ?>
       <?php if(sizeof($finals) > 0): ?>
         <table class="">
           <thead>
@@ -222,13 +231,15 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['people']): ?>
                   <?= htmlspecialchars($rsv['people']) ?>
+                  <?php $people_total += $rsv['people']; ?>
                 <?php else: ?>
-                  &nbsp;
+                  0
                 <?php endif; ?>
               </td>
               <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
+                  <?php $net_total += $rsv['net']; ?>
                   <?php else: ?>
                   0
                 <?php endif; ?>
@@ -288,6 +299,27 @@ function rsvOneLetter($s){
             </tr>
             <?php endforeach; ?>
           </tbody>
+          <tfoot>
+            <tr>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th><?=number_format(sizeof($finals)) ?>件</th>
+              <th>&nbsp;</th>
+              <th><?= number_format($people_total) ?>人</th>
+              <th><?= number_format($net_total) ?></th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </tfoot>
         </table>
       <?php else: ?>
         <p>該当する予約はありません。</p>
@@ -296,6 +328,8 @@ function rsvOneLetter($s){
     <div>
       <h2>仮予約</h2>
       <p><?= $year_mon ?>に獲得し同月中は「仮予約」だったもの</p>
+      <?php $people_total = 0; ?>
+      <?php $net_total = 0; ?>
       <?php if(sizeof($tentatives) > 0): ?>
         <table class="">
           <thead>
@@ -335,13 +369,15 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['people']): ?>
                   <?= htmlspecialchars($rsv['people']) ?>
+                  <?php $people_total += $rsv['people']; ?>
                 <?php else: ?>
-                  &nbsp;
+                  0
                 <?php endif; ?>
               </td>
               <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
+                  <?php $net_total += $rsv['net']; ?>
                   <?php else: ?>
                   0
                 <?php endif; ?>
@@ -401,6 +437,27 @@ function rsvOneLetter($s){
             </tr>
             <?php endforeach; ?>
           </tbody>
+          <tfoot>
+            <tr>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th><?=number_format(sizeof($tentatives)) ?>件</th>
+              <th>&nbsp;</th>
+              <th><?= number_format($people_total) ?>人</th>
+              <th><?= number_format($net_total) ?></th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </tfoot>
         </table>
       <?php else: ?>
         <p>該当する予約はありません。</p>
@@ -409,6 +466,8 @@ function rsvOneLetter($s){
     <div>
       <h2>キャンセル</h2>
       <p><?= $year_mon ?>に獲得し同月中に「キャンセル」になったもの</p>
+      <?php $people_total = 0; ?>
+      <?php $net_total = 0; ?>
       <?php if(sizeof($cancelleds) > 0): ?>
         <table class="">
           <thead>
@@ -448,6 +507,7 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['people']): ?>
                   <?= htmlspecialchars($rsv['people']) ?>
+                  <?php $people_total += $rsv['people']; ?>
                 <?php else: ?>
                   &nbsp;
                 <?php endif; ?>
@@ -455,6 +515,7 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
+                  <?php $net_total += $rsv['net']; ?>
                   <?php else: ?>
                   0
                 <?php endif; ?>
@@ -514,6 +575,27 @@ function rsvOneLetter($s){
             </tr>
             <?php endforeach; ?>
           </tbody>
+          <tfoot>
+            <tr>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th><?=number_format(sizeof($cancelleds)) ?>件</th>
+              <th>&nbsp;</th>
+              <th><?= number_format($people_total) ?>人</th>
+              <th><?= number_format($net_total) ?></th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </tfoot>
         </table>
       <?php else: ?>
         <p>該当する予約はありません。</p>

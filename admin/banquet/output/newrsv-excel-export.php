@@ -104,123 +104,148 @@ $sheet->setTitle($sheetName);
 
 // 共通ヘッダー
 $headers = [
-  '実施日','状態','種類','予約名','販売','人数','金額','担当名','予約ID',
+  '実施日','状態','種類','予約名','代理店','人数','金額','担当名','予約ID',
   '代理店名','仮期限','予約登録','仮予約日','キャンセル日','決定日','メモ','最終'
 ];
 
 function writeSection(&$sheet, $title, $data, $headers, $startRow) {
+  // タイトル
   $sheet->setCellValue("A{$startRow}", $title);
   $startRow++;
 
+  // ヘッダー
   $headerRow = $startRow;
   $sheet->fromArray($headers, null, "A{$startRow}");
   $startRow++;
 
   $dataStartRow = $startRow;
 
+  // データ行
   foreach ($data as $r) {
     $agentName = ($r['agent_id'] == 2999)
       ? cleanLanternName2($r['agent_name2'], 10)
       : cleanLanternName2($r['agent_name']);
 
-    // ▼ 各セルを個別に指定（setCellValueExplicitを使う）
-    $colIndex = 0;
-    $fields = [
-      'reservation_date', 'status_name', 'sales_category_name', 'reservation_name',
-      'agent_name', 'people', 'net', 'pic', 'reservation_id', 'agent_name2',
-      'due_date', 'd_created', 'd_tentative', 'cancel_date', 'd_decided',
-      'memo', 'orig_status_name'
-    ];
+    // 1行ずつ型を意識して書き込み（省略可：ここは従来どおり）
+    $sheet->setCellValue("A{$startRow}", !empty($r['reservation_date']) ? \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new DateTime($r['reservation_date'])) : null);
+    $sheet->getStyle("A{$startRow}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
 
-    foreach ($fields as $i => $key) {
-      $col = chr(ord('A') + $i);
-      $val = $r[$key] ?? '';
+    $sheet->setCellValueExplicit("B{$startRow}", rsvOneLetter($r['status']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("C{$startRow}", $r['sales_category_name'] ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("D{$startRow}", cleanLanternName($r['reservation_name']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("E{$startRow}", cleanLanternName2($r['agent_name']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
-      // 日付形式にしたい列（A, K〜O）
-      $dateCols = ['A', 'K', 'L', 'M', 'N', 'O'];
-      if (in_array($col, $dateCols) && !empty($val)) {
-        try {
-          $dt = new DateTime($val);
-          $excelDate = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($dt);
-          $sheet->setCellValue($col . $startRow, $excelDate);
-          $sheet->getStyle($col . $startRow)
-            ->getNumberFormat()
-            ->setFormatCode('yyyy/mm/dd');
-        } catch (Exception $e) {
-          $sheet->setCellValue($col . $startRow, $val);
-        }
+    // F: 人数（整数）
+    $sheet->setCellValue("F{$startRow}", is_numeric($r['people'] ?? null) ? (int)$r['people'] : null);
+    $sheet->getStyle("F{$startRow}")->getNumberFormat()->setFormatCode('#,##0');
+
+    // G: 金額（整数）
+    $sheet->setCellValue("G{$startRow}", is_numeric($r['net'] ?? null) ? (int)$r['net'] : null);
+    $sheet->getStyle("G{$startRow}")->getNumberFormat()->setFormatCode('#,##0');
+
+    $sheet->setCellValueExplicit("H{$startRow}", cleanLanternName($r['pic']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValue("I{$startRow}", $r['reservation_id'] ?? '');
+
+    $sheet->setCellValueExplicit("J{$startRow}", ($r['agent_id'] == 2999 ? cleanLanternName2($r['agent_name2'],10) : cleanLanternName2($r['agent_name'])) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+    // K～O: 日付列（ある場合だけ書式設定）
+    foreach (['K'=>'due_date','L'=>'d_created','M'=>'d_tentative','N'=>'cancel_date','O'=>'d_decided'] as $col => $key) {
+      if (!empty($r[$key])) {
+        $sheet->setCellValue("{$col}{$startRow}", \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new DateTime($r[$key])));
+        $sheet->getStyle("{$col}{$startRow}")->getNumberFormat()->setFormatCode('yyyy/mm/dd');
       }
+    }
 
-      // 金額（G列 = col G = index 6）
-      elseif ($col === 'G') {
-        $sheet->setCellValue($col . $startRow, intval($val));
-        $sheet->getStyle($col . $startRow)
-          ->getNumberFormat()
-          ->setFormatCode('#,##0');
-      }
-
-      // メモ（P列 = col P = index 15）
-      elseif ($col === 'P') {
-        $sheet->setCellValue($col . $startRow, $val);
-        $sheet->getStyle($col . $startRow)
-          ->getAlignment()
+    // P: メモ 折り返し・左寄せ
+    $sheet->setCellValue("P{$startRow}", $r['memo'] ?? '');
+    $sheet->getStyle("P{$startRow}")->getAlignment()
           ->setWrapText(true)
           ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT)
           ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-      }
 
-      // 通常の文字列列
-      else {
-        $sheet->setCellValueExplicit($col . $startRow, $val, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-      }
-    }
+    // Q: 最終（元ステータス1文字）
+    $sheet->setCellValueExplicit("Q{$startRow}", $r['orig_status_name'] ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
     $startRow++;
   }
 
   $endRow = $startRow - 1;
 
-  // ▼ 罫線
-  $range = "A{$headerRow}:Q{$endRow}";
-  $sheet->getStyle($range)->applyFromArray([
+  // 合計行（データがある場合）
+  $totalRow = $startRow;
+  if ($endRow >= $dataStartRow) {
+    // D列：件数 ＝ 行数を「○件」で
+    $sheet->setCellValue("D{$totalRow}", "=ROWS(A{$dataStartRow}:A{$endRow})&\"件\"");
+
+    // F列：人数合計（SUM、整数）
+    $sheet->setCellValue("F{$totalRow}", "=SUM(F{$dataStartRow}:F{$endRow})");
+    $sheet->getStyle("F{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
+
+    // G列：金額合計（SUM、整数）
+    $sheet->setCellValue("G{$totalRow}", "=SUM(G{$dataStartRow}:G{$endRow})");
+    $sheet->getStyle("G{$totalRow}")->getNumberFormat()->setFormatCode('#,##0');
+
+    // 合計行スタイル（太字・縦中央）
+    $sheet->getStyle("A{$totalRow}:Q{$totalRow}")->applyFromArray([
+      'font' => ['bold' => true],
+      'alignment' => ['vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+      'borders' => [
+        'allBorders' => [
+          'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+          'color' => ['rgb' => '000000'],
+        ],
+      ],
+    ]);
+
+    $startRow++; // 合計行の次へ
+  } else {
+    // データが無ければ合計行は作らず、そのまま
+  }
+
+  // ▼ テーブル罫線：ヘッダー～合計（合計があれば含める）
+  $tableEnd = ($endRow >= $dataStartRow) ? $totalRow : $headerRow;
+  $sheet->getStyle("A{$headerRow}:Q{$tableEnd}")->applyFromArray([
     'borders' => [
       'allBorders' => [
         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
         'color' => ['rgb' => '000000'],
       ],
     ],
-    'alignment' => [ // 上下中央揃え
-      'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-    ],
+    'alignment' => ['vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
   ]);
 
-  // ▼ ヘッダー行（背景・白文字・中央揃え）
+  // ▼ ヘッダー行（濃グレー・白文字・中央）
   $sheet->getStyle("A{$headerRow}:Q{$headerRow}")->applyFromArray([
     'fill' => [
       'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
       'startColor' => ['rgb' => '4F4F4F'],
     ],
-    'font' => [
-      'color' => ['rgb' => 'FFFFFF'],
-      'bold' => true,
-    ],
+    'font' => ['color' => ['rgb' => 'FFFFFF'], 'bold' => true],
     'alignment' => [
       'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
       'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
     ],
   ]);
 
-  return $startRow + 1;
-}
+  // ▼ B,C,F,H,Q 列のセンタリング（セクション範囲に限定）
+  foreach (['B','C','F','H','Q'] as $col) {
+    $sheet->getStyle($col.$headerRow . ':' . $col.$tableEnd)
+          ->getAlignment()
+          ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER)
+          ->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+  }
 
+  return $startRow + 1; // 1行空けて次のセクションへ
+}
 
 
 $row = 1;
-$row = writeSection($sheet, '決定予約', $finals, $headers, $row);
 $row = writeSection($sheet, '仮予約', $tentatives, $headers, $row);
-if($cxl === 'on'){
+$row = writeSection($sheet, '決定予約', $finals, $headers, $row);
+
+#if($cxl === 'on'){
   $row = writeSection($sheet, 'キャンセル', $cancelleds, $headers, $row);
-}
+#}
 
 foreach (['B','C','F','H','Q'] as $col) {
   $sheet->getStyle($col . '1:' . $col . $sheet->getHighestRow())
@@ -236,7 +261,7 @@ $sheet->getColumnDimension('B')->setWidth(12);  // 状態
 $sheet->getColumnDimension('C')->setWidth(12); // 種類
 $sheet->getColumnDimension('D')->setWidth(45); // 予約名
 $sheet->getColumnDimension('E')->setWidth(12); // 販売
-$sheet->getColumnDimension('F')->setWidth(5);  // 人数
+$sheet->getColumnDimension('F')->setWidth(6.5);  // 人数
 $sheet->getColumnDimension('G')->setWidth(12); // 金額
 $sheet->getColumnDimension('H')->setWidth(12); // 担当名
 $sheet->getColumnDimension('I')->setWidth(10); // 予約ID
