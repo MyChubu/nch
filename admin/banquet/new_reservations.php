@@ -99,7 +99,7 @@ if($count > 0){
 
   foreach($rsvs as $rsv) {
     $rsv['orig_status'] = $rsv['status'];
-    $rsv['orig_status_name'] = rsvOneLetter($rsv['orig_status']);
+    $rsv['orig_status_name'] = rsvOneLetter($rsv['status_name']);
     if($rsv['status'] ==1 && $rsv['d_decided'] > $ed){
       $rsv['status'] = 2;
       $rsv['status_name'] = '仮';
@@ -219,8 +219,8 @@ function rsvOneLetter($s){
             <?php foreach($finals as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= rsvOneLetter($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
+              <td><?= statusletter($rsv['status']) ?></td>
+              <td><?= salescatletter($rsv['sales_category_id']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td><?php if($rsv['agent_id']): ?>
                   <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
@@ -294,7 +294,7 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
-                <?= htmlspecialchars($rsv['orig_status_name']) ?>
+                <?= statusletter($rsv['orig_status']) ?>
               </td>
             </tr>
             <?php endforeach; ?>
@@ -357,8 +357,8 @@ function rsvOneLetter($s){
             <?php foreach($tentatives as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= rsvOneLetter($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
+              <td><?= statusletter($rsv['status']) ?></td>
+              <td><?= salescatletter($rsv['sales_category_id']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td><?php if($rsv['agent_id']): ?>
                   <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
@@ -432,7 +432,7 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
-                <?= htmlspecialchars($rsv['orig_status_name']) ?>
+                <?= statusletter($rsv['orig_status']) ?>
               </td>
             </tr>
             <?php endforeach; ?>
@@ -495,8 +495,8 @@ function rsvOneLetter($s){
             <?php foreach($cancelleds as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
-              <td><?= rsvOneLetter($rsv['status']) ?></td>
-              <td><?= htmlspecialchars($rsv['sales_category_name']) ?></td>
+              <td><?= statusletter($rsv['status']) ?></td>
+              <td><?= salescatletter($rsv['sales_category_id']) ?></td>
               <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
               <td><?php if($rsv['agent_id']): ?>
                   <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
@@ -570,7 +570,7 @@ function rsvOneLetter($s){
               </td>
               <td><?= htmlspecialchars($rsv['memo']) ?></td>
               <td>
-                <?= htmlspecialchars($rsv['orig_status_name']) ?>
+                <?= statusletter($rsv['orig_status']) ?>
               </td>
             </tr>
             <?php endforeach; ?>

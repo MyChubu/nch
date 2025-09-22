@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 ?>
 <?php
 require_once('../../common/conf.php');
@@ -36,23 +36,39 @@ $today = date('Y-m-d');
 $d1 = $_GET['d1'] ? (new DateTime($_GET['d1']))->format('Y-m-d') : null;
 $d2 = $_GET['d2'] ? (new DateTime($_GET['d2']))->format('Y-m-d') : null;
 if( !$d1 ){
-  $date1 = $today;
-  $date2 = $today;
-  $update_msg = '（'.$date1.'）';
+  if( $d2 ){
+    $d1 = $d2;
+    $date1 = $d1;
+    $date2 = $d1;
+    $update_msg = '（'.$date1.'）';
+    $d2 = '';
+  }else{
+    $date1 = $today;
+    $date2 = $today;
+    $update_msg = '（'.$date1.'）';
+    $d1 = $today;
+  }
 }else{
   if( !$d2 ){
     $date1 = $d1;
     $date2 = $d1;
     $update_msg = '（'.$date1.'）';
   }else{
-    if( $d1 > $d2 ){
-      $tmp = $d1;
-      $d1 = $d2;
-      $d2 = $tmp; 
+    if( $d1 == $d2 ){
+      $date1 = $d1;
+      $date2 = $d1;
+      $update_msg = '（'.$date1.'）';
+      $d2='';
+    }else{
+      if( $d1 > $d2 ){
+        $tmp = $d1;
+        $d1 = $d2;
+        $d2 = $tmp; 
+      } 
+      $date1 = $d1;
+      $date2 = $d2;
+      $update_msg = '（'.$date1.'～'.$date2.'）';
     }
-    $date1 = $d1;
-    $date2 = $d2;
-    $update_msg = '（'.$date1.'～'.$date2.'）';
   }
 }
 
@@ -66,6 +82,8 @@ $sql='SELECT
   `sales_dept_id`,
   `sales_dept_name`,
   `sales_dept_short`,
+  `sales_category_id`,
+  `sales_category_name`,
   MAX(`people`) AS `people`,
   `pic`,
   `pic_id`,
@@ -136,13 +154,13 @@ function rsvOneLetter($s){
 <main>
   <div class="wrapper">
     <div id="controller">
-      <!-- <div id="controller_left">
+      <div id="controller_left">
         <form  method="get" enqtype="application/x-www-form-urlencoded">
-          <input type="month" name="ym" id="ym" value="<?= htmlspecialchars($ym) ?>" required>
+          <input type="date" name="d1" id="d1" value="<?= htmlspecialchars($d1) ?>" required> ～ <input type="date" name="d2" id="d2" value="<?= htmlspecialchars($d2) ?>" >
           <button type="submit">表示</button>
         </form>
       </div>
-      <div id="controller_right2">
+      <!-- <div id="controller_right2">
         <div id="download"><a href="output/newrsv-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
         <div class="post-button" data-ym="<?=$ym ?>" data-mode="reload"><i class="fa-solid fa-file-excel"></i>Excel</div>
         <label><input type="checkbox" name="cxl" id="cxl">キャンセルも出力</label>
@@ -177,11 +195,11 @@ function rsvOneLetter($s){
             <?php foreach($resvs as $rsv): ?>
               <?php if($rsv['reservation_name'] != '朝食会場'): ?>
               <tr>
-                <td><?= htmlspecialchars(rsvOneLetter($rsv['status'])) ?></td>
-                <td><?= htmlspecialchars($rsv['reservation_id']) ?></td>
+                <td><?= statusletter($rsv['status']) ?></td>
+                <td><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
                 <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
                 <td><?= htmlspecialchars($rsv['reservation_name']) ?></td>
-                <td><?php if($rsv['sales_dept_short']): ?><?= htmlspecialchars($rsv['sales_dept_short']) ?><?php endif; ?></td>
+                <td><?= salescatletter($rsv['sales_category_id']) ?></td>
                 <td><?php if($rsv['people']): ?><?= htmlspecialchars($rsv['people']) ?><?php endif; ?></td>
                 <td><?= cleanLanternName(htmlspecialchars($rsv['pic'])) ?></td>
                 <td><?php if($rsv['net']): ?><?= number_format($rsv['net']) ?><?php endif; ?></td>

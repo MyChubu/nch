@@ -26,7 +26,6 @@
     <li><i class="fa-solid fa-calculator"></i><a href="../banquet/salesyear.php">年間累計</a></li>
     <li><i class="fa-solid fa-compass"></i><a href="../banquet/salesagents.php">エージェント別</a></li>
     <li><i class="fa-solid fa-square-h"></i><a href="../banquet/salesdirect.php">直販</a></li>
-    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/defect_list.php">登録内容チェック</a></li>
   </ul>
   <h3>予約状況</h3>
   <ul>
@@ -35,7 +34,11 @@
     <li><i class="fa-solid fa-list-check"></i><a href="../banquet/new_reservations.php">月別新規予約リスト</a></li>
     <li><i class="fa-solid fa-list-check"></i><a href="../banquet/reservations.php">受注リスト</a></li>
     <li><i class="fa-solid fa-list-check"></i><a href="../banquet/reservations.php?sts=tentative">仮予約リスト</a></li>
-    
+  </ul>
+  <h3>更新履歴</h3>
+  <ul>
+    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/dailyupdates.php">データ更新リスト</a></li>
+    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/defect_list.php">登録内容チェック</a></li>
   </ul>
   <h3>発注</h3>
   <ul>
