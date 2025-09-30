@@ -241,9 +241,9 @@ $row = 1;
 $row = writeSection($sheet, '仮予約', $tentatives, $headers, $row);
 $row = writeSection($sheet, '決定予約', $finals, $headers, $row);
 
-#if($cxl === 'on'){
+if($cxl === 'on'){
   $row = writeSection($sheet, 'キャンセル', $cancelleds, $headers, $row);
-#}
+}
 
 foreach (['B','C','F','H','Q'] as $col) {
   $sheet->getStyle($col . '1:' . $col . $sheet->getHighestRow())
@@ -296,6 +296,19 @@ $sheet->getColumnDimension('Q')->setOutlineLevel(1)->setVisible(false)->setColla
 // アウトラインを有効にする
 $sheet->setShowSummaryRight(true); // グループボタンを右側に表示（任意）
 
+// ▼ 印刷設定：A4縦・全体を1ページに収める
+$sheet->getPageSetup()
+    ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)  // 縦
+    ->setPaperSize(PageSetup::PAPERSIZE_A4)            // A4
+    ->setFitToWidth(1)                                 // 横を1ページ
+    ->setFitToHeight(1);                               // 縦も1ページに収める
+
+// ▼ 余白を狭く（単位はインチ）
+$sheet->getPageMargins()
+    ->setTop(0.3)
+    ->setBottom(0.3)
+    ->setLeft(0.3)
+    ->setRight(0.3);
 
 // ダウンロード出力
 $filename = "新規獲得リスト_{$ym}.xlsx";
