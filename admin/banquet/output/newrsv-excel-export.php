@@ -122,9 +122,7 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
 
   // データ行
   foreach ($data as $r) {
-    $agentName = ($r['agent_id'] == 2999)
-      ? cleanLanternName2($r['agent_name2'], 10)
-      : cleanLanternName2($r['agent_name']);
+    $agentName = ($r['agent_id'] > 0) ? $r['agent_name2'] : "";
 
     // 1行ずつ型を意識して書き込み（省略可：ここは従来どおり）
     $sheet->setCellValue("A{$startRow}", !empty($r['reservation_date']) ? \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new DateTime($r['reservation_date'])) : null);
@@ -132,8 +130,8 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
 
     $sheet->setCellValueExplicit("B{$startRow}", rsvOneLetter($r['status']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
     $sheet->setCellValueExplicit("C{$startRow}", $r['sales_category_name'] ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-    $sheet->setCellValueExplicit("D{$startRow}", cleanLanternName($r['reservation_name']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-    $sheet->setCellValueExplicit("E{$startRow}", cleanLanternName2($r['agent_name']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("D{$startRow}", cleanLanternName2($r['reservation_name'],30) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("E{$startRow}", cleanLanternName2($agentName,20) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
     // F: 人数（整数）
     $sheet->setCellValue("F{$startRow}", is_numeric($r['people'] ?? null) ? (int)$r['people'] : null);
@@ -146,7 +144,7 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
     $sheet->setCellValueExplicit("H{$startRow}", cleanLanternName($r['pic']) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
     $sheet->setCellValue("I{$startRow}", $r['reservation_id'] ?? '');
 
-    $sheet->setCellValueExplicit("J{$startRow}", ($r['agent_id'] == 2999 ? cleanLanternName2($r['agent_name2'],10) : cleanLanternName2($r['agent_name'])) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+    $sheet->setCellValueExplicit("J{$startRow}", cleanLanternName2($r['agent_name'],30) ?? '', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
     // K～O: 日付列（ある場合だけ書式設定）
     foreach (['K'=>'due_date','L'=>'d_created','M'=>'d_tentative','N'=>'cancel_date','O'=>'d_decided'] as $col => $key) {
@@ -260,12 +258,12 @@ $sheet->getColumnDimension('A')->setWidth(12); // 実施日
 $sheet->getColumnDimension('B')->setWidth(12);  // 状態
 $sheet->getColumnDimension('C')->setWidth(12); // 種類
 $sheet->getColumnDimension('D')->setWidth(45); // 予約名
-$sheet->getColumnDimension('E')->setWidth(12); // 販売
+$sheet->getColumnDimension('E')->setWidth(20); // 代理店名
 $sheet->getColumnDimension('F')->setWidth(6.5);  // 人数
 $sheet->getColumnDimension('G')->setWidth(12); // 金額
 $sheet->getColumnDimension('H')->setWidth(12); // 担当名
 $sheet->getColumnDimension('I')->setWidth(10); // 予約ID
-$sheet->getColumnDimension('J')->setWidth(40); // 代理店名
+$sheet->getColumnDimension('J')->setWidth(12); // 代理店
 $sheet->getColumnDimension('K')->setWidth(12); // 仮期限
 $sheet->getColumnDimension('L')->setWidth(12); // 予約登録
 $sheet->getColumnDimension('M')->setWidth(12); // 仮予約日
@@ -273,6 +271,14 @@ $sheet->getColumnDimension('N')->setWidth(12); // キャンセル日
 $sheet->getColumnDimension('O')->setWidth(12); // 決定日
 $sheet->getColumnDimension('P')->setWidth(45); // メモ（広め）
 $sheet->getColumnDimension('Q')->setWidth(8);  // 最終
+
+// D,E,J列をセルに合わせて縮小
+foreach (['D','E','J'] as $col) {
+  $sheet->getStyle($col . '1:' . $col . $sheet->getHighestRow())
+    ->getAlignment()
+    ->setShrinkToFit(true)
+    ->setWrapText(false); // 念のため折り返しは無効化（併用不可）
+}
 
 $sheet->getStyle("F2:F" . $sheet->getHighestRow())
   ->getNumberFormat()
