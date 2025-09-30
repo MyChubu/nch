@@ -122,7 +122,16 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
 
   // データ行
   foreach ($data as $r) {
-    $agentName = ($r['agent_id'] > 0) ? $r['agent_name2'] : "";
+    #$agentName = ($r['agent_id'] > 0) ? $r['agent_name2'] : "";
+    $agentName="";
+    if($r['agent_id'] > 0){
+      if(!empty($r['agent_name2'])){
+        $agentName = $r['agent_name2'];
+      }else{
+        $agentName = $r['agent_name'];
+      }
+    }
+
 
     // 1行ずつ型を意識して書き込み（省略可：ここは従来どおり）
     $sheet->setCellValue("A{$startRow}", !empty($r['reservation_date']) ? \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new DateTime($r['reservation_date'])) : null);
