@@ -20,9 +20,8 @@ function getBanquetEvents($date) {
       $dateObj = new DateTime($row['date']);
       $startObj = new DateTime($row['start']);
       $endObj = new DateTime($row['end']);
-      $addedObj = new DateTime($row['added']);
-      $modifiedObj = new DateTime($row['modified']);
-
+      $addedObj = new DateTime($row['nehops_d_created']);
+      $modifiedObj = new DateTime($row['nehops_mod_date']);
       // 会場（部屋）の情報を取得
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
@@ -478,6 +477,7 @@ function getDetail2($reservation_id) {
     nehops_d_created,
     nehops_d_decided,
     nehops_d_tentative,
+    nehops_mod_date,
     pic,
     pic_id,
     agent_id,
@@ -535,6 +535,13 @@ function getDetail2($reservation_id) {
     } else {
       $nehops_d_tentative = '';
     } 
+    $nehops_d_mod = $data['nehops_mod_date'];
+    if($nehops_d_mod != '0000-00-00' && $nehops_d_mod != '' && $nehops_d_mod != null){
+      $nehops_d_m = new DateTime($data['nehops_mod_date']);
+      $nehops_d_mod = $nehops_d_m->format('Y/m/d');
+    } else {
+      $nehops_d_mod = '';
+    }
 
     $sql2 = 'SELECT * FROM banquet_sales_dept WHERE sales_dept_id = ?';
     $stmt2 = $dbh->prepare($sql2);
@@ -553,6 +560,7 @@ function getDetail2($reservation_id) {
       'nehops_d_created' => $nehops_d_created, // NEHOPS登録日
       'nehops_d_decided' => $nehops_d_decided, // NEHOPS決定日
       'nehops_d_tentative' => $nehops_d_tentative, // NEHOPS仮予約日
+      'nehops_d_mod' => $nehops_d_mod, // NEHOPS最終更新日
       'pic' => $data['pic'], // 担当者名（全角変換）
       'pic_id' => $data['pic_id'], // 担当者ID
       'agent_id' => $data['agent_id'], // エージェントID
@@ -598,6 +606,50 @@ function getDetail($scheid) {
   $start = $startObj->format('H:i');
   $end = $endObj->format('H:i');
 
+  $cancel_date = $data['cancel_date'];
+  if ($cancel_date != '0000-00-00' && $cancel_date != '' && $cancel_date != null) {
+    $cancelObj = new DateTime($data['cancel_date']);
+    $cancel_date = $cancelObj->format('Y/m/d');
+  } else {
+    $cancel_date = '';
+  }
+  $due_date = $data['due_date'];
+  if ($due_date != '0000-00-00' && $due_date != '' && $due_date != null) {
+    $dueObj = new DateTime($data['due_date']);
+    $due_date = $dueObj->format('Y/m/d');
+  } else {
+    $due_date = '';
+  } 
+  $nehops_d_created = $data['nehops_d_created'];
+  if ($nehops_d_created != '0000-00-00' && $nehops_d_created != '' && $nehops_d_created != null) {
+    $nehops_d_c = new DateTime($data['nehops_d_created']);
+    $nehops_d_created = $nehops_d_c->format('Y/m/d');
+  } else {
+    $nehops_d_created = '';
+  }
+  $nehops_d_decided = $data['nehops_d_decided'];
+  if ($nehops_d_decided != '0000-00-00' && $nehops_d_decided != '' && $nehops_d_decided != null) {
+    $nehops_d_d = new DateTime($data['nehops_d_decided']);
+    $nehops_d_decided = $nehops_d_d->format('Y/m/d');
+  } else {
+    $nehops_d_decided = '';
+  }
+  $nehops_d_tentative = $data['nehops_d_tentative'];
+  if ($nehops_d_tentative != '0000-00-00' &&  $nehops_d_tentative != '' && $nehops_d_tentative != null) {
+    $nehops_d_t = new DateTime($data['nehops_d_tentative']);
+    $nehops_d_tentative = $nehops_d_t->format('Y/m/d');
+  } else {
+    $nehops_d_tentative = '';
+  } 
+  $nehops_d_mod=$data['nehops_mod_date'];
+  if ($nehops_d_mod != '0000-00-00' && $nehops_d_mod != '' && $nehops_d_mod != null) {
+    $nehops_d_m = new DateTime($data['nehops_mod_date']);
+    $nehops_d_mod = $nehops_d_m->format('Y/m/d');
+  } else {
+    $nehops_d_mod = '';
+  }
+ 
+  
   $room_id = $data['room_id'];
   $room_name = $data['room_name'];
 
@@ -681,7 +733,14 @@ function getDetail($scheid) {
     'カテゴリ' => $category_name,
     'レイアウト' => $layout_name,
     'レイアウトID' => $layout_id,
-    'デジサイ表示' => $enable
+    'デジサイ表示' => $enable,
+    '登録日' => $nehops_d_created,
+    '仮登録日' => $nehops_d_tentative,
+    '仮登録期限' => $due_date,
+    'キャンセル日' => $cancel_date,
+    '決定日' => $nehops_d_decided,
+    '最終更新日' => $nehops_d_mod
+
   );
 
   // ====================

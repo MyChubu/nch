@@ -134,6 +134,10 @@ $subtotal_amount = $array['subtotal_amount'];
             <th>決定登録</th>
             <td><?=$detail['nehops_d_decided']!="" ? $detail['nehops_d_decided'] : "-" ?></td>
           </tr>
+          <tr>
+            <th>最終更新日</th>
+            <td><?=$detail['nehops_d_mod']!="" ? $detail['nehops_d_mod'] : "-" ?></td>
+          </tr>
       </table>
     </div>
     <?php endif; ?>
