@@ -55,29 +55,29 @@ $items = array(
   'room'
 );
 $message = '';
-if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
+if (isset($_REQUEST['search']) && (int)$_REQUEST['search'] === 1) {
 
   // ------- 正規化（配列化・トリム） -------
-  $reservation_id     = isset($_POST['reservation_id'])     && $_POST['reservation_id'] !== '' ? (int)$_POST['reservation_id'] : null;
-  $date1  = isset($_POST['date1'])  && $_POST['date1'] !== '' ? $_POST['date1'] : null;
-  $date2  = isset($_POST['date2'])  && $_POST['date2'] !== '' ? $_POST['date2'] : null;
+  $reservation_id     = isset($_REQUEST['reservation_id'])     && $_REQUEST['reservation_id'] !== '' ? (int)$_REQUEST['reservation_id'] : null;
+  $date1  = isset($_REQUEST['date1'])  && $_REQUEST['date1'] !== '' ? $_REQUEST['date1'] : null;
+  $date2  = isset($_REQUEST['date2'])  && $_REQUEST['date2'] !== '' ? $_REQUEST['date2'] : null;
 
   // status/room は単一でも配列に寄せる
   $status = [];
-  if (isset($_POST['status'])) {
-    $status = is_array($_POST['status']) ? $_POST['status'] : [$_POST['status']];
+  if (isset($_REQUEST['status'])) {
+    $status = is_array($_REQUEST['status']) ? $_REQUEST['status'] : [$_REQUEST['status']];
     $status = array_values(array_filter(array_map('intval', $status), fn($v)=>$v!==0)); // 0除外
   }
   $rooms = [];
-  if (isset($_POST['room'])) {
-    $rooms = is_array($_POST['room']) ? $_POST['room'] : [$_POST['room']];
+  if (isset($_REQUEST['room'])) {
+    $rooms = is_array($_REQUEST['room']) ? $_REQUEST['room'] : [$_REQUEST['room']];
     $rooms = array_values(array_filter(array_map('intval', $rooms), fn($v)=>$v!==0));
   }
 
-  $reservation_name = isset($_POST['reservation_name']) ? trim((string)$_POST['reservation_name']) : '';
-  $agent            = isset($_POST['agent']) && $_POST['agent'] !== '' ? $_POST['agent'] : null; // 0=直販
-  $agent_name       = isset($_POST['agent_name']) ? trim((string)$_POST['agent_name']) : '';
-  $pic              = isset($_POST['pic']) && $_POST['pic'] !== '' ? $_POST['pic'] : null;
+  $reservation_name = isset($_REQUEST['reservation_name']) ? trim((string)$_REQUEST['reservation_name']) : '';
+  $agent            = isset($_REQUEST['agent']) && $_REQUEST['agent'] !== '' ? $_REQUEST['agent'] : null; // 0=直販
+  $agent_name       = isset($_REQUEST['agent_name']) ? trim((string)$_REQUEST['agent_name']) : '';
+  $pic              = isset($_REQUEST['pic']) && $_REQUEST['pic'] !== '' ? $_REQUEST['pic'] : null;
 
   // ------- WHERE句組み立て -------
   $whereParts = [];
@@ -127,7 +127,7 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
 
   // 予約名（部分一致）
   // --- WHERE句の組み立て中（reservation_name） ---
-  $needleReservationName = isset($_POST['reservation_name']) ? (string)$_POST['reservation_name'] : '';
+  $needleReservationName = isset($_REQUEST['reservation_name']) ? (string)$_REQUEST['reservation_name'] : '';
   if (($like = makeLikeWithEscape($needleReservationName)) !== null) {
     $whereParts[] = "reservation_name LIKE :reservation_name ESCAPE '!'";
     $params[':reservation_name'] = $like;
@@ -150,7 +150,7 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
   }
 
   // --- WHERE句の組み立て中（agent_name） ---
-  $needleAgentName = isset($_POST['agent_name']) ? (string)$_POST['agent_name'] : '';
+  $needleAgentName = isset($_REQUEST['agent_name']) ? (string)$_REQUEST['agent_name'] : '';
   if (($like = makeLikeWithEscape($needleAgentName)) !== null) {
     // ビューに agent_name カラムがある前提。違う場合は実カラム名に変更してください。
     $whereParts[] = "agent_name LIKE :agent_name ESCAPE '!'";
@@ -245,7 +245,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div id="controller">
       <div id="controller_left">
         <div class="searchbox">
-          <form action="search.php" method="post" enctype="multipart/form-data">
+          <form action="search.php" method="get" enctype="multipart/form-data">
           <div>
             予約ID：
             <input type="number" name="reservation_id" id="reservation_id" value="<?= $reservation_id ? htmlspecialchars($reservation_id) : '' ?>" size="10">
