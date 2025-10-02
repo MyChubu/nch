@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 ?>
 <?php
 require_once('../../common/conf.php');
@@ -45,8 +45,8 @@ function makeLikeWithEscape(string $s): ?string {
 
 $items = array(
   'reservation_id',
-  'reservation_date1',
-  'reservation_date2',
+  'date1',
+  'date2',
   'status',
   'reservation_name',
   'agent',
@@ -59,8 +59,8 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
 
   // ------- 正規化（配列化・トリム） -------
   $reservation_id     = isset($_POST['reservation_id'])     && $_POST['reservation_id'] !== '' ? (int)$_POST['reservation_id'] : null;
-  $reservation_date1  = isset($_POST['reservation_date1'])  && $_POST['reservation_date1'] !== '' ? $_POST['reservation_date1'] : null;
-  $reservation_date2  = isset($_POST['reservation_date2'])  && $_POST['reservation_date2'] !== '' ? $_POST['reservation_date2'] : null;
+  $date1  = isset($_POST['date1'])  && $_POST['date1'] !== '' ? $_POST['date1'] : null;
+  $date2  = isset($_POST['date2'])  && $_POST['date2'] !== '' ? $_POST['date2'] : null;
 
   // status/room は単一でも配列に寄せる
   $status = [];
@@ -75,9 +75,9 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
   }
 
   $reservation_name = isset($_POST['reservation_name']) ? trim((string)$_POST['reservation_name']) : '';
-  $agent            = isset($_POST['agent']) && $_POST['agent'] !== '' ? (int)$_POST['agent'] : null; // 0=直販
+  $agent            = isset($_POST['agent']) && $_POST['agent'] !== '' ? $_POST['agent'] : null; // 0=直販
   $agent_name       = isset($_POST['agent_name']) ? trim((string)$_POST['agent_name']) : '';
-  $pic              = isset($_POST['pic']) && $_POST['pic'] !== '' ? (int)$_POST['pic'] : null;
+  $pic              = isset($_POST['pic']) && $_POST['pic'] !== '' ? $_POST['pic'] : null;
 
   // ------- WHERE句組み立て -------
   $whereParts = [];
@@ -89,21 +89,27 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
   }
 
   // 日付レンジ（どちらか片方のみでもOK）
-  // ※ view_monthly_new_reservation2 側の実施日カラム名は "reservation_date" を想定
-  $colDate = 'reservation_date';
-  $d1 = $reservation_date1 ? DateTime::createFromFormat('Y-m-d', $reservation_date1) : null;
-  $d2 = $reservation_date2 ? DateTime::createFromFormat('Y-m-d', $reservation_date2) : null;
+  // ※ view_monthly_new_reservation2 側の実施日カラム名は "date" を想定
+  $colDate = 'date';
+  $d1 = $date1 ? DateTime::createFromFormat('Y-m-d', $date1) : null;
+  $d2 = $date2 ? DateTime::createFromFormat('Y-m-d', $date2) : null;
   if ($d1 && $d2) {
-    // 入替え補正
+    // 両方入力あり → 入替補正
     if ($d1 > $d2) [$d1, $d2] = [$d2, $d1];
     $whereParts[] = "$colDate BETWEEN :d1 AND :d2";
     $params[':d1'] = $d1->format('Y-m-d');
     $params[':d2'] = $d2->format('Y-m-d');
+
   } elseif ($d1) {
-    $whereParts[] = "$colDate >= :d1";
+    // 片方だけ（開始日だけ）→ 同じ値を両方に
+    $whereParts[] = "$colDate BETWEEN :d1 AND :d2";
     $params[':d1'] = $d1->format('Y-m-d');
+    $params[':d2'] = $d1->format('Y-m-d');
+
   } elseif ($d2) {
-    $whereParts[] = "$colDate <= :d2";
+    // 片方だけ（終了日だけ）→ 同じ値を両方に
+    $whereParts[] = "$colDate BETWEEN :d1 AND :d2";
+    $params[':d1'] = $d2->format('Y-m-d');
     $params[':d2'] = $d2->format('Y-m-d');
   }
 
@@ -177,7 +183,7 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
     $where = 'WHERE '.implode(' AND ', $whereParts);
 
     // ------- 実行 -------
-    $sql = "SELECT * FROM `view_daily_subtotal3` $where ORDER BY reservation_date ASC, reservation_id ASC";
+    $sql = "SELECT * FROM `view_daily_subtotal3` $where ORDER BY date ASC, reservation_id ASC";
     $stmt = $dbh->prepare($sql);
     foreach ($params as $k => $v) {
       $stmt->bindValue($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
@@ -242,13 +248,13 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <form action="search.php" method="post" enctype="multipart/form-data">
           <div>
             予約ID：
-            <input type="number" name="reservation_id" id="reservation_id" value="" size="10">
+            <input type="number" name="reservation_id" id="reservation_id" value="<?= $reservation_id ? htmlspecialchars($reservation_id) : '' ?>" size="10">
           </div>
           <div>
             実施日：
-            <input type="date" name="reservation_date1" id="reservation_date1" value="">
+            <input type="date" name="date1" id="date1" value="<?= $d1 ? $d1->format('Y-m-d') : '' ?>">
             ～
-            <input type="date" name="reservation_date2" id="reservation_date2" value="">
+            <input type="date" name="date2" id="date2" value="<?= $d2 && $d1 != $d2 ? $d2->format('Y-m-d') : '' ?>">
           </div>
           <div>状態：
             <label><input type="checkbox" name="status[]" value="1" <?php if($status && in_array(1, $status)) echo 'checked'; ?>>決定</label>
@@ -265,8 +271,8 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <select name="agent" id="agent">
               <option value="">--</option>
               <option value="0">直販</option>
-              <?php foreach($agents as $agent): ?>
-                <option value="<?=$agent['agent_id'] ?>"><?=$agent['agent_group'] ?></option>
+              <?php foreach($agents as $agentid): ?>
+                <option value="<?=$agentid['agent_id'] ?>"<?=$agent && $agentid['agent_id'] == $agent ? ' selected' : '' ?>><?=$agentid['agent_group'] ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -278,8 +284,8 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             担当者：
             <select name="pic" id="pic">
               <option value="">--</option>
-              <?php foreach($pics as $pic): ?>
-                <option value="<?=$pic['pic_id'] ?>"><?=$pic['name'] ?></option>
+              <?php foreach($pics as $picid): ?>
+                <option value="<?=$picid['pic_id'] ?>"<?=$pic && $picid['pic_id'] == $pic ? ' selected' : '' ?>><?=$picid['name'] ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -317,12 +323,13 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>実施日</th>
             <th>状態</th>
             <th>種類</th>
+            <th>予約ID</th>
             <th>予約名</th>
+            <th>会場</th>
             <th>販売</th>
             <th>人数</th>
             <th>金額</th>
             <th>担当名</th>
-            <th>予約ID</th>
             <th>代理店名</th>
             <th>仮期限</th>
             <th>予約登録</th>
@@ -330,9 +337,52 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>キャンセル日</th>
             <th>決定日</th>
             <th>memo</th>
-            <th>最終</th>
           </tr>
         </thead>
+        <tbody>
+          <?php if(!empty($rsvs)): ?>
+            <?php foreach($rsvs as $rsv): ?>
+              <tr>
+                <td><?=htmlspecialchars($rsv['date']) ?></td>
+                <td>
+                  <?php
+                    switch($rsv['status']){
+                      case 1:
+                        echo "決";
+                        break;
+                      case 2:
+                        echo "仮";
+                        break;
+                      case 3:
+                        echo "営";
+                        break;
+                      case 5:
+                        echo "C";
+                        break;
+                      default:
+                        echo "-";
+                    }
+                  ?>
+                </td>
+                <td></td>
+                <td><a href="connection_list.php?resid=<?=$rsv['reservation_id'] ?>"><?=htmlspecialchars($rsv['reservation_id']) ?></a></td>
+                <td><?=htmlspecialchars($rsv['reservation_name']) ?></td>
+                <td><?=htmlspecialchars($rsv['room_name']) ?></td>
+                <td><?=htmlspecialchars($rsv['agent_name']) ?></td>
+                <td><?=htmlspecialchars($rsv['people']) ?></td>
+                <td><?=htmlspecialchars($rsv['total_price']) ?></td>
+                <td><?=htmlspecialchars($rsv['pic']) ?></td>
+                <td><?=htmlspecialchars($rsv['agent_name2']) ?></td>
+                <td></td>
+                <td><?=htmlspecialchars($rsv['d_created']) ?></td>
+                <td></td>
+                <td><?=htmlspecialchars($rsv['cancel_date']) ?></td>
+                <td><?=htmlspecialchars($rsv['d_decided']) ?></td>
+                <td><?=htmlspecialchars($rsv['memo']) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
       </table>
     </div>
 
