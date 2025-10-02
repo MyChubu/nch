@@ -35,6 +35,14 @@ $date = date('Y-m-d');
 $w = date('w');
 $wd= $week[$w];
 
+// 関数定義
+function makeLikeWithEscape(string $s): ?string {
+  $s = trim($s);
+  if ($s === '') return null;
+  // ! を !!、% を !%、_ を !_ に置換し、ESCAPE '!' で安全に LIKE 検索
+  return '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $s) . '%';
+}
+
 $items = array(
   'reservation_id',
   'reservation_date1',
@@ -46,7 +54,7 @@ $items = array(
   'pic',
   'room'
 );
-
+$message = '';
 if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
 
   // ------- 正規化（配列化・トリム） -------
@@ -112,10 +120,14 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
   }
 
   // 予約名（部分一致）
-  if ($reservation_name !== '') {
-    $whereParts[] = 'reservation_name LIKE :reservation_name ESCAPE \'\\\'';
-    $params[':reservation_name'] = '%'.addcslashes($reservation_name, '\%_').'%';
+  // --- WHERE句の組み立て中（reservation_name） ---
+  $needleReservationName = isset($_POST['reservation_name']) ? (string)$_POST['reservation_name'] : '';
+  if (($like = makeLikeWithEscape($needleReservationName)) !== null) {
+    $whereParts[] = "reservation_name LIKE :reservation_name ESCAPE '!'";
+    $params[':reservation_name'] = $like;
   }
+
+
 
   // 代理店（グループ選択: 0=直販 or agent_id）
   // ビュー側のカラム名は運用に合わせて変更してください：
@@ -131,10 +143,12 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
     }
   }
 
-  // 代理店名（部分一致／ビュー側に agent_name がある想定）
-  if ($agent_name !== '') {
-    $whereParts[] = 'agent_name LIKE :agent_name ESCAPE \'\\\'';
-    $params[':agent_name'] = '%'.addcslashes($agent_name, '\%_').'%';
+  // --- WHERE句の組み立て中（agent_name） ---
+  $needleAgentName = isset($_POST['agent_name']) ? (string)$_POST['agent_name'] : '';
+  if (($like = makeLikeWithEscape($needleAgentName)) !== null) {
+    // ビューに agent_name カラムがある前提。違う場合は実カラム名に変更してください。
+    $whereParts[] = "agent_name LIKE :agent_name ESCAPE '!'";
+    $params[':agent_name'] = $like;
   }
 
   // 担当者（pic_id がある想定）
@@ -155,21 +169,26 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
   }
 
   $where = '';
-  if (!empty($whereParts)) {
+  if (empty($whereParts)) {
+    $rsvs = [];
+    $count = 0;
+    $message = '検索条件を指定してください。';
+  } else {
     $where = 'WHERE '.implode(' AND ', $whereParts);
-  }
 
-  // ------- 実行 -------
-  $sql = "SELECT * FROM `view_monthly_new_reservation2` $where ORDER BY reservation_date ASC, reservation_id ASC";
-  $stmt = $dbh->prepare($sql);
-  foreach ($params as $k => $v) {
-    $stmt->bindValue($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
-  }
-  $stmt->execute();
+    // ------- 実行 -------
+    $sql = "SELECT * FROM `view_daily_subtotal3` $where ORDER BY reservation_date ASC, reservation_id ASC";
+    $stmt = $dbh->prepare($sql);
+    foreach ($params as $k => $v) {
+      $stmt->bindValue($k, $v, is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    }
+    $stmt->execute();
 
-  $rsvs  = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  $count = count($rsvs);
-  var_dump($sql, $params, $count); // デバッグ
+    $rsvs  = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $count = count($rsvs);
+    $message = $count . ' 件見つかりました。';
+    var_dump($sql, $params, $count); // デバッグ
+  }
 }
 
 
@@ -177,7 +196,7 @@ if (isset($_POST['search']) && (int)$_POST['search'] === 1) {
 $sql = "SELECT `banquet_room_id`, `name`,`floor` FROM `banquet_rooms` WHERE `status` = 1 ORDER BY `order`, `banquet_room_id`";
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
-$rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$roomList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 //担当者リスト
 $sql = "SELECT `pic_id`, `name` FROM `users` WHERE `status` = 1 AND `group` IN(1,5) ORDER BY `user_id`";
@@ -232,14 +251,14 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <input type="date" name="reservation_date2" id="reservation_date2" value="">
           </div>
           <div>状態：
-            <label><input type="checkbox" name="status[]" value="1">決定</label>
-            <label><input type="checkbox" name="status[]" value="2">仮予約</label>
-            <label><input type="checkbox" name="status[]" value="3">営業押さえ</label>
-            <label><input type="checkbox" name="status[]" value="5">キャンセル</label>
+            <label><input type="checkbox" name="status[]" value="1" <?php if($status && in_array(1, $status)) echo 'checked'; ?>>決定</label>
+            <label><input type="checkbox" name="status[]" value="2" <?php if($status && in_array(2, $status)) echo 'checked'; ?>>仮予約</label>
+            <label><input type="checkbox" name="status[]" value="3" <?php if($status && in_array(3, $status)) echo 'checked'; ?>>営業押さえ</label>
+            <label><input type="checkbox" name="status[]" value="5" <?php if($status && in_array(5, $status)) echo 'checked'; ?>>キャンセル</label>
           </div>
           <div>
             予約名：
-            <input type="text" name="reservation_name" id="reservation_name" value="" size="20">
+            <input type="text" name="reservation_name" id="reservation_name" value="<?= $needleReservationName ? htmlspecialchars($needleReservationName) : '' ?>" size="20">
           </div>
           <div>
             代理店種類：
@@ -253,7 +272,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
           <div>
             代理店名：
-            <input type="text" name="agent_name" id="agent_name" value="" size="20">
+            <input type="text" name="agent_name" id="agent_name" value="<?= $needleAgentName ? htmlspecialchars($needleAgentName) : '' ?>" size="20">
           </div>
           <div>
             担当者：
@@ -267,9 +286,9 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div>
             使用会場：
             <?php $flr = ""; ?>
-            <?php foreach($rooms as $room): ?>
+            <?php foreach($roomList as $room): ?>
               <?php if($flr != $room['floor']): ?><br><?php endif; ?>
-              <label><input type="checkbox" name="room[]" id="" value="<?=$room['banquet_room_id'] ?>"><?=$room['name'] ?>　</label>
+              <label><input type="checkbox" name="room[]" id="" value="<?=$room['banquet_room_id'] ?>" <?php if($rooms && in_array($room['banquet_room_id'], $rooms)) echo 'checked'; ?>><?=$room['name'] ?></label>
             <?php $flr = $room['floor']; ?>
             <?php endforeach; ?>
           </div>
@@ -288,7 +307,10 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <h1>案件検索</h1>
     </div>
     <div>
-      <h2>決定予約</h2>
+      <h2>検索結果</h2>
+      <?php if($message !== ''): ?>
+        <p><?=htmlspecialchars($message) ?></p>
+      <?php endif; ?>
       <table class="">
         <thead>
           <tr>
