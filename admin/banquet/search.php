@@ -153,7 +153,7 @@ if (isset($_REQUEST['search']) && (int)$_REQUEST['search'] === 1) {
   $needleAgentName = isset($_REQUEST['agent_name']) ? (string)$_REQUEST['agent_name'] : '';
   if (($like = makeLikeWithEscape($needleAgentName)) !== null) {
     // ビューに agent_name カラムがある前提。違う場合は実カラム名に変更してください。
-    $whereParts[] = "agent_name LIKE :agent_name ESCAPE '!'";
+    $whereParts[] = "agent_name2 LIKE :agent_name ESCAPE '!'";
     $params[':agent_name'] = $like;
   }
 
