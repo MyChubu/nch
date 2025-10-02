@@ -370,7 +370,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?=htmlspecialchars($rsv['room_name']) ?></td>
                 <td><?=htmlspecialchars($rsv['agent_name']) ?></td>
                 <td><?=htmlspecialchars($rsv['people']) ?></td>
-                <td><?=htmlspecialchars($rsv['total_price']) ?></td>
+                <td><?=htmlspecialchars($rsv['net']) ?></td>
                 <td><?=htmlspecialchars($rsv['pic']) ?></td>
                 <td><?=htmlspecialchars($rsv['agent_name2']) ?></td>
                 <td></td>
