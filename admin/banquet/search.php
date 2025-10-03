@@ -193,7 +193,7 @@ if (isset($_REQUEST['search']) && (int)$_REQUEST['search'] === 1) {
     $rsvs  = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $count = count($rsvs);
     $message = $count . ' 件見つかりました。';
-    var_dump($sql, $params, $count); // デバッグ
+    // var_dump($sql, $params, $count); // デバッグ
   }
 }
 
@@ -324,6 +324,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>状態</th>
             <th>種類</th>
             <th>予約ID</th>
+            <th>枝番</th>
             <th>予約名</th>
             <th>会場</th>
             <th>販売</th>
@@ -336,7 +337,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>仮予約日</th>
             <th>キャンセル日</th>
             <th>決定日</th>
-            <th>memo</th>
+            <th>最終更新</th>
           </tr>
         </thead>
         <tbody>
@@ -344,41 +345,23 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach($rsvs as $rsv): ?>
               <tr>
                 <td><?=htmlspecialchars($rsv['date']) ?></td>
-                <td>
-                  <?php
-                    switch($rsv['status']){
-                      case 1:
-                        echo "決";
-                        break;
-                      case 2:
-                        echo "仮";
-                        break;
-                      case 3:
-                        echo "営";
-                        break;
-                      case 5:
-                        echo "C";
-                        break;
-                      default:
-                        echo "-";
-                    }
-                  ?>
-                </td>
-                <td></td>
+                <td><?=statusletter($rsv['status']) ?></td>
+                <td><?= salescatletter($rsv['banquet_category_id']) ?></td>
                 <td><a href="connection_list.php?resid=<?=$rsv['reservation_id'] ?>"><?=htmlspecialchars($rsv['reservation_id']) ?></a></td>
-                <td><?=htmlspecialchars($rsv['reservation_name']) ?></td>
+                <td><a href="detail.php?scheid=<?= $rsv['sche_id'] ?>"><?=htmlspecialchars($rsv['branch']) ?></td>
+                <td><?=cleanLanternName2(htmlspecialchars($rsv['reservation_name']),30) ?></td>
                 <td><?=htmlspecialchars($rsv['room_name']) ?></td>
                 <td><?=htmlspecialchars($rsv['agent_name']) ?></td>
                 <td><?=htmlspecialchars($rsv['people']) ?></td>
-                <td><?=htmlspecialchars($rsv['net']) ?></td>
-                <td><?=htmlspecialchars($rsv['pic']) ?></td>
-                <td><?=htmlspecialchars($rsv['agent_name2']) ?></td>
-                <td></td>
+                <td><?=$rsv['net'] ? number_format(htmlspecialchars($rsv['net'])) : '' ?></td>
+                <td><?=cleanLanternName(htmlspecialchars($rsv['pic'])) ?></td>
+                <td><?=cleanLanternName2(htmlspecialchars($rsv['agent_name2']),30) ?></td>
+                <td><?=htmlspecialchars($rsv['due_date']) ?></td>
                 <td><?=htmlspecialchars($rsv['d_created']) ?></td>
-                <td></td>
+                <td><?=htmlspecialchars($rsv['d_tentative']) ?></td>
                 <td><?=htmlspecialchars($rsv['cancel_date']) ?></td>
                 <td><?=htmlspecialchars($rsv['d_decided']) ?></td>
-                <td><?=htmlspecialchars($rsv['memo']) ?></td>
+                <td><?=htmlspecialchars($rsv['d_edited']) ?></td>
               </tr>
             <?php endforeach; ?>
           <?php endif; ?>

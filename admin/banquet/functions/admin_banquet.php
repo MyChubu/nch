@@ -1232,7 +1232,8 @@ function cleanLanternName2($name, $max_length = 10) {
   // 先頭の半角・全角スペースを削除
   $name = preg_replace("/^[ 　]+/u", "", $name);
 
-  $name = explode("※", $name)[0];
+  $name_parts = preg_split('/[※【]/u', $name);
+  $name = $name_parts[0];
 
   $name = preg_replace("/[【※]/u", " ", $name); // 各文字単独で置換
 
