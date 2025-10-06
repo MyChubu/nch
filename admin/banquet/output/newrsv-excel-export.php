@@ -19,6 +19,7 @@ $ed = (new DateTime($sd))->modify('last day of +0 month')->format('Y-m-d');
 
 $cxl=$_GET['cxl'] ?? 'off'; // キャンセル表示
 
+$year_month = (new DateTime($sd))->format('Y年m月');
 
 function rsvOneLetter($s) {
   return match($s) {
@@ -49,7 +50,11 @@ function fetchReservations($dbh, $sd, $ed) {
     `due_date`,
     `cancel_date`,
     `memo`
-  FROM `view_monthly_new_reservation2` WHERE `reservation_date` >= :sd AND `d_created` BETWEEN :sdt AND :edt
+  FROM `view_monthly_new_reservation2` 
+  WHERE `reservation_date` >= :sd 
+  AND `d_created` BETWEEN :sdt AND :edt
+  AND `reservation_name` NOT LIKE '%名古屋クラウンホテル%'
+  AND `purpose_id` NOT in (93)
   GROUP BY
     `reservation_id`,
     `reservation_date`,
@@ -245,8 +250,9 @@ function writeSection(&$sheet, $title, $data, $headers, $startRow) {
   return $startRow + 1; // 1行空けて次のセクションへ
 }
 
-
-$row = 1;
+$sheet->setCellValue("A1", $year_month);
+$sheet->getStyle("A1")->getFont()->setBold(true)->setSize(12);
+$row = 2;
 $row = writeSection($sheet, '仮予約', $tentatives, $headers, $row);
 $row = writeSection($sheet, '決定予約', $finals, $headers, $row);
 

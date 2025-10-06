@@ -45,6 +45,7 @@ $year_mon = (new DateTime($sd))->format('Y年m月');
 $finals= array();
 $tentatives= array();
 $cancelleds= array();
+$zeros= array();
 
 $sql ="SELECT
   `reservation_id`,
@@ -68,7 +69,11 @@ $sql ="SELECT
   `due_date`,
   `cancel_date`,
   `memo`
-FROM `view_monthly_new_reservation2` WHERE `reservation_date` >= :sd AND `d_created` BETWEEN :sdt AND :edt
+FROM `view_monthly_new_reservation2` 
+WHERE `reservation_date` >= :sd 
+  AND `d_created` BETWEEN :sdt AND :edt
+  AND `reservation_name` NOT LIKE '%名古屋クラウンホテル%'
+  AND `purpose_id` NOT in (93)
 GROUP BY
   `reservation_id`,
   `reservation_date`,
@@ -99,22 +104,33 @@ if($count > 0){
 
   foreach($rsvs as $rsv) {
     $rsv['orig_status'] = $rsv['status'];
-    $rsv['orig_status_name'] = rsvOneLetter($rsv['status_name']);
     if($rsv['status'] ==1 && $rsv['d_decided'] > $ed){
       $rsv['status'] = 2;
-      $rsv['status_name'] = '仮';
     }
     if($rsv['status'] ==5 && $rsv['cancel_date'] > $ed){
       $rsv['status'] = 2;
-      $rsv['status_name'] = '仮';
     }
     if($rsv['status'] ==2 && $rsv['d_decided']){
       if($rsv['d_decided'] <= $ed){
         $rsv['status'] = 1;
-        $rsv['status_name'] = '決';
       }
       
     }
+    if($rsv['people'] === null){
+      $rsv['people'] = 0;
+    }
+    if($rsv['net'] === null){
+      $rsv['net'] = 0;
+    }
+    $rsv['zerocheck'] = 0;
+    if($rsv['net'] == 0 || $rsv['people'] == 0){
+      $rsv['zerocheck'] = 1;
+    }
+
+    if($rsv['zerocheck'] == 1 && $rsv['status'] != 5){
+      $zeros[] = $rsv;
+    }
+
     if($rsv['status'] == 1){
       $finals[] = $rsv;
     }elseif($rsv['status'] == 2){
@@ -125,21 +141,6 @@ if($count > 0){
   }
 }
 
-function rsvOneLetter($s){
-  if($s ==1){
-    return '決';
-  }elseif($s ==2){
-    return '仮';
-  }elseif($s ==3){
-    return '営';
-  }elseif($s ==4){
-    return '待';
-  }elseif($s ==5){
-    return 'C';
-  }else{
-    return '他';
-  }
-}
 
 ?>
 <!DOCTYPE html>
@@ -187,12 +188,11 @@ function rsvOneLetter($s){
       <p><?= $year_mon ?>に新規獲得した予約のリストです。</p>
       <p>「最終」欄は本日（<?= $date ?>）の予約状況を示しています。</p>
     </div>
+
     <div>
-      <h2>決定予約</h2>
-      <p><?= $year_mon ?>に獲得し同月中に「決定」したもの</p>
-      <?php $people_total = 0; ?>
-      <?php $net_total = 0; ?>
-      <?php if(sizeof($finals) > 0): ?>
+      <h2>ZEROチェック</h2>
+      <p>新規獲得のうち、人数または金額が0のもの</p>
+      <?php if(sizeof($zeros) > 0): ?>
         <table class="">
           <thead>
             <tr>
@@ -213,10 +213,11 @@ function rsvOneLetter($s){
               <th>決定日</th>
               <th>memo</th>
               <th>最終</th>
+              <th>ZERO</th>
             </tr>
           </thead>
           <tbody>
-            <?php foreach($finals as $rsv): ?>
+            <?php foreach($zeros as $rsv): ?>
             <tr>
               <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
               <td><?= statusletter($rsv['status']) ?></td>
@@ -231,7 +232,6 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['people']): ?>
                   <?= htmlspecialchars($rsv['people']) ?>
-                  <?php $people_total += $rsv['people']; ?>
                 <?php else: ?>
                   0
                 <?php endif; ?>
@@ -239,7 +239,6 @@ function rsvOneLetter($s){
               <td class="num">
                 <?php if($rsv['net']): ?>
                   <?= number_format($rsv['net']) ?>
-                  <?php $net_total += $rsv['net']; ?>
                   <?php else: ?>
                   0
                 <?php endif; ?>
@@ -260,8 +259,6 @@ function rsvOneLetter($s){
               <td>
                 <?php if($rsv['due_date']): ?>
                   <?= htmlspecialchars($rsv['due_date']) ?>
-                <?php else: ?>
-                  &nbsp;
                 <?php endif; ?>
               </td>
               <td>
@@ -283,7 +280,7 @@ function rsvOneLetter($s){
                   <?= htmlspecialchars($rsv['cancel_date']) ?>
                 <?php else: ?>
                   &nbsp;
-                <?php endif; ?>
+                <?php endif; ?>   
               </td>
               <td>
                 <?php if($rsv['d_decided']): ?>
@@ -296,35 +293,19 @@ function rsvOneLetter($s){
               <td>
                 <?= statusletter($rsv['orig_status']) ?>
               </td>
+              <td>
+                <?= $rsv['zerocheck']==1 ? '<span class="zero"><i class="fa-solid fa-triangle-exclamation"></i></span>' : '&nbsp;' ?>
+              </td>
+              
             </tr>
             <?php endforeach; ?>
           </tbody>
-          <tfoot>
-            <tr>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th><?=number_format(sizeof($finals)) ?>件</th>
-              <th>&nbsp;</th>
-              <th><?= number_format($people_total) ?>人</th>
-              <th><?= number_format($net_total) ?></th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-            </tr>
-          </tfoot>
         </table>
       <?php else: ?>
         <p>該当する予約はありません。</p>
       <?php endif; ?>
     </div>
+
     <div>
       <h2>仮予約</h2>
       <p><?= $year_mon ?>に獲得し同月中は「仮予約」だったもの</p>
@@ -351,6 +332,7 @@ function rsvOneLetter($s){
               <th>決定日</th>
               <th>memo</th>
               <th>最終</th>
+              <th>ZERO</th>
             </tr>
           </thead>
           <tbody>
@@ -434,6 +416,9 @@ function rsvOneLetter($s){
               <td>
                 <?= statusletter($rsv['orig_status']) ?>
               </td>
+              <td>
+                <?= $rsv['zerocheck']==1 ? '<span class="zero"><i class="fa-solid fa-triangle-exclamation"></i></span>' : '&nbsp;' ?> 
+              </td>
             </tr>
             <?php endforeach; ?>
           </tbody>
@@ -456,6 +441,7 @@ function rsvOneLetter($s){
               <th>&nbsp;</th>
               <th>&nbsp;</th>
               <th>&nbsp;</th>
+              <th>&nbsp;</th>
             </tr>
           </tfoot>
         </table>
@@ -463,6 +449,151 @@ function rsvOneLetter($s){
         <p>該当する予約はありません。</p>
       <?php endif; ?>
     </div>
+
+    <div>
+      <h2>決定予約</h2>
+      <p><?= $year_mon ?>に獲得し同月中に「決定」したもの</p>
+      <?php $people_total = 0; ?>
+      <?php $net_total = 0; ?>
+      <?php if(sizeof($finals) > 0): ?>
+        <table class="">
+          <thead>
+            <tr>
+              <th>実施日</th>
+              <th>状態</th>
+              <th>種類</th>
+              <th>予約名</th>
+              <th>販売</th>
+              <th>人数</th>
+              <th>金額</th>
+              <th>担当名</th>
+              <th>予約ID</th>
+              <th>代理店名</th>
+              <th>仮期限</th>
+              <th>予約登録</th>
+              <th>仮予約日</th>
+              <th>キャンセル日</th>
+              <th>決定日</th>
+              <th>memo</th>
+              <th>最終</th>
+              <th>ZERO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach($finals as $rsv): ?>
+            <tr>
+              <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
+              <td><?= statusletter($rsv['status']) ?></td>
+              <td><?= salescatletter($rsv['sales_category_id']) ?></td>
+              <td><?= cleanLanternName(htmlspecialchars($rsv['reservation_name'])) ?></td>
+              <td><?php if($rsv['agent_id']): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td class="num">
+                <?php if($rsv['people']): ?>
+                  <?= htmlspecialchars($rsv['people']) ?>
+                  <?php $people_total += $rsv['people']; ?>
+                <?php else: ?>
+                  0
+                <?php endif; ?>
+              </td>
+              <td class="num">
+                <?php if($rsv['net']): ?>
+                  <?= number_format($rsv['net']) ?>
+                  <?php $net_total += $rsv['net']; ?>
+                  <?php else: ?>
+                  0
+                <?php endif; ?>
+              </td>
+              <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
+              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td>
+                <?php if($rsv['agent_id']): ?>
+                  <?php if($rsv['agent_id'] == 2999): ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name2'],10)) ?>
+                  <?php else: ?>
+                  <?= htmlspecialchars(cleanLanternName2($rsv['agent_name'])) ?>
+                  <?php endif; ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($rsv['due_date']): ?>
+                  <?= htmlspecialchars($rsv['due_date']) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($rsv['d_created']): ?>
+                  <?= htmlspecialchars($rsv['d_created']) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($rsv['d_tentative']): ?>
+                  <?= htmlspecialchars($rsv['d_tentative']) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($rsv['cancel_date']): ?>
+                  <?= htmlspecialchars($rsv['cancel_date']) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($rsv['d_decided']): ?>
+                  <?= htmlspecialchars($rsv['d_decided']) ?>
+                <?php else: ?>
+                  &nbsp;
+                <?php endif; ?>
+              </td>
+              <td><?= htmlspecialchars($rsv['memo']) ?></td>
+              <td>
+                <?= statusletter($rsv['orig_status']) ?>
+              </td>
+              <td>
+                <?= $rsv['zerocheck']==1 ? '<span class="zero"><i class="fa-solid fa-triangle-exclamation"></i></span>' : '&nbsp;' ?>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th><?=number_format(sizeof($finals)) ?>件</th>
+              <th>&nbsp;</th>
+              <th><?= number_format($people_total) ?>人</th>
+              <th><?= number_format($net_total) ?></th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </tfoot>
+        </table>
+      <?php else: ?>
+        <p>該当する予約はありません。</p>
+      <?php endif; ?>
+    </div>
+
     <div>
       <h2>キャンセル</h2>
       <p><?= $year_mon ?>に獲得し同月中に「キャンセル」になったもの</p>
@@ -489,6 +620,7 @@ function rsvOneLetter($s){
               <th>決定日</th>
               <th>memo</th>
               <th>最終</th>
+              <th>ZERO</th>
             </tr>
           </thead>
           <tbody>
@@ -572,6 +704,9 @@ function rsvOneLetter($s){
               <td>
                 <?= statusletter($rsv['orig_status']) ?>
               </td>
+              <td>
+                <?= $rsv['zerocheck']==1 ? '<span class="zero"><i class="fa-solid fa-triangle-exclamation"></i></span>' : '&nbsp;' ?>
+              </td>
             </tr>
             <?php endforeach; ?>
           </tbody>
@@ -584,6 +719,7 @@ function rsvOneLetter($s){
               <th>&nbsp;</th>
               <th><?= number_format($people_total) ?>人</th>
               <th><?= number_format($net_total) ?></th>
+              <th>&nbsp;</th>
               <th>&nbsp;</th>
               <th>&nbsp;</th>
               <th>&nbsp;</th>
