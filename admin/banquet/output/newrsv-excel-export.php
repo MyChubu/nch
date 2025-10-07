@@ -54,6 +54,8 @@ function fetchReservations($dbh, $sd, $ed) {
   WHERE `reservation_date` >= :sd 
   AND `d_created` BETWEEN :sdt AND :edt
   AND `reservation_name` NOT LIKE '%名古屋クラウンホテル%'
+  AND `reserver` NOT LIKE '%名古屋クラウンホテル%'
+  AND `reserver` NOT LIKE '%堀場産業%'
   AND `purpose_id` NOT in (93)
   GROUP BY
     `reservation_id`,

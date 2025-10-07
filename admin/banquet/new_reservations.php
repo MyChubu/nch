@@ -73,6 +73,8 @@ FROM `view_monthly_new_reservation2`
 WHERE `reservation_date` >= :sd 
   AND `d_created` BETWEEN :sdt AND :edt
   AND `reservation_name` NOT LIKE '%名古屋クラウンホテル%'
+  AND `reserver` NOT LIKE '%名古屋クラウンホテル%'
+  AND `reserver` NOT LIKE '%堀場産業%'
   AND `purpose_id` NOT in (93)
 GROUP BY
   `reservation_id`,
@@ -123,7 +125,7 @@ if($count > 0){
       $rsv['net'] = 0;
     }
     $rsv['zerocheck'] = 0;
-    if($rsv['net'] == 0 || $rsv['people'] == 0){
+    if($rsv['orig_status']!=5 && ($rsv['net'] == 0 || $rsv['people'] == 0)){
       $rsv['zerocheck'] = 1;
     }
 
