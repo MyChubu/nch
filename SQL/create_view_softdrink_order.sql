@@ -1,4 +1,7 @@
-SELECT `S`.`banquet_schedule_id` AS `sche_id`,
+
+CREATE VIEW `view_softdrink_order` AS
+SELECT
+`S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`status` AS `status`,
 `S`.`status_name` AS `status_name`,
 `S`.`reservation_id` AS `reservation_id`,
@@ -31,7 +34,7 @@ SELECT `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`nehops_d_decided` AS `d_decided`,
 `S`.`nehops_d_tentative` AS `d_tentative`,
 `S`.`nehops_edited` AS `d_edited`
-from (
+FROM (
   (
         (
           (
@@ -57,13 +60,12 @@ from (
     (`S`.`agent_id` = `AG`.`agent_id`)
   )
 )
-where `S`.`banquet_schedule_id` is not null
+WHERE `S`.`banquet_schedule_id` IS NOT NULL
 AND `S`.`status` IN (1,2)
 AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001')
-AND `S`.`date` BETWEEN '2025-09-01' AND '2025-12-31'
-  
-group by `S`.`date`,
+
+GROUP BY `S`.`date`,
 `S`.`room_id`
-order by 
+ORDER BY
 `S`.`date`,
 `S`.`start`;
