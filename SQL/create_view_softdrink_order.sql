@@ -68,8 +68,8 @@ FROM (
 )
 WHERE `S`.`banquet_schedule_id` IS NOT NULL
 AND `S`.`status` IN (1,2)
-/*AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001') */
-AND `I`.`name_short` IN ('ペット茶','ペット水')
+AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001')
+-- AND `I`.`name_short` IN ('ペット茶','ペット水')
 ORDER BY
 `S`.`date`,
 `S`.`start`;
