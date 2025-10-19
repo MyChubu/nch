@@ -16,6 +16,8 @@ SELECT
 `S`.`due_date` AS `due_date`,
 `C`.`item_gene_id` AS `item_gene_id`,
 `C`.`item_name` AS `item_name`,
+`I`.`name` AS `item_name2`,
+`I`.`name_short` AS `item_name_short`,
 `C`.`qty` AS `qty`,
 `C`.`unit_price` AS `unit_price`,
 `C`.`amount_gross` AS `gross`,
@@ -36,6 +38,7 @@ SELECT
 `S`.`nehops_edited` AS `d_edited`
 FROM (
   (
+    (
         (
           (
             (
@@ -56,13 +59,17 @@ FROM (
         ) LEFT JOIN `banquet_rooms` `R` ON(
           (`S`.`room_id` = `R`.`banquet_room_id`)
         )
+      ) LEFT JOIN `banquet_items` `I` ON(
+        (`C`.`item_gene_id` = `I`.`banquet_item_id`)
+      )
   ) LEFT JOIN `banquet_agents` `AG` ON(
     (`S`.`agent_id` = `AG`.`agent_id`)
   )
 )
 WHERE `S`.`banquet_schedule_id` IS NOT NULL
 AND `S`.`status` IN (1,2)
-AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001')
+/*AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001') */
+AND `I`.`name_short` IN ('ペット茶','ペット水')
 ORDER BY
 `S`.`date`,
 `S`.`start`;
