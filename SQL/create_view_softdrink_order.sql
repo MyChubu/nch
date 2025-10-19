@@ -39,33 +39,30 @@ FROM (
         (
           (
             (
-              `banquet_schedules` `S` left join `banquet_charges` `C` on(
+              `banquet_schedules` `S` LEFT JOIN `banquet_charges` `C` ON(
                 (
                   (`C`.`reservation_id` = `S`.`reservation_id`) 
-                  and (`C`.`branch` = `S`.`branch`) 
-                  and (`C`.`branch` <> 9999) 
-                  and (not((`C`.`item_group_id` like 'X%')))
+                  AND (`C`.`branch` = `S`.`branch`) 
+                  AND (`C`.`branch` <> 9999) 
+                  AND (NOT((`C`.`item_group_id` LIKE 'X%')))
                 )
               )
-            ) left join `banquet_purposes` `P` on(
+            ) LEFT JOIN `banquet_purposes` `P` ON(
               (`S`.`purpose_id` = `P`.`banquet_purpose_id`)
             )
-          ) left join `banquet_categories` `BC` on(
+          ) LEFT JOIN `banquet_categories` `BC` ON(
             (`P`.`banquet_category_id` = `BC`.`banquet_category_id`)
           )
-        ) left join `banquet_rooms` `R` on(
+        ) LEFT JOIN `banquet_rooms` `R` ON(
           (`S`.`room_id` = `R`.`banquet_room_id`)
         )
-  ) left join `banquet_agents` `AG` on(
+  ) LEFT JOIN `banquet_agents` `AG` ON(
     (`S`.`agent_id` = `AG`.`agent_id`)
   )
 )
 WHERE `S`.`banquet_schedule_id` IS NOT NULL
 AND `S`.`status` IN (1,2)
 AND `C`.`item_gene_id` IN ('B02-0007','B02-0008','M10-0014','M12-0001')
-
-GROUP BY `S`.`date`,
-`S`.`room_id`
 ORDER BY
 `S`.`date`,
 `S`.`start`;
