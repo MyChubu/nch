@@ -43,6 +43,7 @@
   <h3>発注</h3>
   <ul>
     <li><i class="fa-solid fa-utensils"></i><a href="../banquet/kitchen_order.php">料理発注確認</a></li>
+    <li><i class="fa-solid fa-bottle-water"></i><a href="../banquet/softdrink_orders.php">ペットボトルお茶・水</a></li>
   </ul>
   <h3>アップロード</h3>
   <ul>
