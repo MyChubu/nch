@@ -179,8 +179,7 @@ if($count > 0){
                 <th>金額GROSS</th>
                 <th>金額NET</th>
                 <th>担当</th>
-                <th>作成日</th>
-                <th>決定日</th>
+                <th>代理店</th>
                 <th>最終更新</th>
               </tr>
             </thead>
@@ -191,7 +190,7 @@ if($count > 0){
                   <td><?=statusletter($order['status']) ?></td>
                   <td><?=salescatletter($order['banquet_category_id']) ?></td>
                   <td><a href="connection_list.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
-                  <td><?=htmlspecialchars($order['reservation_name']) ?></td>
+                  <td><?=cleanLanternName($order['reservation_name'],25) ?></td>
                   <td><?=htmlspecialchars($order['room_name']) ?></td>
                   <td><?=htmlspecialchars($order['item_name_short']) ?></td>
                   <td><?=htmlspecialchars(number_format($order['unit_price'])) ?></td>
@@ -199,8 +198,7 @@ if($count > 0){
                   <td><?=htmlspecialchars(number_format($order['gross'])) ?></td>
                   <td><?=htmlspecialchars(number_format($order['net'])) ?></td>
                   <td><?=cleanLanternName($order['pic']) ?></td>
-                  <td><?=htmlspecialchars($order['d_created']) ?></td>
-                  <td><?=htmlspecialchars($order['d_decided']) ?></td>
+                  <td><?=cleanLanternName($order['agent_name2']) ?></td>
                   <td><?=htmlspecialchars($order['d_mod']) ?></td>
 
                 </tr>
@@ -214,7 +212,7 @@ if($count > 0){
                 <td><?=number_format($tea_total,0) ?> 本</td>
                 <td><?=number_format($tea_gross_total,0) ?> 円</td>
                 <td><?=number_format($tea_net_total,0) ?> 円</td>
-                <td colspan="4"></td>
+                <td colspan="3"></td>
               </tr>
             </tfooter>
           </table>
@@ -237,8 +235,7 @@ if($count > 0){
                 <th>金額GROSS</th>
                 <th>金額NET</th>
                 <th>担当</th>
-                <th>作成日</th>
-                <th>決定日</th>
+                <th>代理店</th>
                 <th>最終更新</th>
               </tr>
             </thead>
@@ -249,7 +246,7 @@ if($count > 0){
                   <td><?=statusletter($order['status']) ?></td>
                   <td><?=salescatletter($order['banquet_category_id']) ?></td>
                   <td><a href="connection_list.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
-                  <td><?=htmlspecialchars($order['reservation_name']) ?></td>
+                  <td><?=cleanLanternName($order['reservation_name'],25) ?></td>
                   <td><?=htmlspecialchars($order['room_name']) ?></td>
                   <td><?=htmlspecialchars($order['item_name_short']) ?></td>
                   <td><?=htmlspecialchars(number_format($order['unit_price'])) ?></td>
@@ -257,8 +254,7 @@ if($count > 0){
                   <td><?=htmlspecialchars(number_format($order['gross'])) ?></td>
                   <td><?=htmlspecialchars(number_format($order['net'])) ?></td>
                   <td><?=cleanLanternName($order['pic']) ?></td>
-                  <td><?=htmlspecialchars($order['d_created']) ?></td>
-                  <td><?=htmlspecialchars($order['d_decided']) ?></td>
+                  <td><?=cleanLanternName($order['agent_name2']) ?></td>
                   <td><?=htmlspecialchars($order['d_mod']) ?></td>
 
                 </tr>
@@ -272,7 +268,7 @@ if($count > 0){
                 <td><?=number_format($wtr_total,0) ?> 本</td>
                 <td><?=number_format($wtr_gross_total,0) ?> 円</td>
                 <td><?=number_format($wtr_net_total,0) ?> 円</td>
-                <td colspan="4"></td>
+                <td colspan="3"></td>
               </tr>
             </tfooter>
           </table>
