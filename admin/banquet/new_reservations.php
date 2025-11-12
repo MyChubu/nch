@@ -163,7 +163,7 @@ if($count > 0){
   <link rel="stylesheet" href="css/reservations.css?<?=date('YmdHis') ?>">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  
+  <link rel="stylesheet" href="css/new_reservations.css?<?=date('YmdHis') ?>">
   <link rel="stylesheet" href="css/table_sort.css?<?=date('YmdHis') ?>">
   <script src="js/table_sort.js"></script>
 </head>
@@ -180,9 +180,6 @@ if($count > 0){
         </div>
       <div id="controller_right2">
         <div id="download"><a href="output/newrsv-excel-export.php?ym=<?= $ym ?>&mon=<?= $mon ?>&sts=<?= $sts ?>" target="_blank"><i class="fa-solid fa-file-excel"></i>Excel</a></div>
-        <div class="post-button" data-ym="<?=$ym ?>" data-mode="reload"><i class="fa-solid fa-file-excel"></i>Excel</div>
-        <label><input type="checkbox" name="cxl" id="cxl">キャンセルも出力</label>
-        <form id="postForm" method="POST"></form>
       </div>
     </div>
     <div>

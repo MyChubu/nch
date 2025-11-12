@@ -125,3 +125,12 @@ select#level option:nth-child(4){
   color: #FFF;
 }
 
+span.required{
+  display: inline-block;
+  padding:2px 4px;
+  border-radius: 3px;
+  background-color: red;
+  color: #FFF;
+  margin-left: 5px;
+}
+
