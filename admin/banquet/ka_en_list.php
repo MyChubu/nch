@@ -114,6 +114,8 @@ $week_after = $dt_week_after->format('Y-m-d');
         <th><i class="fa-solid fa-signal"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
+        <th><i class="fa-solid fa-diamond"></i></th>
+        <th></th>
       </tr>
       <?php for($i=0; $i<sizeof($events_en); $i++ ) :?>
         <?php if($events_en[$i]['status'] !=5):  ?>
@@ -180,6 +182,7 @@ $week_after = $dt_week_after->format('Y-m-d');
               &nbsp;
             <?php endif; ?>
           </td>
+          <td><a href="detail.php?scheid=<?= $events_en[$i]['banquet_schedule_id'] ?>">詳細</a></td>
         </tr>
         <?php endif; ?>
       <?php endfor; ?>
@@ -203,6 +206,7 @@ $week_after = $dt_week_after->format('Y-m-d');
         <th><i class="fa-solid fa-signal"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
+        <th><i class="fa-solid fa-diamond"></i></th>
       </tr>
       <?php for($i=0; $i<sizeof($events_ka); $i++ ) :?>
         <?php if($events_ka[$i]['status'] !=5):  ?>
@@ -245,6 +249,7 @@ $week_after = $dt_week_after->format('Y-m-d');
               &nbsp;
             <?php endif; ?>
           </td>
+          <td><a href="detail.php?scheid=<?= $events_ka[$i]['banquet_schedule_id'] ?>">詳細</a></td>
         </tr>
         <?php endif; ?>
       <?php endfor; ?>
@@ -268,6 +273,7 @@ $week_after = $dt_week_after->format('Y-m-d');
         <th><i class="fa-solid fa-signal"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
+        <th><i class="fa-solid fa-diamond"></i></th>
       </tr>
       <?php for($i=0; $i<sizeof($events_other); $i++ ) :?>
         <?php if($events_other[$i]['status'] !=5):  ?>
@@ -309,6 +315,7 @@ $week_after = $dt_week_after->format('Y-m-d');
               &nbsp;
             <?php endif; ?>
           </td>
+          <td><a href="detail.php?scheid=<?= $events_other[$i]['banquet_schedule_id'] ?>">詳細</a></td>
         </tr>
         <?php endif; ?>
       <?php endfor; ?>

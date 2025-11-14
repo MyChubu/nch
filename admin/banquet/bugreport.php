@@ -107,8 +107,8 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
           </tr>
         </table>
         <div class="form_buttons">  
-          <input type="submit" value="送信">
-          <input type="reset" value="リセット"> 
+          <input type="button" value="送信" onclick="if(confirm('内容を送信してもよろしいですか？')){this.form.submit();}">
+          <input type="button" value="リセット" onclick="if(confirm('内容をリセットしてもよろしいですか？')){this.form.reset();}"> 
         </div>
       </form>
     </div>

@@ -96,7 +96,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
         <th><i class="fa-solid fa-plus"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
         <th><i class="fa-solid fa-floppy-disk"></i></th>
-        <th><i class="fa-solid fa-gear"></i></th>
+        <th><i class="fa-solid fa-diamond"></i></th>
         
       </tr>
       <?php for($i=0; $i<sizeof($events); $i++ ) :?>

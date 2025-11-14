@@ -133,4 +133,22 @@ span.required{
   color: #FFF;
   margin-left: 5px;
 }
+div.form_buttons{
+  text-align: center;
+  margin-top: 20px;
+}
+div.form_buttons input[type="button"]{
+  margin: 0 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #FFF;
+  background-color: cadetblue;
+  min-width: 150px;
+}
+div.form_buttons input[type="button"]:hover{
+  background-color:darkcyan
+}
 
