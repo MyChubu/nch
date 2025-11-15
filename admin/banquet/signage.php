@@ -1,4 +1,10 @@
 <?php
+// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+?>
+<?php
 require_once('../../common/conf.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
@@ -91,12 +97,12 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
         <th><i class="fa-solid fa-stairs"></i></th>
         <th><i class="fa-solid fa-user"></i></th>
         <th><i class="fa-solid fa-signal"></i></th>
-        <th><i class="fa-solid fa-layer-group"></i></th>
+        <th><i class="fa-solid fa-bell-concierge"></i></th>
         <th><i class="fa-solid fa-flag-checkered"></i></th>
         <th><i class="fa-solid fa-plus"></i></th>
         <th><i class="fa-solid fa-display"></i></th>
         <th><i class="fa-solid fa-floppy-disk"></i></th>
-        <th><i class="fa-solid fa-diamond"></i></th>
+        <th><i class="fa-solid fa-layer-group"></i></th>
         
       </tr>
       <?php for($i=0; $i<sizeof($events); $i++ ) :?>
@@ -127,7 +133,11 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
             </label>
           </td>
           <td><?=$events[$i]['modified'] ?></td>
-          <td><a href="detail.php?scheid=<?= $events[$i]['banquet_schedule_id'] ?>">詳細</a></td>
+          <td>
+            <?php if ($events[$i]['ext_sign'] == 1) : ?>
+              <i class="fa-solid fa-layer-group"></i> 
+            <?php endif; ?>
+            <a href="signage_ext.php?scheid=<?= $events[$i]['banquet_schedule_id'] ?>">変更</a></td>
           <input type="hidden" name="events[<?=$i ?>][sche_id]" value="<?= $events[$i]['banquet_schedule_id'] ?>">
         </tr>
         

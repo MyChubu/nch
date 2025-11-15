@@ -22,6 +22,7 @@ function getBanquetEvents($date) {
       $endObj = new DateTime($row['end']);
       $addedObj = new DateTime($row['nehops_d_created']);
       $modifiedObj = new DateTime($row['nehops_mod_date']);
+      $extSign = 0; // 拡張表示フラグ初期化
       // 会場（部屋）の情報を取得
       $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
       $stmt2 = $dbh->prepare($sql2);
@@ -45,6 +46,15 @@ function getBanquetEvents($date) {
       $category = $stmt4->fetch();
       $category_name = $category['banquet_category_name'];
 
+      // 拡張表示があるか調べる
+      $sql5 = 'select * from banquet_ext_sign where sche_id = ? AND enable = 1';
+      $stmt5 = $dbh->prepare($sql5);
+      $stmt5->execute([$row['banquet_schedule_id']]);
+      $ext_count = $stmt5->rowCount();
+      if ($ext_count > 0) {
+        $extSign = 1; // 拡張表示がある場合、追加売上フラグを立てる
+      }
+
       // イベント情報を配列にまとめる
       $events[] = array(
         'reservation_id' => $row['reservation_id'],                       // 予約ID
@@ -65,6 +75,7 @@ function getBanquetEvents($date) {
         'pic' => mb_convert_kana($row['pic'], 'KVas'),                  // 担当者名（全角変換）
         'additional_sales' => $row['additional_sales'],                 // 追加売上フラグ
         'enable' => $row['enable'],                                     // 有効フラグ
+        'ext_sign' => $extSign,                                        // 拡張表示フラグ
         'added' => $addedObj->format('Y/m/d'),                          // 登録日
         'modified' => $modifiedObj->format('Y/m/d'),                    // 最終更新日
         'modified_by' => $row['modified_by']                            // 更新者
