@@ -137,7 +137,9 @@ div.form_buttons{
   text-align: center;
   margin-top: 20px;
 }
-div.form_buttons input[type="button"]{
+div.form_buttons input[type="button"],
+div.form_buttons input[type="submit"]
+{
   margin: 0 10px;
   padding: 10px 20px;
   border: none;
@@ -148,7 +150,9 @@ div.form_buttons input[type="button"]{
   background-color: cadetblue;
   min-width: 150px;
 }
-div.form_buttons input[type="button"]:hover{
+div.form_buttons input[type="button"]:hover,
+div.form_buttons input[type="submit"]:hover
+{
   background-color:darkcyan
 }
 

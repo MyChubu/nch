@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 ?>
 <?php
 require_once('../../common/conf.php');
@@ -36,6 +36,7 @@ if( $scheid == '' ){
   exit;
 }
 
+// 予定の情報を取得
 $sql = "SELECT * FROM banquet_schedules WHERE banquet_schedule_id = :scheid";
 $stmt = $dbh->prepare($sql);
 $stmt->bindParam(':scheid', $scheid, PDO::PARAM_INT);
@@ -50,6 +51,8 @@ $dateObj = new DateTime($row['date']);
 $date = $dateObj->format('Y-m-d');
 $startObj = new DateTime($row['start']);
 $endObj = new DateTime($row['end']);
+$starttime=$startObj->format('H:i');
+$endtime=$endObj->format('H:i');
 
 // 会場（部屋）の情報を取得
 $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
@@ -74,9 +77,117 @@ $stmt4->execute([$banquet_category_id]);
 $category = $stmt4->fetch();
 $category_name = $category['banquet_category_name'];
 
+//例外表示新規追加
+if($_POST['cat'] == 2){
+  // var_dump($_POST['n']);
+  $n=array();
+  $er=array();
+  $err=0;
+  $items=  array('sche_id','date','start','end','event_name','enable','memo');
+  $requireds = array('sche_id','date','start','end','event_name');
+  foreach($items as $item){
+    $n[$item] = isset($_POST['n'][$item]) ? $_POST['n'][$item] : '';
+    $er[$item] = 0;
+  }
+  foreach($requireds as $req){
+    if($n[$req] == ''){
+      $er[$req] = 1;
+      $err++;
+    }
+  }
+  // var_dump($er);
+  // var_dump($err);
+  if($err == 0){
+    $start=$n['date'].' '.$n['start'].':00';
+    $end=$n['date'].' '.$n['end'].':00';
+  }
+  $n['enable'] = ($n['enable'] == '1') ? 1 : 0;
+  $n['event_name'] = mb_convert_kana($n['event_name'],'KVas');
+  $sqln = 'insert into banquet_ext_sign (
+  sche_id,
+  date,
+  start,
+  end,
+  event_name,
+  memo,
+  enable,
+  added,
+  modified
+  ) values (
+  :sche_id,
+  :date,
+  :start,
+  :end,
+  :event_name,
+  :memo,
+  :enable,
+  now(),
+  now()
+  )';
+  $stmtn = $dbh->prepare($sqln);
+  $stmtn->bindParam(':sche_id', $n['sche_id'], PDO::PARAM_INT);
+  $stmtn->bindParam(':date', $n['date'], PDO::PARAM_STR);
+  $stmtn->bindParam(':start', $start, PDO::PARAM_STR);
+  $stmtn->bindParam(':end', $end, PDO::PARAM_STR);
+  $stmtn->bindParam(':event_name', $n['event_name'], PDO::PARAM_STR);
+  $stmtn->bindParam(':memo', $n['memo'], PDO::PARAM_STR);
+  $stmtn->bindParam(':enable', $n['enable'], PDO::PARAM_INT);
+  $stmtn->execute(); 
+}
+
+//例外表示変更
+if($_POST['cat'] == 1){
+  //var_dump($_POST['v']);
+  $v=$_POST['v'];
+  for($i=0; $i < sizeof($v); $i++){
+    $item = $v[$i];
+    $er=array();
+    $err=0;
+    $items=  array('sche_id','date','start','end','event_name','enable','id','memo');
+    $requireds = array('sche_id','date','start','end','event_name','id');
+    foreach($items as $it){
+      $item[$it] = isset($item[$it]) ? $item[$it] : '';
+      $er[$it] = 0;
+    }
+    foreach($requireds as $req){
+      if($item[$req] == ''){
+        $er[$req] = 1;
+        $err++;
+      }
+    }
+    // var_dump($er);
+    // var_dump($err);
+    if($err == 0){
+      $start=$item['date'].' '.$item['start'].':00';
+      $end=$item['date'].' '.$item['end'].':00';
+      $item['enable'] = ($item['enable'] == 'on') ? 1 : 0;
+      $item['event_name'] = mb_convert_kana($item['event_name'],'KVas');
+      $sqla = 'update banquet_ext_sign set
+      start = :start,
+      end = :end,
+      event_name = :event_name,
+      memo = :memo,
+      enable = :enable,
+      modified = now()
+      where banquet_ext_sign_id = :id
+      ';
+      $stmta = $dbh->prepare($sqla);
+      $stmta->bindParam(':start', $start, PDO::PARAM_STR);
+      $stmta->bindParam(':end', $end, PDO::PARAM_STR);
+      $stmta->bindParam(':event_name', $item['event_name'], PDO::PARAM_STR);
+      $stmta->bindParam(':memo', $item['memo'], PDO::PARAM_STR);
+      $stmta->bindParam(':enable', $item['enable'], PDO::PARAM_INT);
+      $stmta->bindParam(':id', $item['id'], PDO::PARAM_INT);
+      $stmta->execute(); 
+    }
+  }
+
+}
+
+
 // 拡張表示があるか調べる
 $ext_signs = array();
-$sql5 = 'select * from banquet_ext_sign where sche_id = ? ';
+$sql5 = 'select * from banquet_ext_sign where sche_id = ? order by enable desc, start asc, end asc';
 $stmt5 = $dbh->prepare($sql5);
 $stmt5->execute([$row['banquet_schedule_id']]);
 $ext_count = $stmt5->rowCount();
@@ -142,8 +253,8 @@ if ($ext_count > 0) {
         <td><?=$row['reservation_id'] ?></td>
         <td><?=$row['branch'] ?></td>
         <td><?=$date ?></td>
-        <td><?=$startObj->format('H:i') ?></td> 
-        <td><?=$endObj->format('H:i') ?></td>
+        <td><?=$starttime ?></td> 
+        <td><?=$endtime ?></td>
         <td><?=$row['room_name'] ?></td>
         <td><?=$row['people'] ?></td>
         <td><?=cleanLanternName($row['pic']) ?></td>
@@ -161,7 +272,8 @@ if ($ext_count > 0) {
   </div>
   <h2>例外表示設定</h2>
   <div>
-    <form action="">
+  <?php if(sizeof($ext_signs) > 0): ?>
+    <form action="" method="post" enctype="multipart/form-data" id="extsignagemod">
     <table class="event_table">
       <tr>
         <th><i class="fa-solid fa-arrow-right"></i></th>
@@ -170,31 +282,63 @@ if ($ext_count > 0) {
         <th><i class="fa-solid fa-display"></i></th>
         <th><i class="fa-solid fa-pen"></i></th>
       </tr>
-      <?php if(sizeof($ext_signs) > 0): ?>
+      
       <?php $i=0; ?>
       <?php foreach ($ext_signs as $ext) : ?>
-      <tr>
-        <td><input type="time" name="v[<?=$i ?>][start]" min="<?=$startObj->format('H:i') ?>" max="<?=$endObj->format('H:i') ?>" value="<?=$ext['start'] ?>" required></td>
-        <td><input type="time" name="v[<?=$i ?>][end]" min="<?=$startObj->format('H:i') ?>" max="<?=$endObj->format('H:i') ?>" value="<?=$ext['end'] ?>" required></td>
-        <td><input type="text" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" required></td>
-        <td><input type="checkbox" name="v[<?=$i ?>][enable]" <?= $ext['enable'] == 1 ? 'checked' : '' ?>></td>
+        <?php
+          $ext_startObj = new DateTime($ext['start']);
+          $ext_endObj = new DateTime($ext['end']);
+          $ext_starttime = $ext_startObj->format('H:i');
+          $ext_endtime = $ext_endObj->format('H:i');
+        ?>
+      <tr class="event_tr_<?=$ext['enable'] ?>">
+        <td><input type="time" name="v[<?=$i ?>][start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_starttime ?>" required></td>
+        <td><input type="time" name="v[<?=$i ?>][end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_endtime ?>" required></td>
+        <td><input type="text" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" placeholder="<?= $row['event_name'] ?>" required></td>
+        <td><input type="hidden" name="v[<?=$i ?>][enable]" value="0"><input type="checkbox" name="v[<?=$i ?>][enable]" <?= $ext['enable'] == 1 ? 'checked' : '' ?>></td>
         <td><textarea name="v[<?=$i ?>][memo]"><?=$ext['memo'] ?></textarea></td>
         <input type="hidden" name="v[<?=$i ?>][sche_id]" value="<?= $scheid ?>">
-        <input type="hidden" name="v[<?=$i ?>][id]" value="<?= $ext['banquet_signage_ext_id'] ?>">
+        <input type="hidden" name="v[<?=$i ?>][id]" value="<?= $ext['banquet_ext_sign_id'] ?>">
+        <input type="hidden" name="v[<?=$i ?>][date]" value="<?= $date ?>">
       </tr>
       <?php $i++; ?>
       <?php endforeach; ?>
-      <?php endif; ?>
-      <!-- 新規追加行 -->
+    </table>
+    <div class="form_buttons">
+      <button type="submit" form="extsignagemod">変更を保存</button>
+      <input type="hidden" name="cat" value="1">
+    </div>
+    </form>
+  <?php else: ?>
+    <p>現在、例外表示設定はありません。</p>
+  <?php endif; ?>
+  </div>
+  <!-- 新規追加行 -->
+  <h2>表示追加</h2>
+  <div>
+    <form action="" method="post" enctype="multipart/form-data" id="extsignagenew">
+    <table class="event_table">
       <tr>
-        <td><input type="time" name="n[start]" min="<?=$startObj->format('H:i') ?>" max="<?=$endObj->format('H:i') ?>" required></td>
-        <td><input type="time" name="n[end]" min="<?=$startObj->format('H:i') ?>" max="<?=$endObj->format('H:i') ?>" required></td>
-        <td><input type="text" name="n[event_name]" required></td>
-        <td><input type="checkbox" name="n[enable]" checked></td>
+        <th><i class="fa-solid fa-arrow-right"></i></th>
+        <th><i class="fa-solid fa-arrow-left"></i></th>
+        <th>デジサイ表示名</th>
+        <th><i class="fa-solid fa-display"></i></th>
+        <th><i class="fa-solid fa-pen"></i></th>
+      </tr>
+      <tr>
+        <td><input type="time" name="n[start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$starttime ?>" required></td>
+        <td><input type="time" name="n[end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$endtime ?>" required></td>
+        <td><input type="text" name="n[event_name]" placeholder="<?= $row['event_name'] ?>" required></td>
+        <td><input type="hidden" name="n[enable]" value="0"><input type="checkbox" name="n[enable]" value="1" checked></td>
         <td><textarea name="n[memo]"></textarea></td>
       </tr>
         <input type="hidden" name="n[sche_id]" value="<?= $scheid ?>">
     </table>
+    <div class="form_buttons">
+      <button type="submit" form="extsignagenew">新規登録</button>
+      <input type="hidden" name="cat" value="2">
+      <input type="hidden" name="n[date]" value="<?= $date ?>">
+    </div>
     </form>
   </div>
 </div>
