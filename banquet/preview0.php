@@ -1,33 +1,15 @@
 <?php
 require_once('../common/conf.php');
 $date = date('Y-m-d');
+$now = date('Y-m-d H:i:s');
 if(isset($_REQUEST['event_date']) && $_REQUEST['event_date'] != '') {
   $date = $_REQUEST['event_date'];
+  $now = date('Y-m-d H:i:s', strtotime($date));
 }
-$min_time = "08:00";
-$max_time = "22:00";
-if(isset($_REQUEST['time']) && $_REQUEST['time'] != '') {
-  $time = $_REQUEST['time'];
-  if($time < $min_time){
-    $time = $min_time;
-  }elseif($time > $max_time){
-    $time = $max_time;
-  }
-}else{
-  $time = $min_time;
-}
-
-$now = date('Y-m-d H:i:s', strtotime($date . ' ' . $time));
 $hizuke =date('Y年m月d日 ', strtotime($date));
 $week = array('日', '月', '火', '水', '木', '金', '土');
 $hizuke .= '(' . $week[date('w', strtotime($date))] . '曜日)';
 
-$minus_1h = (new DateTime($now))->modify('-1 hour')->format('H:i');
-$minus_halfh = (new DateTime($now))->modify('-30 minutes')->format('H:i');
-$minus_quarterh = (new DateTime($now))->modify('-15 minutes')->format('H:i');
-$plus_quarterh = (new DateTime($now))->modify('+15 minutes')->format('H:i');
-$plus_halfh = (new DateTime($now))->modify('+30 minutes')->format('H:i');
-$plus_1h = (new DateTime($now))->modify('+1 hour')->format('H:i');
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
@@ -38,30 +20,9 @@ $count = $stmt->rowCount();
 $events=array();
 if($count > 0){
   foreach ($stmt as $row) {
-    $scheid = $row['banquet_schedule_id'];
-    //例外表示があるかチェック
-    $sql_ext = 'select * from banquet_ext_sign where sche_id = :scheid and enable = 1 order by start ASC, end ASC';
-    $stmt_ext = $dbh->prepare($sql_ext);
-    $stmt_ext->bindParam(':scheid', $scheid, PDO::PARAM_INT);
-    $stmt_ext->execute();
-    $ext_count = $stmt_ext->rowCount();
-    if($ext_count > 0){
-      foreach($stmt_ext as $ext_row){
-        if( $ext_row['end'] > $now){
-          $event_start = (new DateTime($ext_row['start']))->format('H:i');
-          $event_end = (new DateTime($ext_row['end']))->format('H:i');
-          $event_name = mb_convert_kana($ext_row['event_name'], 'KVas');
-          break;
-        }
-      }
-    }else{
-      $event_start = (new DateTime($row['start']))->format('H:i');
-      $event_end = (new DateTime($row['end']))->format('H:i');
-      $event_name = mb_convert_kana($row['event_name'], 'KVas');
-    }
-    if(!isset($event_start)){
-      continue;
-    }
+    $event_start = date('H:i', strtotime($row['start']));
+    $event_end = date('H:i', strtotime($row['end']));
+    $event_name = mb_convert_kana($row['event_name'], 'KVas');
     $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
     $stmt2 = $dbh->prepare($sql2);
     $stmt2->execute([$row['room_id']]);
@@ -90,7 +51,7 @@ if($count > 0){
   <meta http-equiv="refresh" content="300">
   <!-- reset.css ress -->
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-  <link rel="stylesheet" href="css/style.css?<?= time() ?>">
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
   <script src="js/particles.js"></script>
   <title>会議・宴会予定-<?=$hizuke ?></title>
@@ -101,24 +62,8 @@ if($count > 0){
     <header>
       <div class="headbox">
         <div class="headbox_left">
-          <h1>Today's Schedule</h1>
-          <h2><?= $hizuke ?></h2>
-          <div id="realtime"><?= $now ?></div>
-          <div class="time_nav">
-            <a href="?event_date=<?= date('Y-m-d', strtotime($date . ' -1 day')) ?>">前日</a>
-            <a href="?event_date=<?= date('Y-m-d', strtotime($date . ' +1 day')) ?>">翌日</a>
-          </div>
-          <div class="time_nav">
-            <a href="?event_date=<?=$date ?>&time=<?=$min_time ?>">S</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$minus_1h ?>">-1H</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$minus_halfh ?>">-30</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$minus_quarterh ?>">-15</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$plus_quarterh ?>">+15</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$plus_halfh ?>">+30</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$plus_1h ?>">+1H</a>
-            <a href="?event_date=<?=$date ?>&time=<?=$max_time ?>">E</a>
-          </div>
-          
+        <h1>Today's Schedule</h1>
+        <h2><?= $hizuke ?></h2>
         </div>
         <div class="headbox_right">
           <div class="headbox_logo">
