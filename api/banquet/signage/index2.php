@@ -42,7 +42,7 @@ if($count > 0){
     $ext_count = $stmt_ext->rowCount();
     if($ext_count > 0){
       foreach($stmt_ext as $ext_row){
-        if( $ext_row['end'] >= $now){
+        if( $ext_row['end'] > $now){
           $event_start = (new DateTime($ext_row['start']))->format('H:i');
           $event_end = (new DateTime($ext_row['end']))->format('H:i');
           $event_name = mb_convert_kana($ext_row['event_name'], 'KVas');

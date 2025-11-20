@@ -495,6 +495,9 @@ span.additional_sales {
   color: #555;
   margin-top: 10px;
 }
+span.ext_sign_1 {
+  color: red;
+}
 
 @media screen and (max-width: 1370px) {
   html{

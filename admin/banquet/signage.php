@@ -123,6 +123,8 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
           <td>
             <?php if($events[$i]['additional_sales'] == 1): ?>
               <span class="additional_sales">追</span>
+              <?php elseif($events[$i]['ext_sign'] == 1) : ?>
+                <span class="ext_sign_1"><i class="fa-solid fa-folder-tree"></i></span>
               <?php else: ?>
                 &nbsp;
             <?php endif; ?>
@@ -134,10 +136,8 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
           </td>
           <td><?=$events[$i]['modified'] ?></td>
           <td>
-            <?php if ($events[$i]['ext_sign'] == 1) : ?>
-              <i class="fa-solid fa-layer-group"></i> 
-            <?php endif; ?>
-            <a href="signage_ext.php?scheid=<?= $events[$i]['banquet_schedule_id'] ?>">変更</a></td>
+            <a href="signage_ext.php?scheid=<?= $events[$i]['banquet_schedule_id'] ?>">変更</a>
+          </td>
           <input type="hidden" name="events[<?=$i ?>][sche_id]" value="<?= $events[$i]['banquet_schedule_id'] ?>">
         </tr>
         
