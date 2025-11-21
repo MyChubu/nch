@@ -77,112 +77,112 @@ $stmt4->execute([$banquet_category_id]);
 $category = $stmt4->fetch();
 $category_name = $category['banquet_category_name'];
 
-//例外表示新規追加
-if($_POST['cat'] == 2){
-  // var_dump($_POST['n']);
-  $n=array();
-  $er=array();
-  $err=0;
-  $items=  array('sche_id','date','start','end','event_name','enable','memo');
-  $requireds = array('sche_id','date','start','end','event_name');
-  foreach($items as $item){
-    $n[$item] = isset($_POST['n'][$item]) ? $_POST['n'][$item] : '';
-    $er[$item] = 0;
-  }
-  foreach($requireds as $req){
-    if($n[$req] == ''){
-      $er[$req] = 1;
-      $err++;
-    }
-  }
-  // var_dump($er);
-  // var_dump($err);
-  if($err == 0){
-    $start=$n['date'].' '.$n['start'].':00';
-    $end=$n['date'].' '.$n['end'].':00';
-  }
-  $n['enable'] = ($n['enable'] == '1') ? 1 : 0;
-  $n['event_name'] = mb_convert_kana($n['event_name'],'KVas');
-  $sqln = 'insert into banquet_ext_sign (
-  sche_id,
-  date,
-  start,
-  end,
-  event_name,
-  memo,
-  enable,
-  added,
-  modified
-  ) values (
-  :sche_id,
-  :date,
-  :start,
-  :end,
-  :event_name,
-  :memo,
-  :enable,
-  now(),
-  now()
-  )';
-  $stmtn = $dbh->prepare($sqln);
-  $stmtn->bindParam(':sche_id', $n['sche_id'], PDO::PARAM_INT);
-  $stmtn->bindParam(':date', $n['date'], PDO::PARAM_STR);
-  $stmtn->bindParam(':start', $start, PDO::PARAM_STR);
-  $stmtn->bindParam(':end', $end, PDO::PARAM_STR);
-  $stmtn->bindParam(':event_name', $n['event_name'], PDO::PARAM_STR);
-  $stmtn->bindParam(':memo', $n['memo'], PDO::PARAM_STR);
-  $stmtn->bindParam(':enable', $n['enable'], PDO::PARAM_INT);
-  $stmtn->execute(); 
-}
+// //例外表示新規追加
+// if($_POST['cat'] == 2){
+//   // var_dump($_POST['n']);
+//   $n=array();
+//   $er=array();
+//   $err=0;
+//   $items=  array('sche_id','date','start','end','event_name','enable','memo');
+//   $requireds = array('sche_id','date','start','end','event_name');
+//   foreach($items as $item){
+//     $n[$item] = isset($_POST['n'][$item]) ? $_POST['n'][$item] : '';
+//     $er[$item] = 0;
+//   }
+//   foreach($requireds as $req){
+//     if($n[$req] == ''){
+//       $er[$req] = 1;
+//       $err++;
+//     }
+//   }
+//   // var_dump($er);
+//   // var_dump($err);
+//   if($err == 0){
+//     $start=$n['date'].' '.$n['start'].':00';
+//     $end=$n['date'].' '.$n['end'].':00';
+//   }
+//   $n['enable'] = ($n['enable'] == '1') ? 1 : 0;
+//   $n['event_name'] = mb_convert_kana($n['event_name'],'KVas');
+//   $sqln = 'insert into banquet_ext_sign (
+//   sche_id,
+//   date,
+//   start,
+//   end,
+//   event_name,
+//   memo,
+//   enable,
+//   added,
+//   modified
+//   ) values (
+//   :sche_id,
+//   :date,
+//   :start,
+//   :end,
+//   :event_name,
+//   :memo,
+//   :enable,
+//   now(),
+//   now()
+//   )';
+//   $stmtn = $dbh->prepare($sqln);
+//   $stmtn->bindParam(':sche_id', $n['sche_id'], PDO::PARAM_INT);
+//   $stmtn->bindParam(':date', $n['date'], PDO::PARAM_STR);
+//   $stmtn->bindParam(':start', $start, PDO::PARAM_STR);
+//   $stmtn->bindParam(':end', $end, PDO::PARAM_STR);
+//   $stmtn->bindParam(':event_name', $n['event_name'], PDO::PARAM_STR);
+//   $stmtn->bindParam(':memo', $n['memo'], PDO::PARAM_STR);
+//   $stmtn->bindParam(':enable', $n['enable'], PDO::PARAM_INT);
+//   $stmtn->execute(); 
+// }
 
-//例外表示変更
-if($_POST['cat'] == 1){
-  //var_dump($_POST['v']);
-  $v=$_POST['v'];
-  for($i=0; $i < sizeof($v); $i++){
-    $item = $v[$i];
-    $er=array();
-    $err=0;
-    $items=  array('sche_id','date','start','end','event_name','enable','id','memo');
-    $requireds = array('sche_id','date','start','end','event_name','id');
-    foreach($items as $it){
-      $item[$it] = isset($item[$it]) ? $item[$it] : '';
-      $er[$it] = 0;
-    }
-    foreach($requireds as $req){
-      if($item[$req] == ''){
-        $er[$req] = 1;
-        $err++;
-      }
-    }
-    // var_dump($er);
-    // var_dump($err);
-    if($err == 0){
-      $start=$item['date'].' '.$item['start'].':00';
-      $end=$item['date'].' '.$item['end'].':00';
-      $item['enable'] = ($item['enable'] == 'on') ? 1 : 0;
-      $item['event_name'] = mb_convert_kana($item['event_name'],'KVas');
-      $sqla = 'update banquet_ext_sign set
-      start = :start,
-      end = :end,
-      event_name = :event_name,
-      memo = :memo,
-      enable = :enable,
-      modified = now()
-      where banquet_ext_sign_id = :id
-      ';
-      $stmta = $dbh->prepare($sqla);
-      $stmta->bindParam(':start', $start, PDO::PARAM_STR);
-      $stmta->bindParam(':end', $end, PDO::PARAM_STR);
-      $stmta->bindParam(':event_name', $item['event_name'], PDO::PARAM_STR);
-      $stmta->bindParam(':memo', $item['memo'], PDO::PARAM_STR);
-      $stmta->bindParam(':enable', $item['enable'], PDO::PARAM_INT);
-      $stmta->bindParam(':id', $item['id'], PDO::PARAM_INT);
-      $stmta->execute(); 
-    }
-  }
+// //例外表示変更
+// if($_POST['cat'] == 1){
+//   //var_dump($_POST['v']);
+//   $v=$_POST['v'];
+//   for($i=0; $i < sizeof($v); $i++){
+//     $item = $v[$i];
+//     $er=array();
+//     $err=0;
+//     $items=  array('sche_id','date','start','end','event_name','enable','id','memo');
+//     $requireds = array('sche_id','date','start','end','event_name','id');
+//     foreach($items as $it){
+//       $item[$it] = isset($item[$it]) ? $item[$it] : '';
+//       $er[$it] = 0;
+//     }
+//     foreach($requireds as $req){
+//       if($item[$req] == ''){
+//         $er[$req] = 1;
+//         $err++;
+//       }
+//     }
+//     // var_dump($er);
+//     // var_dump($err);
+//     if($err == 0){
+//       $start=$item['date'].' '.$item['start'].':00';
+//       $end=$item['date'].' '.$item['end'].':00';
+//       $item['enable'] = ($item['enable'] == 'on') ? 1 : 0;
+//       $item['event_name'] = mb_convert_kana($item['event_name'],'KVas');
+//       $sqla = 'update banquet_ext_sign set
+//       start = :start,
+//       end = :end,
+//       event_name = :event_name,
+//       memo = :memo,
+//       enable = :enable,
+//       modified = now()
+//       where banquet_ext_sign_id = :id
+//       ';
+//       $stmta = $dbh->prepare($sqla);
+//       $stmta->bindParam(':start', $start, PDO::PARAM_STR);
+//       $stmta->bindParam(':end', $end, PDO::PARAM_STR);
+//       $stmta->bindParam(':event_name', $item['event_name'], PDO::PARAM_STR);
+//       $stmta->bindParam(':memo', $item['memo'], PDO::PARAM_STR);
+//       $stmta->bindParam(':enable', $item['enable'], PDO::PARAM_INT);
+//       $stmta->bindParam(':id', $item['id'], PDO::PARAM_INT);
+//       $stmta->execute(); 
+//     }
+//   }
 
-}
+// }
 
 
 // 拡張表示があるか調べる
@@ -273,7 +273,7 @@ if ($ext_count > 0) {
   <h2>例外表示設定</h2>
   <div>
   <?php if(sizeof($ext_signs) > 0): ?>
-    <form action="" method="post" enctype="multipart/form-data" id="extsignagemod">
+    <form action="../functions/sche_ext_update.php" method="post" enctype="multipart/form-data" id="extsignagemod">
     <table class="event_table">
       <tr>
         <th><i class="fa-solid fa-arrow-right"></i></th>
@@ -307,6 +307,7 @@ if ($ext_count > 0) {
     <div class="form_buttons">
       <button type="submit" form="extsignagemod">変更を保存</button>
       <input type="hidden" name="cat" value="1">
+      <input type="hidden" name="scheid" value="<?= $scheid ?>">
     </div>
     </form>
   <?php else: ?>
@@ -316,7 +317,7 @@ if ($ext_count > 0) {
   <!-- 新規追加行 -->
   <h2>表示追加</h2>
   <div>
-    <form action="" method="post" enctype="multipart/form-data" id="extsignagenew">
+    <form action="../functions/sche_ext_update.php" method="post" enctype="multipart/form-data" id="extsignagenew">
     <table class="event_table">
       <tr>
         <th><i class="fa-solid fa-arrow-right"></i></th>
@@ -338,6 +339,7 @@ if ($ext_count > 0) {
       <button type="submit" form="extsignagenew">新規登録</button>
       <input type="hidden" name="cat" value="2">
       <input type="hidden" name="n[date]" value="<?= $date ?>">
+      <input type="hidden" name="scheid" value="<?= $scheid ?>">
     </div>
     </form>
   </div>
