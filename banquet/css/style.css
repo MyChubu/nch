@@ -57,11 +57,12 @@ body.preview{
 .eventbox{
   width: 100%;
   display: flex;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
+  align-items: center;
 }
 .eventbox_left{
   width: 75%;
-  font-size: 1.8em;
+  font-size: 2.8em;
   text-align: left;
   font-weight: 700;
   
@@ -79,7 +80,7 @@ body.preview{
   font-size: 0.9em;
 }
 .eventbox_time{
-  font-size: 0.8em;
+  font-size: 1.5em;
 }
 .eventbox_left,.eventbox_floor,.eventbox_time{
   text-shadow: 2px 3px 3px rgba(0, 0, 0, .6);

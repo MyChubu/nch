@@ -141,7 +141,7 @@ if($count > 0){
                 <?=$event['room_name'] ?> <span class="eventbox_floor">【<?=$event['floor'] ?>】</span>
               </div>
               <div class="eventbox_time">
-                <?=$event['start'] ?> - <?=$event['end'] ?>
+                <?=$event['start'] ?> ～
               </div>
             </div>
           </div>
