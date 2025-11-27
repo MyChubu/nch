@@ -21,6 +21,10 @@
     <li><i class="fa-solid fa-plus"></i><a href="../banquet/info_entry.php">お知らせ登録</a></li>
   </ul>
   -->
+  <h3>検索</h3>
+  <ul>
+    <li><i class="fa-solid fa-magnifying-glass"></i><a href="../banquet/search.php">予約検索_β版</a></li>
+  </ul>
   <h3>売上</h3>
   <ul>
     <li><i class="fa-solid fa-calculator"></i><a href="../banquet/salesyear.php">年間累計</a></li>
