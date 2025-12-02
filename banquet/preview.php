@@ -101,7 +101,7 @@ if($count > 0){
     <header>
       <div class="headbox">
         <div class="headbox_left">
-          <h1>Today's Schedule</h1>
+          <h1>本日のご案内</h1>
           <h2><?= $hizuke ?></h2>
           <div id="realtime"><?= $now ?></div>
           <div class="time_nav">

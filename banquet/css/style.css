@@ -2,7 +2,7 @@ body{
   font-family: '游明朝','Yu Mincho',YuMincho,'Hiragino Mincho Pro',serif;
   text-align: center;
   background-color:darkslategrey;
-  color: white;
+  color: #000;
   max-height: 1920px;
   overflow: hidden;
 }
@@ -11,10 +11,12 @@ body{
   
   max-width: 1080px;
   margin: 0 auto;
-  background-color: rgb(36, 27, 85);
+  background-color:#fff8b4;
   height: 1920px;
   padding: 35px 35px;
   overflow: hidden;
+  background-image: url('../images/didisign_bg.png');
+  background-size: cover;
 }
 body.preview{
   overflow:auto;
@@ -31,15 +33,15 @@ body.preview{
   text-align: left;
 }
 .headbox_left h1{
-  font-size: 3.5em;
+  font-size: 4em;
   font-weight: 700;
-  color:cornflowerblue;
+  color:darkred;
   text-shadow: 2px 2px 3px rgba(6, 7, 54, 0.6);
 }
 .headbox_left h2{
   font-size: 2em;
   font-weight: 700;
-  color:darkgrey
+  color:darkred;
 }
 
 .headbox_right{
