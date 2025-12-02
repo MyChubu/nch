@@ -15,7 +15,7 @@ body{
   height: 1920px;
   padding: 35px 35px;
   overflow: hidden;
-  background-image: url('../images/didisign_bg.png');
+  background-image: url('../images/digisign_bg.png');
   background-size: cover;
 }
 body.preview{
