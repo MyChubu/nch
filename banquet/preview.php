@@ -4,7 +4,7 @@ $date = date('Y-m-d');
 if(isset($_REQUEST['event_date']) && $_REQUEST['event_date'] != '') {
   $date = $_REQUEST['event_date'];
 }
-$min_time = "08:00";
+$min_time = "06:00";
 $max_time = "22:00";
 if(isset($_REQUEST['time']) && $_REQUEST['time'] != '') {
   $time = $_REQUEST['time'];
