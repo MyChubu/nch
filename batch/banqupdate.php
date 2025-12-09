@@ -35,7 +35,8 @@ if ($count > 0) {
         '行灯名称','会場予約人数','営業担当名称','予約状態ｺｰﾄﾞ','予約状態名称','会場ｺｰﾄﾞ','会場使用目的ｺｰﾄﾞ',
         '会場使用目的名称','会場形式ｺｰﾄﾞ','会場形式名称','ｴｰｼﾞｪﾝﾄｺｰﾄﾞ','エージェン 名称','申込会社 名称','ｴｰｼﾞｪﾝﾄ名称',
         '予約状態備考','売上部門ｺｰﾄﾞ','売上部門名称','実施日','営業担当ｺｰﾄﾞ','追加売上区分','追加売上区分名称',
-        'ｷｬﾝｾﾙ日','予約状態期限日','最終更新日','作成日時','更新日時','予約登録日','決定日','仮予約日'
+        'ｷｬﾝｾﾙ日','予約状態期限日','最終更新日','作成日時','更新日時','予約登録日','決定日','仮予約日',
+        '予約種類ｺｰﾄﾞ','予約種類名称'
       ];
       $first_line = fgets($handle);
       $first_line = mb_convert_encoding($first_line, 'UTF-8', 'SJIS-win');
@@ -152,6 +153,9 @@ if ($count > 0) {
             $nehops_edited = (new DateTime($data[34]))->format('Y-m-d H:i:s');
           }
 
+          $reservation_type_code = $data[38];
+          $reservation_type_name = $data[39];
+
           $pic_id = $data[27];
           $a8l = $data[28];
           if($a8l == 'N' || $a8l == 'n' || $a8l == '0'  || $a8l == 'false' || $a8l == 'False' || $a8l == 'FALSE'){
@@ -189,6 +193,8 @@ if ($count > 0) {
                 memo = ?,
                 sales_dept_id = ?,
                 sales_dept_name = ?,
+                reservation_type_code = ?,
+                reservation_type_name = ?,
                 reservation_date = ?,
                 pic_id = ?,
                 additional_sales = ?,
@@ -226,6 +232,8 @@ if ($count > 0) {
                 $memo,
                 $sales_dept_id,
                 $sales_dept_name,
+                $reservation_type_code,
+                $reservation_type_name,
                 $reservation_date,
                 $pic_id,
                 $additional_sales,
