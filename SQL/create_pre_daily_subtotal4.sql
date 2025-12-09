@@ -7,7 +7,8 @@ select `S`.`banquet_schedule_id` AS `sche_id`,
 `S`.`branch` AS `branch`,
 count(`S`.`reservation_id`) AS `count`,
 `S`.`additional_sales` AS `additional_sales`,
-date_format(`S`.`reservation_date`,'%Y-%m') AS `ym`,
+date_format(`S`.`reservation_date`,
+'%Y-%m') AS `ym`,
 `S`.`date` AS `date`,
 `S`.`room_id` AS `room_id`,
 `R`.`name` AS `room_name`,
@@ -39,15 +40,60 @@ sum(((`C`.`amount_gross` - `C`.`service_fee`) - `C`.`tax`)) AS `ex-ts`,
 `SD`.`sales_dept_short` AS `sales_dept_short`,
 `SD`.`category_id` AS `sales_category_id`,
 `BC2`.`banquet_category_name` AS `sales_category_name`,
+`S`.`reservation_type_code` AS `reservation_type_code`,
+`BC3`.`banquet_category_id` AS `reservation_type`,
+`BC3`.`banquet_category_name` AS `reservation_type_name`,
 `S`.`agent_id` AS `agent_id`,
 `AG`.`agent_group` AS `agent_name`,
 `AG`.`agent_group_short` AS `agent_short`,
 `S`.`agent_name` AS `agent_name2`,
-`S`.`reserver` AS `reserver` from (((((((`salmonbadger2_nchsignage`.`banquet_schedules` `S` left join `salmonbadger2_nchsignage`.`banquet_charges` `C` on(((`C`.`reservation_id` = `S`.`reservation_id`) and (`C`.`branch` = `S`.`branch`) and (`C`.`branch` <> 9999) and (not((`C`.`item_group_id` like 'X%')))))) left join `salmonbadger2_nchsignage`.`banquet_purposes` `P` on((`S`.`purpose_id` = `P`.`banquet_purpose_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC` on((`P`.`banquet_category_id` = `BC`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_rooms` `R` on((`S`.`room_id` = `R`.`banquet_room_id`))) left join `salmonbadger2_nchsignage`.`banquet_sales_dept` `SD` on((`S`.`sales_dept_id` = `SD`.`sales_dept_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC2` on((`SD`.`category_id` = `BC2`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_agents` `AG` on((`S`.`agent_id` = `AG`.`agent_id`))) where ((`S`.`banquet_schedule_id` is not null) and (`S`.`status` not in (4,
-5)) and (`S`.`purpose_id` not in (0,
-88,
-94)) and (`S`.`reservation_name` <> '朝食会場')) group by `S`.`date`,
+`S`.`reserver` AS `reserver` from (
+  (
+    (
+      (
+        (
+          (
+            (
+              (
+                `banquet_schedules` `S` left join `banquet_charges` `C` on(
+                  (
+                    (`C`.`reservation_id` = `S`.`reservation_id`) 
+                    and (`C`.`branch` = `S`.`branch`) 
+                    and (`C`.`branch` <> 9999) 
+                    and (not((`C`.`item_group_id` like 'X%')))
+                  )
+                )
+              ) left join `banquet_purposes` `P` on(
+                (`S`.`purpose_id` = `P`.`banquet_purpose_id`)
+              )
+            ) left join `banquet_categories` `BC` on(
+              (`P`.`banquet_category_id` = `BC`.`banquet_category_id`)
+            )
+          ) left join `banquet_rooms` `R` on(
+            (`S`.`room_id` = `R`.`banquet_room_id`)
+          )
+        ) left join `banquet_sales_dept` `SD` on(
+          (`S`.`sales_dept_id` = `SD`.`sales_dept_id`)
+        )
+      ) left join `banquet_categories` `BC2` on(
+        (`SD`.`category_id` = `BC2`.`banquet_category_id`)
+      )
+    ) left join `banquet_categories` `BC3` on(
+      (`S`.`reservation_type_code` = `BC3`.`reservation_type_code`)
+    )
+  ) left join `banquet_agents` `AG` on(
+    (`S`.`agent_id` = `AG`.`agent_id`)
+  )
+)
+where (
+  (`S`.`banquet_schedule_id` is not null) 
+  and (`S`.`status` not in (4,5)) 
+  and (`S`.`purpose_id` not in (0,88,94)) 
+  and (`S`.`reservation_name` <> '朝食会場')
+) 
+group by `S`.`date`,
 `P`.`banquet_category_id`,
-`S`.`room_id` order by `S`.`date`,
+`S`.`room_id`
+order by `S`.`date`,
 `P`.`banquet_category_id`,
 `S`.`start`

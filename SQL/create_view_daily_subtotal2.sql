@@ -1,4 +1,5 @@
-with `ranked_reservations` as (
+with `ranked_reservations` as 
+(
   select 
     `pre_daily_subtotal2`.`sche_id` AS `sche_id`,
     `pre_daily_subtotal2`.`status` AS `status`,
@@ -38,6 +39,9 @@ with `ranked_reservations` as (
     `pre_daily_subtotal2`.`sales_dept_short` AS `sales_dept_short`,
     `pre_daily_subtotal2`.`sales_category_id` AS `sales_category_id`,
     `pre_daily_subtotal2`.`sales_category_name` AS `sales_category_name`,
+    `pre_daily_subtotal2`.`reservation_type` AS `reservation_type`,
+    `pre_daily_subtotal2`.`reservation_type_code` AS `reservation_type_code`,
+    `pre_daily_subtotal2`.`reservation_type_name` AS `reservation_type_name`,
     `pre_daily_subtotal2`.`pic` AS `pic`,
     `pre_daily_subtotal2`.`pic_id` AS `pic_id`,
     `pre_daily_subtotal2`.`agent_id` AS `agent_id`,
@@ -46,11 +50,11 @@ with `ranked_reservations` as (
     `pre_daily_subtotal2`.`agent_name2` AS `agent_name2`,
     `pre_daily_subtotal2`.`reserver` AS `reserver`,
     row_number() OVER (
-      PARTITION BY 
-        `pre_daily_subtotal2`.`ym`,
+      PARTITION BY `pre_daily_subtotal2`.`ym`,
         `pre_daily_subtotal2`.`date`,
         `pre_daily_subtotal2`.`room_id` 
-      ORDER BY `pre_daily_subtotal2`.`gross` desc 
+      ORDER BY 
+        `pre_daily_subtotal2`.`gross` desc 
     )  AS `rn` 
   from `pre_daily_subtotal2`
 ) 
@@ -81,6 +85,9 @@ select
   `t2`.`sales_dept_short` AS `sales_dept_short`,
   `t2`.`sales_category_id` AS `sales_category_id`,
   `t2`.`sales_category_name` AS `sales_category_name`,
+  `t2`.`reservation_type` AS `reservation_type`,
+  `t2`.`reservation_type_code` AS `reservation_type_code`,
+  `t2`.`reservation_type_name` AS `reservation_type_name`,
   `t2`.`people` AS `people`,
   `t2`.`purpose_id` AS `purpose_id`,
   `t2`.`purpose_name` AS `purpose_name`,
@@ -98,68 +105,78 @@ select
   `t2`.`agent_name` AS `agent_name`,
   `t2`.`agent_short` AS `agent_short`,
   `t2`.`agent_name2` AS `agent_name2`,
-  `t2`.`reserver` AS `reserver`
-from (
-  `pre_daily_subtotal2` `t1` join (
-    select 
-      `ranked_reservations`.`sche_id` AS `sche_id`,
-      `ranked_reservations`.`status` AS `status`,
-      `ranked_reservations`.`status_name` AS `status_name`,
-      `ranked_reservations`.`reservation_id` AS `reservation_id`,
-      `ranked_reservations`.`reservation_name` AS `reservation_name`,
-      `ranked_reservations`.`reservation_date` AS `reservation_date`,
-      `ranked_reservations`.`branch` AS `branch`,
-      `ranked_reservations`.`count` AS `count`,
-      `ranked_reservations`.`additional_sales` AS `additional_sales`,
-      `ranked_reservations`.`ym` AS `ym`,
-      `ranked_reservations`.`date` AS `date`,
-      `ranked_reservations`.`room_id` AS `room_id`,
-      `ranked_reservations`.`room_name` AS `room_name`,
-      `ranked_reservations`.`start` AS `start`,
-      `ranked_reservations`.`end` AS `end`,
-      `ranked_reservations`.`due_date` AS `due_date`,
-      `ranked_reservations`.`cancel_date` AS `cancel_date`,
-      `ranked_reservations`.`d_created` AS `d_created`,
-      `ranked_reservations`.`d_decided` AS `d_decided`,
-      `ranked_reservations`.`d_tentative` AS `d_tentative`,
-      `ranked_reservations`.`purpose_id` AS `purpose_id`,
-      `ranked_reservations`.`purpose_name` AS `purpose_name`,
-      `ranked_reservations`.`purpose_short` AS `purpose_short`,
-      `ranked_reservations`.`people` AS `people`,
-      `ranked_reservations`.`subtotal` AS `subtotal`,
-      `ranked_reservations`.`gross` AS `gross`,
-      `ranked_reservations`.`net` AS `net`,
-      `ranked_reservations`.`service_fee` AS `service_fee`,
-      `ranked_reservations`.`tax` AS `tax`,
-      `ranked_reservations`.`discount` AS `discount`,
-      `ranked_reservations`.`ex-ts` AS `ex-ts`,
-      `ranked_reservations`.`banquet_category_id` AS `banquet_category_id`,
-      `ranked_reservations`.`banquet_category_name` AS `banquet_category_name`,
-      `ranked_reservations`.`sales_dept_id` AS `sales_dept_id`,
-      `ranked_reservations`.`sales_dept_name` AS `sales_dept_name`,
-      `ranked_reservations`.`sales_dept_short` AS `sales_dept_short`,
-      `ranked_reservations`.`sales_category_id` AS `sales_category_id`,
-      `ranked_reservations`.`sales_category_name` AS `sales_category_name`,
-      `ranked_reservations`.`pic` AS `pic`,
-      `ranked_reservations`.`pic_id` AS `pic_id`,
-      `ranked_reservations`.`agent_id` AS `agent_id`,
-      `ranked_reservations`.`agent_name` AS `agent_name`,
-      `ranked_reservations`.`agent_short` AS `agent_short`,
-      `ranked_reservations`.`agent_name2` AS `agent_name2`,
-      `ranked_reservations`.`reserver` AS `reserver`,
-      `ranked_reservations`.`rn` AS `rn` 
-    from `ranked_reservations` 
-    where (`ranked_reservations`.`rn` = 1)
-  ) `t2` on(
+  `t2`.`reserver` AS `reserver` 
+from 
+  (
+    `pre_daily_subtotal2` `t1` join 
     (
-      (`t1`.`ym` = `t2`.`ym`) 
-      and (`t1`.`date` = `t2`.`date`) 
-      and (`t1`.`room_id` = `t2`.`room_id`) 
-      and (`t1`.`reservation_id` = `t2`.`reservation_id`)
+      select 
+        `ranked_reservations`.`sche_id` AS `sche_id`,
+        `ranked_reservations`.`status` AS `status`,
+        `ranked_reservations`.`status_name` AS `status_name`,
+        `ranked_reservations`.`reservation_id` AS `reservation_id`,
+        `ranked_reservations`.`reservation_name` AS `reservation_name`,
+        `ranked_reservations`.`reservation_date` AS `reservation_date`,
+        `ranked_reservations`.`branch` AS `branch`,
+        `ranked_reservations`.`count` AS `count`,
+        `ranked_reservations`.`additional_sales` AS `additional_sales`,
+        `ranked_reservations`.`ym` AS `ym`,
+        `ranked_reservations`.`date` AS `date`,
+        `ranked_reservations`.`room_id` AS `room_id`,
+        `ranked_reservations`.`room_name` AS `room_name`,
+        `ranked_reservations`.`start` AS `start`,
+        `ranked_reservations`.`end` AS `end`,
+        `ranked_reservations`.`due_date` AS `due_date`,
+        `ranked_reservations`.`cancel_date` AS `cancel_date`,
+        `ranked_reservations`.`d_created` AS `d_created`,
+        `ranked_reservations`.`d_decided` AS `d_decided`,
+        `ranked_reservations`.`d_tentative` AS `d_tentative`,
+        `ranked_reservations`.`purpose_id` AS `purpose_id`,
+        `ranked_reservations`.`purpose_name` AS `purpose_name`,
+        `ranked_reservations`.`purpose_short` AS `purpose_short`,
+        `ranked_reservations`.`people` AS `people`,
+        `ranked_reservations`.`subtotal` AS `subtotal`,
+        `ranked_reservations`.`gross` AS `gross`,
+        `ranked_reservations`.`net` AS `net`,
+        `ranked_reservations`.`service_fee` AS `service_fee`,
+        `ranked_reservations`.`tax` AS `tax`,
+        `ranked_reservations`.`discount` AS `discount`,
+        `ranked_reservations`.`ex-ts` AS `ex-ts`,
+        `ranked_reservations`.`banquet_category_id` AS `banquet_category_id`,
+        `ranked_reservations`.`banquet_category_name` AS `banquet_category_name`,
+        `ranked_reservations`.`sales_dept_id` AS `sales_dept_id`,
+        `ranked_reservations`.`sales_dept_name` AS `sales_dept_name`,
+        `ranked_reservations`.`sales_dept_short` AS `sales_dept_short`,
+        `ranked_reservations`.`sales_category_id` AS `sales_category_id`,
+        `ranked_reservations`.`sales_category_name` AS `sales_category_name`,
+        `ranked_reservations`.`reservation_type` AS `reservation_type`,
+        `ranked_reservations`.`reservation_type_code` AS `reservation_type_code`,
+        `ranked_reservations`.`reservation_type_name` AS `reservation_type_name`,
+        `ranked_reservations`.`pic` AS `pic`,
+        `ranked_reservations`.`pic_id` AS `pic_id`,
+        `ranked_reservations`.`agent_id` AS `agent_id`,
+        `ranked_reservations`.`agent_name` AS `agent_name`,
+        `ranked_reservations`.`agent_short` AS `agent_short`,
+        `ranked_reservations`.`agent_name2` AS `agent_name2`,
+        `ranked_reservations`.`reserver` AS `reserver`,
+        `ranked_reservations`.`rn` AS `rn` 
+      from `ranked_reservations` 
+      where (
+        `ranked_reservations`.`rn` = 1
+      )
+    ) 
+    `t2` on
+    (
+      (
+        (`t1`.`ym` = `t2`.`ym`) 
+        and (`t1`.`date` = `t2`.`date`) 
+        and (`t1`.`room_id` = `t2`.`room_id`) 
+        and (`t1`.`reservation_id` = `t2`.`reservation_id`)
+      )
     )
   )
-) 
-group by `t1`.`ym`,
-`t1`.`status`,
-`t1`.`date`,
-`t1`.`room_id`
+group by
+  `t1`.`ym`,
+  `t1`.`status`,
+  `t1`.`date`,
+  `t1`.`room_id`

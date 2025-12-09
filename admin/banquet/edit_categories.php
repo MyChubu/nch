@@ -67,6 +67,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <thead>
         <tr>
           <th>ID</th>
+          <th>予約種類コード</th>
           <th>カテゴリー名</th>
           <th>略称</th>
         </tr>
@@ -77,6 +78,9 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr>
           <td>
             <input type="text" class="master_edit" name="value[<?= $i ?>][banquet_category_id]" value="<?= htmlspecialchars($category['banquet_category_id'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+          </td>
+          <td>
+            <input type="text" class="master_edit" name="value[<?= $i ?>][reservation_type_code]" value="<?= htmlspecialchars($category['reservation_type_code'], ENT_QUOTES, 'UTF-8') ?>" disabled>
           </td>
           <td>
             <input type="text" class="master_edit" name="value[<?= $i ?>][banquet_category_name]" value="<?= htmlspecialchars($category['banquet_category_name'], ENT_QUOTES, 'UTF-8') ?>" disabled>
