@@ -223,7 +223,7 @@ if($count > 0){
                 <td class="cell_w30"><?=statusletter($reservation['status']) ?></td>
                 
                 <td class="cell_w30"><?= salescatletter($reservation['sales_category_id']) ?></td>
-                <td class="cell_w30"><?= $reservation['reservation_type'] == $reservation['sales_category_id'] ? "":"C" ?></td>
+                <td class="cell_w30"><?= $reservation['reservation_type'] == $reservation['sales_category_id'] ? '' : '<i class="fa-solid fa-not-equal"></i>' ?></td>
                 <td class="cell_w30"><?= htmlspecialchars($reservation['people']) ?></td>
                 <td class="cell_w100"><?= number_format($reservation['net']) ?></td>
                 <td class="cell_w100"><?= number_format($reservation['gross']) ?></td>
