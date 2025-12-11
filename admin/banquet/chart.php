@@ -95,6 +95,16 @@ $category_total_counts = $chartdata['category_total_counts'];
       flex-wrap: wrap;
       gap: 10px;
     }
+    .graph_charts {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+      align-items: stretch;
+      align-content: stretch;
+    }
     .chartbox {
       width: calc(100% - 10px)  ;
       background-color: #fff;
@@ -108,16 +118,18 @@ $category_total_counts = $chartdata['category_total_counts'];
     .cb_quarter {
       width: calc(24% - 10px);
     }
-    @media screen and (max-width:1370px) {
-      
-      .cb_half {
-        width: calc(100% - 10px);
-      }
-      .cb_quarter {
-        width: calc(48% - 10px);
-      }
-      
+
+
+  @media screen and (max-width: 1370px) {
+    
+    .cb_half {
+      width: calc(100% - 10px);
     }
+    .cb_quarter {
+      width: calc(48% - 10px);
+    } 
+    
+  }
   </style>
 </head>
 <body>
@@ -125,18 +137,36 @@ $category_total_counts = $chartdata['category_total_counts'];
 <main>
 <div class="wrapper">
   <div>
-    <h2>売上推移</h2>
-    <canvas id="myChart"></canvas>
-    <div class="text_right">税・サービス料抜(単位：千円)</div>
+    <form  enctype="multipart/form-data" id="schedate_change">
+      <select name="nendo" id="nendo">
+        <option value=""></option>
+        <?php for($i = 2024; $i<= date('Y') + 3; $i++): ?>
+          <option value="<?=$i ?>" <?=($nendo == $i)?"selected":"" ?>><?=$i ?></option>
+        <?php endfor; ?>
+      </select>年度
+      
+      <button type="submit">変更</button>
+    </form>
+    <div id="controller_year">
+      <div id="before_year"><a href="?nendo=<?= $before_nendo ?>"><i class="fa-solid fa-arrow-left"></i>前年度</a></div>
+      <div id="this_year"><a href="?nendo=<?= $this_nendo ?>">今年度</a></div>
+      <div id="after_year"><a href="?nendo=<?= $after_nendo ?>">翌年度<i class="fa-solid fa-arrow-right"></i></a></div>
+    
+    </div>
   </div>
-
-  <div>
-    <h2>売上推移2</h2>
-    <canvas id="myChart2"></canvas>
-    <div class="text_right">税・サービス料抜(単位：千円)</div>
-
+  <h1><?=$nendo ?>年度推移</h1>
+  <div class="graph_charts">
+    <div class="chartbox cb_half">
+      <h2>売上推移</h2>
+      <canvas id="myChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+    <div class="chartbox cb_half">
+      <h2>売上推移2</h2>
+      <canvas id="myChart2"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
   </div>
-  
   <div class="pie_charts">
     <div class="chartbox cb_half">
       <h2>カテゴリー別（金額）</h2>
@@ -193,16 +223,6 @@ $category_total_counts = $chartdata['category_total_counts'];
   const data = {
     labels: labels,
     datasets: [
-      // 折れ線グラフ（2025年度累計）
-      {
-        label: '<?=$nendo ?>年度累計',
-        data: [<?= implode(',', $sales_subtotal_array) ?>],
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        type: 'line',
-        fill: false,
-        yAxisID: 'y-axis-2'
-      },
       // 折れ線グラフ（2024年度累計）
       {
         label: '<?=$last_nendo ?>年度累計',
@@ -213,15 +233,15 @@ $category_total_counts = $chartdata['category_total_counts'];
         fill: false,
         yAxisID: 'y-axis-2'
       },
-      // 棒グラフ（2025年度）
+      // 折れ線グラフ（2025年度累計）
       {
-        label: '<?=$nendo ?>年度',
-        data: [<?= implode(',', $sales_array) ?>],
-        backgroundColor: 'rgba(0, 246, 143, 0.5)',
-        borderColor: 'rgb(0, 246, 143)',
-        type: 'bar',
+        label: '<?=$nendo ?>年度累計',
+        data: [<?= implode(',', $sales_subtotal_array) ?>],
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        type: 'line',
         fill: false,
-        yAxisID: 'y-axis-1'
+        yAxisID: 'y-axis-2'
       },
       // 棒グラフ（2024年度）
       {
@@ -232,8 +252,17 @@ $category_total_counts = $chartdata['category_total_counts'];
         type: 'bar',
         fill: false,
         yAxisID: 'y-axis-1'
+      },
+      // 棒グラフ（2025年度）
+      {
+        label: '<?=$nendo ?>年度',
+        data: [<?= implode(',', $sales_array) ?>],
+        backgroundColor: 'rgba(0, 246, 143, 0.5)',
+        borderColor: 'rgb(0, 246, 143)',
+        type: 'bar',
+        fill: false,
+        yAxisID: 'y-axis-1'
       }
-      
     ]
   };
   const config = {
@@ -318,7 +347,14 @@ $category_total_counts = $chartdata['category_total_counts'];
           fill: false,
           yAxisID: 'y-right'
         },
-
+        // 2024棒グラフ
+        {
+          label: '<?=$last_nendo ?> 実績',
+          data: [<?= implode(',', $last_determined_sales) ?>],
+          backgroundColor: 'rgba(255, 99, 132, 0.4)',
+          stack: '<?=$last_nendo ?>',
+          yAxisID: 'y-left'
+        },
 
         // 2025棒グラフ
         {
@@ -341,15 +377,8 @@ $category_total_counts = $chartdata['category_total_counts'];
           backgroundColor: 'rgba(54, 235, 151, 0.5)',
           stack: '<?=$nendo ?>',
           yAxisID: 'y-left'
-        },
-        // 2024棒グラフ
-        {
-          label: '<?=$last_nendo ?> 実績',
-          data: [<?= implode(',', $last_determined_sales) ?>],
-          backgroundColor: 'rgba(255, 99, 132, 0.4)',
-          stack: '<?=$last_nendo ?>',
-          yAxisID: 'y-left'
         }
+        
       ]
     };
 
