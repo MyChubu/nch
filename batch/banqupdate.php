@@ -291,6 +291,8 @@ if ($count > 0) {
                 memo,
                 sales_dept_id,
                 sales_dept_name,
+                reservation_type_code,
+                reservation_type_name,
                 reservation_date,
                 pic_id,
                 additional_sales,
@@ -305,7 +307,7 @@ if ($count > 0) {
                 enable,
                 added,
                 modified,
-                modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
+                modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
               $stmt = $dbh->prepare($sql);
               $stmt->execute([
                 $reservation_id,
@@ -331,6 +333,8 @@ if ($count > 0) {
                 $memo,
                 $sales_dept_id,
                 $sales_dept_name,
+                $reservation_type_code,
+                $reservation_type_name,
                 $reservation_date,
                 $pic_id,
                 $additional_sales,

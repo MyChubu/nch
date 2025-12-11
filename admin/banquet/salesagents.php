@@ -260,12 +260,13 @@ $dbh = null;
                 <td><?=$row['agent_short'] ?></td>
                 <td><?=$sales_count ?></td>
                 <!--<td><?=number_format($row['additional_sales']) ?></td>-->
+                <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <td><?=number_format($row['ex-ts']) ?></td>
+                
               </tr>
               <?php
                 $total_count += $row['count'];
