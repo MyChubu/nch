@@ -12,7 +12,7 @@ body{
   max-width: 1080px;
   margin: 0 auto;
   background-color:#fff8b4;
-  height: 1920px;
+  /* height: 1920px; */
   padding: 35px 35px;
   overflow: hidden;
   background-image: url('../images/digisign_bg.png');
