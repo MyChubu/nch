@@ -4,6 +4,8 @@ require_once('../common/conf.php');
 if(defined('CSV_DATA_PATH') == false) {
   define('CSV_DATA_PATH', '../data/csv/');
 }
+
+
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
@@ -35,7 +37,8 @@ if ($count > 0) {
         '行灯名称','会場予約人数','営業担当名称','予約状態ｺｰﾄﾞ','予約状態名称','会場ｺｰﾄﾞ','会場使用目的ｺｰﾄﾞ',
         '会場使用目的名称','会場形式ｺｰﾄﾞ','会場形式名称','ｴｰｼﾞｪﾝﾄｺｰﾄﾞ','エージェン 名称','申込会社 名称','ｴｰｼﾞｪﾝﾄ名称',
         '予約状態備考','売上部門ｺｰﾄﾞ','売上部門名称','実施日','営業担当ｺｰﾄﾞ','追加売上区分','追加売上区分名称',
-        'ｷｬﾝｾﾙ日','予約状態期限日','最終更新日','作成日時','更新日時'
+        'ｷｬﾝｾﾙ日','予約状態期限日','最終更新日','作成日時','更新日時','予約登録日','決定日','仮予約日',
+        '予約種類ｺｰﾄﾞ','予約種類名称'
       ];
       $first_line = fgets($handle);
       $first_line = mb_convert_encoding($first_line, 'UTF-8', 'SJIS-win');
@@ -130,6 +133,19 @@ if ($count > 0) {
           if($data[32] !=''){
             $nehops_mod_date = (new DateTime($data[32]))->format('Y-m-d');
           }
+          $nehops_d_created =null;
+          if($data[35] !=''){
+            $nehops_d_created = (new DateTime($data[35]))->format('Y-m-d');
+          }
+          $nehops_d_decided =null;
+          if($data[36] !=''){
+            $nehops_d_decided = (new DateTime($data[36]))->format('Y-m-d');
+          }
+          $nehops_d_tentative =null;
+          if($data[37] !=''){
+            $nehops_d_tentative = (new DateTime($data[37]))->format('Y-m-d');
+          }
+
           $nehops_created = null;
           if($data[33] !=''){
             $nehops_created = (new DateTime($data[33]))->format('Y-m-d H:i:s');
@@ -138,6 +154,9 @@ if ($count > 0) {
           if($data[34] !=''){
             $nehops_edited = (new DateTime($data[34]))->format('Y-m-d H:i:s');
           }
+
+          $reservation_type_code = $data[38];
+          $reservation_type_name = $data[39];
 
           $pic_id = $data[27];
           $a8l = $data[28];
@@ -176,6 +195,8 @@ if ($count > 0) {
                 memo = ?,
                 sales_dept_id = ?,
                 sales_dept_name = ?,
+                reservation_type_code = ?,
+                reservation_type_name = ?,
                 reservation_date = ?,
                 pic_id = ?,
                 additional_sales = ?,
@@ -184,6 +205,9 @@ if ($count > 0) {
                 nehops_mod_date = ?,
                 nehops_created = ?,
                 nehops_edited = ?,
+                nehops_d_created = ?,
+                nehops_d_decided = ?,
+                nehops_d_tentative = ?,
                 modified = now(),
                 modified_by = "csvdata"
                 where reservation_id = ? and branch = ?';
@@ -210,6 +234,8 @@ if ($count > 0) {
                 $memo,
                 $sales_dept_id,
                 $sales_dept_name,
+                $reservation_type_code,
+                $reservation_type_name,
                 $reservation_date,
                 $pic_id,
                 $additional_sales,
@@ -218,6 +244,9 @@ if ($count > 0) {
                 $nehops_mod_date,
                 $nehops_created,
                 $nehops_edited,
+                $nehops_d_created,
+                $nehops_d_decided,
+                $nehops_d_tentative,
                 $reservation_id,
                 $branch
               ]);
@@ -264,6 +293,8 @@ if ($count > 0) {
                 memo,
                 sales_dept_id,
                 sales_dept_name,
+                reservation_type_code,
+                reservation_type_name,
                 reservation_date,
                 pic_id,
                 additional_sales,
@@ -272,10 +303,13 @@ if ($count > 0) {
                 nehops_mod_date,
                 nehops_created,
                 nehops_edited,
+                nehops_d_created,
+                nehops_d_decided,
+                nehops_d_tentative,
                 enable,
                 added,
                 modified,
-                modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
+                modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
               $stmt = $dbh->prepare($sql);
               $stmt->execute([
                 $reservation_id,
@@ -301,6 +335,8 @@ if ($count > 0) {
                 $memo,
                 $sales_dept_id,
                 $sales_dept_name,
+                $reservation_type_code,
+                $reservation_type_name,
                 $reservation_date,
                 $pic_id,
                 $additional_sales,
@@ -309,6 +345,9 @@ if ($count > 0) {
                 $nehops_mod_date,
                 $nehops_created,
                 $nehops_edited,
+                $nehops_d_created,
+                $nehops_d_decided,
+                $nehops_d_tentative,
                 $enable,
                 'csvdata'
               ]);

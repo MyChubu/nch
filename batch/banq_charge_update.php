@@ -4,6 +4,34 @@ require_once('../common/conf.php');
 if(defined('CSV_DATA_PATH') == false) {
   define('CSV_DATA_PATH', '../data/csv/');
 }
+
+// ===== SQLログ出力 =====
+define('SQL_CHR_LOG_PATH','../data/logs/chg_update_insert_'.date('Ymd').'.log'); // 好きな場所に変更OK
+
+function sql_chg_log(string $sql, array $params = [], string $tag = ''): void {
+  // 個人情報/長文が出るならここでマスクするのが安全
+  $masked = array_map(function($v){
+    if ($v === null) return 'NULL';
+    if ($v === true) return 'TRUE';
+    if ($v === false) return 'FALSE';
+    if (is_numeric($v)) return (string)$v;
+    $s = (string)$v;
+    $s = str_replace(["\r","\n","\t"], ['\\r','\\n','\\t'], $s);
+    if (mb_strlen($s) > 300) $s = mb_substr($s, 0, 300) . '...';
+    return "'" . addslashes($s) . "'";
+  }, $params);
+
+  $line = sprintf(
+    "[%s] %s SQL=%s | params=[%s]\n",
+    date('Y-m-d H:i:s'),
+    $tag,
+    $sql,
+    implode(", ", $masked)
+  );
+  file_put_contents(SQL_CHR_LOG_PATH, $line, FILE_APPEND);
+}
+
+
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
@@ -138,7 +166,7 @@ if($count > 0){
               modified_by = "csvdata"
               where reservation_id = ? and branch = ? and detail_number = ? and item_group_id = ?';
             $stmt = $dbh->prepare($sql);
-            $stmt->execute([
+            $params = [
               $date,
               $reservation_name,
               $main_room,
@@ -164,7 +192,36 @@ if($count > 0){
               $branch,
               $detail_number,
               $item_group_id
-            ]);
+            ];
+            sql_chg_log($sql, $params, 'BANQUET_CHARGE_UPDATE');
+            $stmt->execute($params);
+            // $stmt->execute([
+            //   $date,
+            //   $reservation_name,
+            //   $main_room,
+            //   $package_category,
+            //   $package_cat_name,
+            //   $package_id,
+            //   $package_name,
+            //   $item_group_id,
+            //   $item_group_name,
+            //   $item_id,
+            //   $item_name,
+            //   $item_gene_id,
+            //   $unit_price,
+            //   $qty,
+            //   $amount_gross,
+            //   $amount_net,
+            //   $service_fee,
+            //   $tax,
+            //   $discount_name,
+            //   $discount_rate,
+            //   $discount_amount,
+            //   $reservation_id,
+            //   $branch,
+            //   $detail_number,
+            //   $item_group_id
+            // ]);
             $dbh -> commit();
           }catch(PDOException $e){
             $dbh -> rollBack();
@@ -203,7 +260,7 @@ if($count > 0){
               modified,
               modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
             $stmt = $dbh->prepare($sql);
-            $stmt->execute([
+            $params = [
               $reservation_id,
               $date,
               $branch,
@@ -229,7 +286,36 @@ if($count > 0){
               $discount_rate,
               $discount_amount,
               'csvdata'
-            ]);
+            ];
+            sql_chg_log($sql, $params, 'BANQUET_CHARGE_INSERT');
+            $stmyt->execute($params);
+            // $stmt->execute([
+            //   $reservation_id,
+            //   $date,
+            //   $branch,
+            //   $detail_number,
+            //   $reservation_name,
+            //   $main_room,
+            //   $package_category,
+            //   $package_cat_name,
+            //   $package_id,
+            //   $package_name,
+            //   $item_group_id,
+            //   $item_group_name,
+            //   $item_id,
+            //   $item_name,
+            //   $item_gene_id,
+            //   $unit_price,
+            //   $qty,
+            //   $amount_gross,
+            //   $amount_net,
+            //   $service_fee,
+            //   $tax,
+            //   $discount_name,
+            //   $discount_rate,
+            //   $discount_amount,
+            //   'csvdata'
+            // ]);
             $dbh -> commit();
           }catch(PDOException $e){
             $dbh -> rollBack();
@@ -251,14 +337,16 @@ if($count > 0){
       $sql = "DELETE FROM banquet_charges 
               WHERE reservation_id = ? AND date = ? AND detail_number NOT IN ($placeholders)";
       $params = array_merge([$reservation_id, $date], $detail_numbers);
-
+      
       $stmt = $dbh->prepare($sql);
+      sql_chg_log($sql, $params, 'BANQUET_CHARGE_DELETE');
       $stmt->execute($params);
 
       $sql = "DELETE FROM banquet_charges 
               WHERE reservation_id = ? AND date = ? AND modified < ?";
       $params = [$reservation_id, $date, $start_time];
       $stmt = $dbh->prepare($sql);
+      sql_chg_log($sql, $params, 'BANQUET_CHARGE_OLD_DELETE');
       $stmt->execute($params);
     }
 

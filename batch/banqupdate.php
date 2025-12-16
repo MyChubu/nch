@@ -4,6 +4,35 @@ require_once('../common/conf.php');
 if(defined('CSV_DATA_PATH') == false) {
   define('CSV_DATA_PATH', '../data/csv/');
 }
+
+// ===== SQLログ出力 =====
+define('SQL_LOG_PATH','../data/logs/sche_update_insert_'.date('Ymd').'.log'); // 好きな場所に変更OK
+
+function sql_log(string $sql, array $params = [], string $tag = ''): void {
+  // 個人情報/長文が出るならここでマスクするのが安全
+  $masked = array_map(function($v){
+    if ($v === null) return 'NULL';
+    if ($v === true) return 'TRUE';
+    if ($v === false) return 'FALSE';
+    if (is_numeric($v)) return (string)$v;
+    $s = (string)$v;
+    $s = str_replace(["\r","\n","\t"], ['\\r','\\n','\\t'], $s);
+    if (mb_strlen($s) > 300) $s = mb_substr($s, 0, 300) . '...';
+    return "'" . addslashes($s) . "'";
+  }, $params);
+
+  $line = sprintf(
+    "[%s] %s SQL=%s | params=[%s]\n",
+    date('Y-m-d H:i:s'),
+    $tag,
+    $sql,
+    implode(", ", $masked)
+  );
+  file_put_contents(SQL_LOG_PATH, $line, FILE_APPEND);
+}
+
+
+
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
@@ -62,7 +91,7 @@ if ($count > 0) {
       $banq_max_date ="";
       $banq_modtime = date("Y-m-d H:i:s");
       while (($line = fgets($handle)) !== false) {
-        if ($i > 0) {  // 1行目（ヘッダー）は無視
+      
         
           // **エンコーディング変換**
           $line = mb_convert_encoding($line, 'UTF-8', 'SJIS-win');
@@ -210,7 +239,8 @@ if ($count > 0) {
                 modified_by = "csvdata"
                 where reservation_id = ? and branch = ?';
               $stmt = $dbh->prepare($sql);
-              $stmt->execute([
+
+              $params = [
                 $people,
                 $reservation_name,
                 $date,
@@ -247,7 +277,47 @@ if ($count > 0) {
                 $nehops_d_tentative,
                 $reservation_id,
                 $branch
-              ]);
+              ];
+              sql_log($sql, $params, 'UPDATE banquet_schedules');
+              $stmt->execute($params);
+              // $stmt->execute([
+              //   $people,
+              //   $reservation_name,
+              //   $date,
+              //   $start,
+              //   $end,
+              //   $room_id,
+              //   $room_name,
+              //   $event_name,
+              //   $status_id,
+              //   $status_name,
+              //   $purpose_id,
+              //   $purpose_name,
+              //   $layout_id,
+              //   $layout_name,
+              //   $pic,
+              //   $agent_id,
+              //   $agent_name,
+              //   $reserver,
+              //   $memo,
+              //   $sales_dept_id,
+              //   $sales_dept_name,
+              //   $reservation_type_code,
+              //   $reservation_type_name,
+              //   $reservation_date,
+              //   $pic_id,
+              //   $additional_sales,
+              //   $cancel_date,
+              //   $due_date,
+              //   $nehops_mod_date,
+              //   $nehops_created,
+              //   $nehops_edited,
+              //   $nehops_d_created,
+              //   $nehops_d_decided,
+              //   $nehops_d_tentative,
+              //   $reservation_id,
+              //   $branch
+              // ]);
               $dbh -> commit();
             }catch(PDOException $e){
               $dbh -> rollBack();
@@ -309,7 +379,7 @@ if ($count > 0) {
                 modified,
                 modified_by) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),now(),?)';
               $stmt = $dbh->prepare($sql);
-              $stmt->execute([
+              $params = [
                 $reservation_id,
                 $people,
                 $branch,
@@ -348,7 +418,49 @@ if ($count > 0) {
                 $nehops_d_tentative,
                 $enable,
                 'csvdata'
-              ]);
+              ];
+              sql_log($sql, $params, 'INSERT banquet_schedules');
+              $stmt->execute($params);
+              // $stmt->execute([
+              //   $reservation_id,
+              //   $people,
+              //   $branch,
+              //   $reservation_name,
+              //   $date,
+              //   $start,
+              //   $end,
+              //   $room_id,
+              //   $room_name,
+              //   $event_name,
+              //   $status_id,
+              //   $status_name,
+              //   $purpose_id,
+              //   $purpose_name,
+              //   $layout_id,
+              //   $layout_name,
+              //   $pic,
+              //   $agent_id,
+              //   $agent_name,
+              //   $reserver,
+              //   $memo,
+              //   $sales_dept_id,
+              //   $sales_dept_name,
+              //   $reservation_type_code,
+              //   $reservation_type_name,
+              //   $reservation_date,
+              //   $pic_id,
+              //   $additional_sales,
+              //   $cancel_date,
+              //   $due_date,
+              //   $nehops_mod_date,
+              //   $nehops_created,
+              //   $nehops_edited,
+              //   $nehops_d_created,
+              //   $nehops_d_decided,
+              //   $nehops_d_tentative,
+              //   $enable,
+              //   'csvdata'
+              // ]);
         
               $dbh -> commit();
             }catch(PDOException $e){
@@ -356,7 +468,7 @@ if ($count > 0) {
               echo 'Error: ' . $e->getMessage();
             }
           }
-        }
+        
         $i++;
       }
       
@@ -385,7 +497,10 @@ if ($count > 0) {
               $dbh -> beginTransaction();
               $sql = 'update banquet_schedules set status =?, status_name = ?, enable = ?, modified = now(), modified_by = "csvdata" where banquet_schedule_id = ?';
               $stmt = $dbh->prepare($sql);
-              $stmt->execute([5, $status_name, 0,$schedule_id]);
+              $params = [5, $status_name, 0, $schedule_id];
+              // $stmt->execute([5, $status_name, 0,$schedule_id]);
+              sql_log($sql, $params, 'UPDATE cancel');
+              $stmt->execute($params);
               $dbh -> commit();
             }catch(PDOException $e){
               $dbh -> rollBack();
