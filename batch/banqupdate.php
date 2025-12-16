@@ -278,7 +278,7 @@ if ($count > 0) {
                 $reservation_id,
                 $branch
               ];
-              sql_log($sql, $params, 'UPDATE banquet_schedules');
+              // sql_log($sql, $params, 'UPDATE banquet_schedules');
               $stmt->execute($params);
               // $stmt->execute([
               //   $people,
@@ -419,7 +419,7 @@ if ($count > 0) {
                 $enable,
                 'csvdata'
               ];
-              sql_log($sql, $params, 'INSERT banquet_schedules');
+              // sql_log($sql, $params, 'INSERT banquet_schedules');
               $stmt->execute($params);
               // $stmt->execute([
               //   $reservation_id,
@@ -499,7 +499,7 @@ if ($count > 0) {
               $stmt = $dbh->prepare($sql);
               $params = [5, $status_name, 0, $schedule_id];
               // $stmt->execute([5, $status_name, 0,$schedule_id]);
-              sql_log($sql, $params, 'UPDATE cancel');
+              // sql_log($sql, $params, 'UPDATE cancel');
               $stmt->execute($params);
               $dbh -> commit();
             }catch(PDOException $e){

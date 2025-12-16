@@ -193,7 +193,7 @@ if($count > 0){
               $detail_number,
               $item_group_id
             ];
-            sql_chg_log($sql, $params, 'BANQUET_CHARGE_UPDATE');
+            // sql_chg_log($sql, $params, 'BANQUET_CHARGE_UPDATE');
             $stmt->execute($params);
             // $stmt->execute([
             //   $date,
@@ -287,7 +287,7 @@ if($count > 0){
               $discount_amount,
               'csvdata'
             ];
-            sql_chg_log($sql, $params, 'BANQUET_CHARGE_INSERT');
+            // sql_chg_log($sql, $params, 'BANQUET_CHARGE_INSERT');
             $stmyt->execute($params);
             // $stmt->execute([
             //   $reservation_id,
@@ -339,14 +339,14 @@ if($count > 0){
       $params = array_merge([$reservation_id, $date], $detail_numbers);
       
       $stmt = $dbh->prepare($sql);
-      sql_chg_log($sql, $params, 'BANQUET_CHARGE_DELETE');
+      // sql_chg_log($sql, $params, 'BANQUET_CHARGE_DELETE');
       $stmt->execute($params);
 
       $sql = "DELETE FROM banquet_charges 
               WHERE reservation_id = ? AND date = ? AND modified < ?";
       $params = [$reservation_id, $date, $start_time];
       $stmt = $dbh->prepare($sql);
-      sql_chg_log($sql, $params, 'BANQUET_CHARGE_OLD_DELETE');
+      // sql_chg_log($sql, $params, 'BANQUET_CHARGE_OLD_DELETE');
       $stmt->execute($params);
     }
 
