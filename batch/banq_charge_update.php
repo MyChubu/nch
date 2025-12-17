@@ -6,7 +6,7 @@ if(defined('CSV_DATA_PATH') == false) {
 }
 
 // ===== SQLログ出力 =====
-define('SQL_CHR_LOG_PATH','../data/logs/chg_update_insert_'.date('Ymd').'.log'); // 好きな場所に変更OK
+define('SQL_CHG_LOG_PATH','../data/logs/chg_update_insert_'.date('Ymd').'.log'); // 好きな場所に変更OK
 
 function sql_chg_log(string $sql, array $params = [], string $tag = ''): void {
   // 個人情報/長文が出るならここでマスクするのが安全
@@ -28,13 +28,14 @@ function sql_chg_log(string $sql, array $params = [], string $tag = ''): void {
     $sql,
     implode(", ", $masked)
   );
-  file_put_contents(SQL_CHR_LOG_PATH, $line, FILE_APPEND);
+  file_put_contents(SQL_CHG_LOG_PATH, $line, FILE_APPEND);
 }
-
+// ===== SQLログ出力ここまで =====
 
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 }
+
 $sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 3 ORDER BY csv_id ASC LIMIT 1';
 // サーバ性能上、1回につき1件にした
 #$sql = 'SELECT * FROM csvs WHERE status = 2 AND csv_kind = 3 ORDER BY csv_id ASC ';
@@ -90,16 +91,6 @@ if($count > 0){
         // **STEP 4: `str_getcsv()` を適用**
         $data = str_getcsv($line, ",", '"');
 
-
-        // **デバッグ用**
-        #var_dump($data);
-
-        // **カラム数チェック**
-        /*
-        if (count($data) !== 23) {
-            echo "⚠️ カラム数不一致: " . count($data) . " 列 (期待値: 23)\n";
-        }
-        */
         $reservation_id=intval($data[0]);
         $date=$data[1];
         $branch=intval($data[2]);
@@ -193,7 +184,7 @@ if($count > 0){
               $detail_number,
               $item_group_id
             ];
-            // sql_chg_log($sql, $params, 'BANQUET_CHARGE_UPDATE');
+            sql_chg_log($sql, $params, 'BANQUET_CHARGE_UPDATE');
             $stmt->execute($params);
             // $stmt->execute([
             //   $date,
@@ -287,8 +278,8 @@ if($count > 0){
               $discount_amount,
               'csvdata'
             ];
-            // sql_chg_log($sql, $params, 'BANQUET_CHARGE_INSERT');
-            $stmyt->execute($params);
+            sql_chg_log($sql, $params, 'BANQUET_CHARGE_INSERT');
+            $stmt->execute($params);
             // $stmt->execute([
             //   $reservation_id,
             //   $date,
@@ -339,18 +330,17 @@ if($count > 0){
       $params = array_merge([$reservation_id, $date], $detail_numbers);
       
       $stmt = $dbh->prepare($sql);
-      // sql_chg_log($sql, $params, 'BANQUET_CHARGE_DELETE');
+      sql_chg_log($sql, $params, 'BANQUET_CHARGE_DELETE');
       $stmt->execute($params);
 
       $sql = "DELETE FROM banquet_charges 
               WHERE reservation_id = ? AND date = ? AND modified < ?";
       $params = [$reservation_id, $date, $start_time];
       $stmt = $dbh->prepare($sql);
-      // sql_chg_log($sql, $params, 'BANQUET_CHARGE_OLD_DELETE');
+      sql_chg_log($sql, $params, 'BANQUET_CHARGE_OLD_DELETE');
       $stmt->execute($params);
     }
 
-    
     $sql = 'update csvs set status = ?, modified = now() where csv_id = ?';
     $stmt = $dbh->prepare($sql); 
     $stmt->execute([0,$csv_id]);
@@ -358,7 +348,6 @@ if($count > 0){
 }
 // CSVファイルの削除
 $keydate = (new DateTime())->modify('-1 day')->format('Y-m-d H:i:s'); // 1日前の日付を取得
-#$keydate = date("Y-m-d H:i:s", strtotime("-1 day"));  // 1日前の日付を取得
 $sql = 'select * from csvs where status = ? and csv_kind = ? and modified < ?';
 $stmt = $dbh->prepare($sql);  // SQL文を実行する準備
 $stmt->execute([0,3,$keydate]);  // SQL文を実行

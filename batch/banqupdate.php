@@ -30,8 +30,7 @@ function sql_log(string $sql, array $params = [], string $tag = ''): void {
   );
   file_put_contents(SQL_LOG_PATH, $line, FILE_APPEND);
 }
-
-
+// ===== SQLログ出力ここまで =====
 
 if(isset($dbh) == false){
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
