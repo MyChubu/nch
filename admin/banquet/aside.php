@@ -23,11 +23,11 @@
   -->
   <h3>検索</h3>
   <ul>
-    <li><i class="fa-solid fa-magnifying-glass"></i><a href="../banquet/search.php">予約検索_β版</a></li>
+    <li><i class="fa-solid fa-magnifying-glass"></i><a href="../banquet/search.php">予約検索(β)</a></li>
   </ul>
   <h3>売上</h3>
   <ul>
-    <li><i class="fa-solid fa-chart-area"></i><a href="../banquet/chart.php">グラフ</a></li>
+    <li><i class="fa-solid fa-chart-area"></i><a href="../banquet/chart.php">グラフ(β)</a></li>
     <li><i class="fa-solid fa-calculator"></i><a href="../banquet/salesyear.php">年間累計</a></li>
     <li><i class="fa-solid fa-building-circle-arrow-right"></i><a href="../banquet/salesagents.php">エージェント別</a></li>
     <li><i class="fa-solid fa-square-h"></i><a href="../banquet/salesdirect.php">直販</a></li>

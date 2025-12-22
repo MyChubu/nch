@@ -79,10 +79,10 @@ body.preview{
 }
 .eventbox_floor{
   width: 100%;
-  font-size: 0.9em;
+  font-size: 1.1em;
 }
 .eventbox_time{
-  font-size: 1.5em;
+  font-size: 1.1em;
 }
 .eventbox_left,.eventbox_floor,.eventbox_time{
   text-shadow: 2px 3px 3px rgba(0, 0, 0, .6);
