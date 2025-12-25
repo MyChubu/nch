@@ -31,56 +31,94 @@ $plus_1h = (new DateTime($now))->modify('+1 hour')->format('H:i');
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
-$sql = 'select * from banquet_schedules where date = ? and end > ? and enable = ? order by start ASC, branch ASC';
-$stmt = $dbh->prepare($sql);
-$stmt->execute([$date, $now, 1]);
-$count = $stmt->rowCount();
-$events=array();
-if($count > 0){
-  foreach ($stmt as $row) {
-    $scheid = $row['banquet_schedule_id'];
-    //例外表示があるかチェック
-    $sql_ext = 'select * from banquet_ext_sign where sche_id = :scheid and enable = 1 order by start ASC, end ASC';
-    $stmt_ext = $dbh->prepare($sql_ext);
-    $stmt_ext->bindParam(':scheid', $scheid, PDO::PARAM_INT);
-    $stmt_ext->execute();
-    $ext_count = $stmt_ext->rowCount();
-    if($ext_count > 0){
-      foreach($stmt_ext as $ext_row){
-        if( $ext_row['end'] > $now){
-          $event_start = (new DateTime($ext_row['start']))->format('H:i');
-          $event_end = (new DateTime($ext_row['end']))->format('H:i');
-          $event_name = mb_convert_kana($ext_row['event_name'], 'KVas');
-          break;
-        }
-      }
-    }else{
-      $event_start = (new DateTime($row['start']))->format('H:i');
-      $event_end = (new DateTime($row['end']))->format('H:i');
-      $event_name = mb_convert_kana($row['event_name'], 'KVas');
-    }
-    if(!isset($event_start)){
-      continue;
-    }
-    $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
-    $stmt2 = $dbh->prepare($sql2);
-    $stmt2->execute([$row['room_id']]);
-    $room = $stmt2->fetch();
-    $room_name = $room['name'];
-    $room_name_en = $room['name_en'];
-    $floor = $room['floor'];
+$sql = <<<SQL
+WITH
+-- 例外表示（有効）を、sche_idごとに start→end で並べ、今より後に終わるものに順位を付ける
+ext_ranked AS (
+  SELECT
+    e.sche_id,
+    e.start,
+    e.end,
+    e.event_name,
+    ROW_NUMBER() OVER (PARTITION BY e.sche_id ORDER BY e.start ASC, e.end ASC) AS rn
+  FROM banquet_ext_sign e
+  WHERE e.enable = 1
+    AND e.end > ?
+),
+-- 上のうち、sche_idごとに「採用する1件（rn=1）」だけ残す
+ext_pick AS (
+  SELECT sche_id, start, end, event_name
+  FROM ext_ranked
+  WHERE rn = 1
+),
+-- reservation_idごとの最小start（予約単位で時系列にするキー）
+res_first AS (
+  SELECT
+    reservation_id,
+    MIN(start) AS first_start
+  FROM banquet_schedules
+  WHERE date = ?
+    AND end > ?
+    AND enable = ?
+  GROUP BY reservation_id
+)
 
-    $events[] = array(
-      'event_name' => $event_name,
-      'date' => $row['date'],
-      'start' => $event_start,
-      'end' => $event_end,
-      'room_name' => $room_name,
-      'room_name_en' => $room_name_en,
-      'floor' => $floor
-    );
-  }
+SELECT
+  s.reservation_id,
+  s.banquet_schedule_id,
+  s.branch,
+  s.date,
+
+  -- ★例外があれば例外、なければ通常
+  COALESCE(ep.start, s.start)      AS view_start,
+  COALESCE(ep.end,   s.end)        AS view_end,
+  COALESCE(ep.event_name, s.event_name) AS view_event_name,
+
+  r.name    AS room_name,
+  r.name_en AS room_name_en,
+  r.floor,
+  r.size,
+
+  rf.first_start
+
+FROM banquet_schedules s
+JOIN res_first rf
+  ON rf.reservation_id = s.reservation_id
+LEFT JOIN ext_pick ep
+  ON ep.sche_id = s.banquet_schedule_id
+LEFT JOIN banquet_rooms r
+  ON r.banquet_room_id = s.room_id
+
+WHERE s.date = ?
+  AND s.end > ?
+  AND s.enable = ?
+
+ORDER BY
+  rf.first_start ASC,        -- 予約単位で時系列（最小start）
+  s.reservation_id ASC,      -- 同時刻の安定化
+  view_start ASC,            -- 予約内は表示開始が早い順（例外反映後）
+  (r.size IS NULL) ASC,      -- size NULLは最後（任意）
+  r.size DESC,               -- view_start同じなら面積が大きい順
+  s.branch ASC               -- 最後に安定化（任意）
+SQL;
+
+$stmt = $dbh->prepare($sql);
+$stmt->execute([$now, $date, $now, 1, $date, $now, 1]);
+
+$events = [];
+foreach ($stmt as $row) {
+  $events[] = [
+    'event_name'   => mb_convert_kana($row['view_event_name'], 'KVas'),
+    'date'         => $row['date'],
+    'start'        => (new DateTime($row['view_start']))->format('H:i'),
+    'end'          => (new DateTime($row['view_end']))->format('H:i'),
+    'room_name'    => $row['room_name'],
+    'room_name_en' => $row['room_name_en'],
+    'floor'        => $row['floor'],
+  ];
 }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -149,7 +187,7 @@ if($count > 0){
         <?php } ?>
 
       <?php }else{ ?>
-        <p>本日の予定はございません。</p>
+        <p>本日の予定は終了いたしました。</p>
       <?php } ?>
       </div>
 

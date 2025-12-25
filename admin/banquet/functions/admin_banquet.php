@@ -29,6 +29,7 @@ function getBanquetEvents($date) {
       $stmt2->execute([$row['room_id']]);
       $room = $stmt2->fetch();
       $floor = $room['floor']; // 階数
+      $size= $room['size']; // 面積
 
       // 使用目的の情報を取得
       $sql3 = 'select * from banquet_purposes where banquet_purpose_id = ?';
@@ -65,6 +66,7 @@ function getBanquetEvents($date) {
         'end' => $endObj->format('H:i'),                                // 終了時間
         'room_name' => $row['room_name'],                               // 部屋名
         'floor' => $floor,                                              // 階数
+        'size' => $size,                                                // 面積
         'status' => $row['status'],                                     // ステータスコード
         'status_name' => $row['status_name'],                           // ステータス名
         'purpose_id' => $row['purpose_id'],                             // 使用目的ID
@@ -86,6 +88,114 @@ function getBanquetEvents($date) {
   // イベント情報を返す
   return $events;
 }
+function getBanquetEvents2($date) {
+  $dbh = new PDO(DSN, DB_USER, DB_PASS);
+
+  $week = ['日','月','火','水','木','金','土'];
+
+  $sql = <<<SQL
+  
+    SELECT
+      s.reservation_id,
+      s.banquet_schedule_id,
+      s.event_name,
+      s.date,
+      s.start,
+      s.end,
+      s.room_name,
+      s.status,
+      s.status_name,
+      s.purpose_id,
+      s.pic,
+      s.additional_sales,
+      s.enable,
+      s.nehops_d_created,
+      s.nehops_mod_date,
+      s.modified_by,
+
+      r.floor,
+      r.size,
+
+      p.banquet_purpose_name,
+      p.banquet_purpose_short,
+      p.banquet_category_id,
+
+      c.banquet_category_name,
+
+      CASE WHEN es.sche_id IS NOT NULL THEN 1 ELSE 0 END AS ext_sign,
+
+      -- ★ reservation_idごとの最小start（グループの並び順キー）
+      MIN(s.start) OVER (PARTITION BY s.reservation_id) AS first_start
+
+    FROM banquet_schedules s
+    LEFT JOIN banquet_rooms r
+      ON r.banquet_room_id = s.room_id
+    LEFT JOIN banquet_purposes p
+      ON p.banquet_purpose_id = s.purpose_id
+    LEFT JOIN banquet_categories c
+      ON c.banquet_category_id = p.banquet_category_id
+    LEFT JOIN (
+      SELECT DISTINCT sche_id
+      FROM banquet_ext_sign
+      WHERE enable = 1
+    ) es
+      ON es.sche_id = s.banquet_schedule_id
+
+    WHERE s.date = ?
+
+    ORDER BY
+      first_start ASC,            -- ★ 予約単位で時系列（最小start）
+      s.reservation_id ASC,       -- ★ first_start同値のとき安定化
+      s.status ASC,               -- ★ 予約内：ステータス昇順
+      s.enable DESC,          -- ★ 予約内：有効が先
+      s.start ASC,                -- ★ 予約内：startが早い順
+      (r.size IS NULL) ASC,       -- ★ size NULLは最後（任意）
+      r.size DESC;                -- ★ start同じなら面積大きい順
+
+  SQL;
+
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([$date]);
+
+  $events = [];
+
+  foreach ($stmt as $row) {
+    $dateObj     = new DateTime($row['date']);
+    $startObj    = new DateTime($row['start']);
+    $endObj      = new DateTime($row['end']);
+    $addedObj    = new DateTime($row['nehops_d_created']);
+    $modifiedObj = new DateTime($row['nehops_mod_date']);
+
+    $events[] = [
+      'reservation_id'      => $row['reservation_id'],
+      'banquet_schedule_id' => $row['banquet_schedule_id'],
+      'event_name'          => $row['event_name'],
+      'date'                => $dateObj->format('Y/m/d').'('.$week[$dateObj->format('w')].')',
+      'start'               => $startObj->format('H:i'),
+      'end'                 => $endObj->format('H:i'),
+      'room_name'           => $row['room_name'],
+      'floor'               => $row['floor'],
+      'size'                => $row['size'],
+      'status'              => $row['status'],
+      'status_name'         => $row['status_name'],
+      'purpose_id'          => $row['purpose_id'],
+      'purpose_name'        => $row['banquet_purpose_name'],
+      'purpose_short'       => $row['banquet_purpose_short'],
+      'category_id'         => $row['banquet_category_id'],
+      'category_name'       => $row['banquet_category_name'],
+      'pic'                 => mb_convert_kana($row['pic'], 'KVas'),
+      'additional_sales'    => $row['additional_sales'],
+      'enable'              => $row['enable'],
+      'ext_sign'            => (int)$row['ext_sign'],
+      'added'               => $addedObj->format('Y/m/d'),
+      'modified'            => $modifiedObj->format('Y/m/d'),
+      'modified_by'         => $row['modified_by'],
+    ];
+  }
+
+  return $events;
+}
+
 
 function getKaEnList($date){
   $dbh = new PDO(DSN, DB_USER, DB_PASS); // DB接続

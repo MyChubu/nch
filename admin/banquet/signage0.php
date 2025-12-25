@@ -33,7 +33,7 @@ $date = date('Y-m-d');
 if(isset($_REQUEST['event_date']) && $_REQUEST['event_date'] != '') {
   $date = $_REQUEST['event_date'];
 }
-$events = getBanquetEvents2($date);
+$events = getBanquetEvents($date);
 
 $today = (new DateTime())->format('Y-m-d');
 $currentDate = new DateTime($date);

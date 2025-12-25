@@ -25,60 +25,60 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
 $hizuke .= '（' . $week[(int)$dateObj->format('w')] . '曜日）';
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where date = ? and end > ? and enable = ? and additional_sales = ? order by start ASC, branch ASC';
+$sql = <<<SQL
+SELECT
+  s.banquet_schedule_id,
+  s.reservation_id,
+  s.branch,
+  s.event_name,
+  s.date,
+  s.start,
+  s.end,
+  r.name        AS room_name,
+  r.name_en     AS room_name_en,
+  r.floor,
+  r.size,
+
+  MIN(s.start) OVER (PARTITION BY s.reservation_id) AS first_start
+
+FROM banquet_schedules s
+LEFT JOIN banquet_rooms r
+  ON r.banquet_room_id = s.room_id
+
+WHERE
+  s.date = ?
+  AND s.end > ?
+  AND s.enable = ?
+  AND s.additional_sales = ?
+
+ORDER BY
+  first_start ASC,          -- 予約単位で時系列
+  s.reservation_id ASC,     -- 同時刻の安定化
+  s.start ASC,              -- グループ内 start
+  (r.size IS NULL) ASC,     -- size NULLは最後（任意）
+  r.size DESC,              -- start同一なら広い順
+  s.branch ASC              -- 最後に支店で安定化（任意）
+SQL;
+
 $stmt = $dbh->prepare($sql);
 $stmt->execute([$date, $now, 1, 0]);
-$count = $stmt->rowCount();
-$events=array();
-if($count > 0){
-  foreach ($stmt as $row) {
-    $scheid = $row['banquet_schedule_id'];
 
-    //例外表示があるかチェック
-    $sql_ext = 'select * from banquet_ext_sign where sche_id = :scheid and enable = 1 order by start ASC, end ASC';
-    $stmt_ext = $dbh->prepare($sql_ext);
-    $stmt_ext->bindParam(':scheid', $scheid, PDO::PARAM_INT);
-    $stmt_ext->execute();
-    $ext_count = $stmt_ext->rowCount();
-    if($ext_count > 0){
-      foreach($stmt_ext as $ext_row){
-        if( $ext_row['end'] > $now){
-          $event_start = (new DateTime($ext_row['start']))->format('H:i');
-          $event_end = (new DateTime($ext_row['end']))->format('H:i');
-          $event_name = mb_convert_kana($ext_row['event_name'], 'KVas');
-          break;
-        }
-      }
-    }else{
-      $event_start = (new DateTime($row['start']))->format('H:i');
-      $event_end = (new DateTime($row['end']))->format('H:i');
-      $event_name = mb_convert_kana($row['event_name'], 'KVas');
-    }
-    if(!isset($event_start)){
-      continue;
-    }
-    
-    $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
-    $stmt2 = $dbh->prepare($sql2);
-    $stmt2->execute([$row['room_id']]);
-    $room = $stmt2->fetch();
-    $room_name = $room['name'];
-    $room_name_en = $room['name_en'];
-    $floor = $room['floor'];
-    $events[] = array(
-      'id'=>$row['banquet_schedule_id'],
-      'reservation_id'=>$row['reservation_id'],
-      'branch'=>$row['branch'],
-      'event_name' => $event_name,
-      'date' => $row['date'],
-      'start' => $event_start,
-      'end' => $event_end,
-      'room_name' => $room_name,
-      'room_name_en' => $room_name_en,
-      'floor' => $floor
-    );
-  }
+$events = [];
+foreach ($stmt as $row) {
+  $events[] = [
+    'id'            => $row['banquet_schedule_id'],
+    'reservation_id'=> $row['reservation_id'],
+    'branch'        => $row['branch'],
+    'event_name'    => mb_convert_kana($row['event_name'], 'KVas'),
+    'date'          => $row['date'],
+    'start'         => (new DateTime($row['start']))->format('H:i'),
+    'end'           => (new DateTime($row['end']))->format('H:i'),
+    'room_name'     => $row['room_name'],
+    'room_name_en'  => $row['room_name_en'],
+    'floor'         => $row['floor'],
+  ];
 }
+
 $data=array(
   'status'=>200,
   'message'=>'OK',

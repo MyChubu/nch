@@ -11,5 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editableInputs.forEach(el => {
       el.disabled = !isEditable;
     });
+
   });
 });

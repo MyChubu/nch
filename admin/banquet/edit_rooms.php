@@ -41,7 +41,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/edit_master.css">
+  <link rel="stylesheet" href="css/edit_master.css?202512221345">
   <link rel="stylesheet" href="css/form.css">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
@@ -71,9 +71,11 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <th>名称</th>
           <th>英名</th>
           <th class="cell_w60">階</th>
+          <th class="cell_w60">㎡</th>
           <th class="cell_w60">使用</th>
           <th class="cell_w60">カレンダー</th>
-          <th class="cell_w80">表示順</th>
+          <th class="cell_w80">Cal順</th>
+
         </tr>
       </thead>
       <tbody>
@@ -81,16 +83,16 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($results as $room): ?>
         <tr>
           <td>
-            <input type="text" name="value[<?=$i ?>][banquet_room_id]" value="<?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
+            <input type="text" name="value[<?=$i ?>][banquet_room_id]" value="<?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit master_admin" disabled>
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][name]" value="<?= htmlspecialchars($room['name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
+            <input type="text" name="value[<?=$i ?>][name]" value="<?= htmlspecialchars($room['name'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit master_admin" disabled>
           </td>
           <td>
-            <input type="text" name="value[<?=$i ?>][name_en]" value="<?= htmlspecialchars($room['name_en'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit" disabled>
+            <input type="text" name="value[<?=$i ?>][name_en]" value="<?= htmlspecialchars($room['name_en'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit master_admin" disabled>
           </td>
           <td>
-            <select name="value[<?=$i ?>][floor]" class="master_edit" disabled>
+            <select name="value[<?=$i ?>][floor]" class="master_edit master_admin" disabled>
               <?php for ($f = 0; $f <= 8; $f++):
                 if($f==0){
                   $flr = 'B1';
@@ -102,15 +104,17 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php endfor; ?>
             </select>
           </td>
-
           <td>
-            <input type="checkbox" class="master_edit" name="status" value="1" <?= $room['status'] ? 'checked' : '' ?> disabled>
+            <input type="number" name="value[<?=$i ?>][size]" value="<?= htmlspecialchars($room['size'], ENT_QUOTES, 'UTF-8') ?>" class="master_edit master_admin" disabled>
           </td>
           <td>
-            <input type="checkbox" class="master_edit" name="cal" value="1" <?= $room['cal'] ? 'checked' : '' ?> disabled>
+            <input type="checkbox" class="master_edit master_admin" name="status" value="1" <?= $room['status'] ? 'checked' : '' ?> disabled>
           </td>
           <td>
-            <input type="number" class="master_edit" name="order" value="<?= htmlspecialchars($room['order'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+            <input type="checkbox" class="master_edit master_admin" name="cal" value="1" <?= $room['cal'] ? 'checked' : '' ?> disabled>
+          </td>
+          <td>
+            <input type="number" class="master_edit master_admin" name="order" value="<?= htmlspecialchars($room['order'], ENT_QUOTES, 'UTF-8') ?>" disabled>
           </td>
           <input type="hidden" name="value[<?=$i ?>][r_id]" value="<?= htmlspecialchars($room['banquet_room_id'], ENT_QUOTES, 'UTF-8') ?>">
         </tr>
@@ -127,22 +131,23 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <th>名称</th>
           <th>英名</th>
           <th class="cell_w60">階</th>
+          <th class="cell_w60">㎡</th>
           <th class="cell_w60">使用</th>
           <th class="cell_w60">カレンダー</th>  
           <th class="cell_w80">表示順</th>
         </tr>
         <tr>
           <td>
-            <input type="text" name="new_room_id" value="" class="master_add" placeholder="000" required>
+            <input type="text" name="new_room_id" value="" class="master_add master_admin" placeholder="000" required disabled>
           </td>
           <td>
-            <input type="text" name="new_name" value="" class="master_add" placeholder="うめ" required>
+            <input type="text" name="new_name" value="" class="master_add master_admin" placeholder="うめ" required disabled>
           </td>
           <td>
-            <input type="text" name="new_name_en" value="" class="master_add" placeholder="Ume">
+            <input type="text" name="new_name_en" value="" class="master_add master_admin" placeholder="Ume" disabled>
           </td>
           <td>
-            <select name="new_floor" class="master_add">
+            <select name="new_floor" class="master_add master_admin" disabled>
               <?php for ($f = 0; $f <= 8; $f++):
                 if($f==0){
                   $flr = 'B1';
@@ -155,19 +160,22 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </select>
           </td>
           <td>
-            <input type="checkbox" class="master_add" name="new_status" value="1" checked>
+            <input type="number" name="new_size" value="" class="master_add master_admin" placeholder="100" required disabled>
           </td>
           <td>
-            <input type="checkbox" class="master_add" name="new_cal" value="1" checked>
+            <input type="checkbox" class="master_add master_admin" name="new_status" value="1" checked disabled>
           </td>
           <td>
-            <input type="number" class="master_add" name="new_order" value="40" min="1" max="100" required>
+            <input type="checkbox" class="master_add master_admin" name="new_cal" value="1" checked disabled>
+          </td>
+          <td>
+            <input type="number" class="master_add master_admin" name="new_order" value="40" min="1" max="100" required disabled>
           </td>
         </tr>
       </table>
       <div class="form_button">
-        <button type="submit" class="btn btn-primary">追加</button> 
-        <button type="reset" class="btn btn-secondary">リセット</button>
+        <button type="submit" class="btn btn-primary master_add master_admin" disabled>追加</button> 
+        <button type="reset" class="btn btn-secondary master_add master_admin" disabled>リセット</button>
       </div>
     </form>
   </div>
