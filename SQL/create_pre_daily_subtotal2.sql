@@ -43,11 +43,10 @@ sum(((`C`.`amount_gross` - `C`.`service_fee`) - `C`.`tax`)) AS `ex-ts`,
 `AG`.`agent_group` AS `agent_name`,
 `AG`.`agent_group_short` AS `agent_short`,
 `S`.`agent_name` AS `agent_name2`,
-`S`.`reserver` AS `reserver` from (((((((`salmonbadger2_nchsignage`.`banquet_schedules` `S` left join `salmonbadger2_nchsignage`.`banquet_charges` `C` on(((`C`.`reservation_id` = `S`.`reservation_id`) and (`C`.`branch` = `S`.`branch`) and (`C`.`branch` <> 9999) and (not((`C`.`item_group_id` like 'X%')))))) left join `salmonbadger2_nchsignage`.`banquet_purposes` `P` on((`S`.`purpose_id` = `P`.`banquet_purpose_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC` on((`P`.`banquet_category_id` = `BC`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_rooms` `R` on((`S`.`room_id` = `R`.`banquet_room_id`))) left join `salmonbadger2_nchsignage`.`banquet_sales_dept` `SD` on((`S`.`sales_dept_id` = `SD`.`sales_dept_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC2` on((`SD`.`category_id` = `BC2`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_agents` `AG` on((`S`.`agent_id` = `AG`.`agent_id`))) where ((`S`.`banquet_schedule_id` is not null) and (`S`.`status` not in (4,
-5)) and (`S`.`purpose_id` not in (0,
-88,
-94)) and (`S`.`reservation_name` <> '朝食会場')) group by `S`.`date`,
+`S`.`reserver` AS `reserver`
+from (((((((`salmonbadger2_nchsignage`.`banquet_schedules` `S` left join `salmonbadger2_nchsignage`.`banquet_charges` `C` on(((`C`.`reservation_id` = `S`.`reservation_id`) and (`C`.`branch` = `S`.`branch`) and (`C`.`branch` <> 9999) and (not((`C`.`item_group_id` like 'X%')))))) left join `salmonbadger2_nchsignage`.`banquet_purposes` `P` on((`S`.`purpose_id` = `P`.`banquet_purpose_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC` on((`P`.`banquet_category_id` = `BC`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_rooms` `R` on((`S`.`room_id` = `R`.`banquet_room_id`))) left join `salmonbadger2_nchsignage`.`banquet_sales_dept` `SD` on((`S`.`sales_dept_id` = `SD`.`sales_dept_id`))) left join `salmonbadger2_nchsignage`.`banquet_categories` `BC2` on((`SD`.`category_id` = `BC2`.`banquet_category_id`))) left join `salmonbadger2_nchsignage`.`banquet_agents` `AG` on((`S`.`agent_id` = `AG`.`agent_id`))) where ((`S`.`banquet_schedule_id` is not null) and (`S`.`status` not in (4,5)) and (`S`.`purpose_id` not in (0,88,94)) and (`S`.`reservation_name` <> '朝食会場')) group by `S`.`date`,
 `P`.`banquet_category_id`,
-`S`.`room_id` order by `S`.`date`,
+`S`.`room_id`
+order by `S`.`date`,
 `P`.`banquet_category_id`,
 `S`.`start`
