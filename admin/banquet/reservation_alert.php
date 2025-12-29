@@ -36,9 +36,6 @@ $w = date('w');
 $wd= $week[$w];
 
 
-
-
-
 $sql ="SELECT
   `reservation_id`,
   `reservation_date`,
