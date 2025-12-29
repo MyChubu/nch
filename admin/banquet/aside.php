@@ -43,7 +43,7 @@
   <h3>更新履歴</h3>
   <ul>
     <li><i class="fa-solid fa-hand-sparkles"></i><a href="../banquet/dailyupdates.php">データ更新リスト</a></li>
-    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/defect_list.php">登録内容チェック</a></li>
+    <li><i class="fa-solid fa-list-check"></i><a href="../banquet/reservation_alert.php">登録内容チェック</a></li>
   </ul>
   <h3>発注</h3>
   <ul>
