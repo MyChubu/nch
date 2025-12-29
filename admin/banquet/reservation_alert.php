@@ -93,8 +93,8 @@ HAVING
   OR MAX(`reservation_sales_diff`) = 1
   OR MAX(`due_over_flg`) = 1
 ORDER BY
-  `pic_id`,
   `reservation_date`,
+  `pic_id`,
   `reservation_id`";
 $stmt = $dbh->prepare($sql);
 
