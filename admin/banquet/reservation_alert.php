@@ -178,10 +178,10 @@ if($count > 0){
 
     </div>
     <div>
-      <h1>データ不備リスト（<?= $date ?> 現在）</h1>
+      <h1>データ不備リスト [<?=$count?>件]（<?= $date ?> 現在）</h1>
     </div>
     <div>
-      <table id="rsv_table" class="sortable">
+      <table id="data-table" class="sortable">
         <thead>
           <tr>
             <th class="cell_w80">予約ID</th>
