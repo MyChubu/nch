@@ -1,11 +1,38 @@
 <?php
+// NEHOPSのデータ不備を担当者にメールで通知するバッチ処理
+// cronで毎日実行想定（平日朝8時ごろ）
+//休日は処理しない
+//・土日（cron側でも設定する）
+//・年末年始（12/28〜1/4）
+
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 require_once('../common/conf.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
+
+$today = new DateTimeImmutable('today');
+
+// 曜日取得（0=日曜, 6=土曜）
+$w = (int)$today->format('w');
+if ($w === 0 || $w === 6) {
+  exit; // 土日
+}
+
+// 月日取得
+$month = (int)$today->format('m');
+$day   = (int)$today->format('d');
+// 年末年始（12/28〜1/4）
+if (
+  ($month === 12 && $day >= 28) ||
+  ($month === 1  && $day <= 4)
+) {
+  exit;
+}
+
+$ymd = $today->format('Y年m月d日');
 
 //NEHOPSのデータに不備がある場合、担当者にリストをメールする
 
@@ -183,7 +210,7 @@ foreach($users as $user){
     $body .= "・明細なし = 料金明細がありません。明細を入力してください。\n";
     $body .= "・予約種類不一致 = 「予約種類」と「売上部門」が一致していません。基本情報を修正してください。\n\n";
     $body .= "------------------------------\n";
-    $body .= "【データ不備リスト】\n\n";
+    $body .= "【データ不備リスト】 " . $ymd . " 現在\n\n";
     $body .= $list;
     $body .= "\n------------------------------\n\n";
     $body .= "すでに修正済みの場合は、このメールは行き違いとなりますので、ご了承ください。";
