@@ -1,6 +1,6 @@
 <?php
 // NEHOPSのデータ不備を担当者にメールで通知するバッチ処理
-// cronで毎日実行想定（平日朝8時ごろ）
+// cronで毎日実行想定（平日朝7時）
 //休日は処理しない
 //・土日（cron側でも設定する）
 //・年末年始（12/28〜1/4）
@@ -35,13 +35,13 @@ if (
 $ymd = $today->format('Y年m月d日');
 
 //NEHOPSのデータに不備がある場合、担当者にリストをメールする
-
 //担当者リスト取得
 $sql = "SELECT `user_id`, `name`, `mail`, `pic_id` FROM `users` WHERE `group` = 1 AND `status` = 1";
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+//担当者ごとに処理
 foreach($users as $user){
   $events = array();
   $user_id = $user['user_id'];
@@ -56,36 +56,27 @@ foreach($users as $user){
       reservation_date,
       reservation_name,
       MIN(status) AS status,
-
       sales_category_id,
       sales_category_name,
-
       reservation_type_code,
       reservation_type,
       reservation_type_name,
-
       agent_id,
       agent_name,
       agent_short,
       agent_name2,
-
       MAX(people) AS people,
       SUM(gross)  AS gross,
       SUM(net)    AS net,
-
       pic_id,
       pic,
-
       d_created,
       d_decided,
       d_tentative,
-
       due_date,
       cancel_date,
-
       MAX(reservation_sales_diff) AS reservation_sales_diff,
       MAX(due_over_flg)           AS due_over_flg
-
     FROM view_monthly_new_reservation3
     WHERE reservation_date >= CURDATE()
       AND pic_id = :pic_id
@@ -110,7 +101,7 @@ foreach($users as $user){
       due_date,
       cancel_date
     HAVING
-        SUM(net) = 0
+      SUM(net) = 0
       OR MAX(people) = 0
       OR MAX(reservation_sales_diff) = 1
       OR MAX(due_over_flg) = 1
@@ -118,12 +109,11 @@ foreach($users as $user){
       reservation_date,
       reservation_id
   ";
-  // var_dump($pic_id);
+ 
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':pic_id', $pic_id, PDO::PARAM_STR);
   $stmt->execute();
   $count = $stmt->rowCount();
-  // var_dump($count);
   if($count > 0){
     $rsvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -194,9 +184,7 @@ foreach($users as $user){
       //...
     }
 
-
     //メール本文作成
-    //... 
     $body ="";
     $body .= "このメールは、WEBシステムより自動で送信しております。\n\n";
     $body .= $user_name . " 様\n\n";
@@ -215,12 +203,10 @@ foreach($users as $user){
     $body .= "\n------------------------------\n\n";
     $body .= "すでに修正済みの場合は、このメールは行き違いとなりますので、ご了承ください。";
 
-
     //メール送信
     $subject = "【NEHOPS】データ不備のお知らせ";
     $headers = "From:noreply@nagoyacrown.co.jp\r\n";
     mb_send_mail($user_mail, $subject, $body, $headers);
-
   }
 }
 ?>
