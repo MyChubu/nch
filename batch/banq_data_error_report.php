@@ -1,14 +1,14 @@
 <?php
+// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 // NEHOPSのデータ不備を担当者にメールで通知するバッチ処理
 // cronで毎日実行想定（平日朝7時）
 //休日は処理しない
 //・土日（cron側でも設定する）
 //・年末年始（12/28〜1/4）
-
-// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
 
 require_once('../common/conf.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
