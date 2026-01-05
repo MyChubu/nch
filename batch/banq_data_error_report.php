@@ -6,8 +6,9 @@
 
 // NEHOPSのデータ不備を担当者にメールで通知するバッチ処理
 // cronで毎日実行想定（朝7時）
-//休日は処理しない
+
 //・月曜送信
+//・月末日送信（12月は27日）
 //・年末年始（12/28〜1/4）
 
 require_once('../common/conf.php');
@@ -15,22 +16,41 @@ $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
 $today = new DateTimeImmutable('today');
 
-// 曜日取得（1=月曜日）
-$w = (int)$today->format('w');
-if ($w !== 1) {
-  exit; // 月曜以外
-}
-
-// 月日取得
 $month = (int)$today->format('m');
 $day   = (int)$today->format('d');
-// 年末年始（12/28〜1/4）
-if (
+
+/*
+ * 1) 12/27 は強制実行
+ */
+if ($month === 12 && $day === 27) {
+    // 実行OK（何もしない）
+}
+/*
+ * 2) 年末年始（12/28〜1/4）は実行しない
+ */
+elseif (
   ($month === 12 && $day >= 28) ||
   ($month === 1  && $day <= 4)
 ) {
   exit;
 }
+/*
+ * 3) 月末日は実行（曜日不問）
+ */
+elseif ($today->format('d') === $today->format('t')) {
+    // 実行OK
+}
+/*
+ * 4) 原則：月曜日のみ実行
+ */
+else {
+  $w = (int)$today->format('N'); // 1=月曜
+  if ($w !== 1) {
+    exit;
+  }
+}
+
+// ここから下に処理を書く
 
 $ymd = $today->format('Y年m月d日');
 
