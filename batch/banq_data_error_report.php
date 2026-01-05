@@ -5,9 +5,9 @@
 // error_reporting(E_ALL);
 
 // NEHOPSのデータ不備を担当者にメールで通知するバッチ処理
-// cronで毎日実行想定（平日朝7時）
+// cronで毎日実行想定（朝7時）
 //休日は処理しない
-//・土日（cron側でも設定する）
+//・月曜送信
 //・年末年始（12/28〜1/4）
 
 require_once('../common/conf.php');
@@ -15,10 +15,10 @@ $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
 $today = new DateTimeImmutable('today');
 
-// 曜日取得（0=日曜, 6=土曜）
+// 曜日取得（1=月曜日）
 $w = (int)$today->format('w');
-if ($w === 0 || $w === 6) {
-  exit; // 土日
+if ($w !== 1) {
+  exit; // 月曜以外
 }
 
 // 月日取得
@@ -46,8 +46,8 @@ foreach($users as $user){
   $events = array();
   $user_id = $user['user_id'];
   $user_name = $user['name'];
-  // $user_mail = $user['mail'];
-  $user_mail = 'takeichi@nagoyacrown.co.jp'; //テスト用
+  $user_mail = $user['mail'];
+  // $user_mail = 'takeichi@nagoyacrown.co.jp'; //テスト用
   $pic_id = $user['pic_id'];
   //データ不備リスト取得
   $sql = "
