@@ -107,18 +107,28 @@ if($count > 0){
   $rsvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   foreach($rsvs as $rsv){
+    $errs=array(
+      "net" => 0,
+      "people" => 0,
+      "sales_diff" => 0,
+      "due_over" => 0
+    );
     $errors = array();
     if($rsv['net'] == 0){
       $errors[] = '明細なし';
+      $errs['net'] = 1;
     } 
     if($rsv['people'] == 0){
       $errors[] = '人数なし';
+      $errs['people'] = 1;
     } 
     if($rsv['reservation_sales_diff'] == 1){
       $errors[] = '予約種類不一致';
+      $errs['sales_diff'] = 1;
     }
     if($rsv['due_over_flg'] == 1){
       $errors[] = '仮期限切れ';
+      $errs['due_over'] = 1;
     }
     $events[] = array(
       'reservation_id' => $rsv['reservation_id'],
@@ -140,7 +150,8 @@ if($count > 0){
       'pic_id' => $rsv['pic_id'],
       'pic' => $rsv['pic'],
       'due_date' => $rsv['due_date'],
-      'errors' => $errors
+      'errors' => $errors,
+      'errs' => $errs
     );
   }
     
@@ -193,9 +204,13 @@ if($count > 0){
             <th class="cell_w150">予約種類</th>
             <th class="cell_w30">人数</th>
             <th class="cell_w100">売上金額</th>
-            <th class="cell_w300">担当者</th>
-            <th class="cell_w200">代理店</th>
-            <th>代理店名</th>
+            <th class="cell_w50">担当</th>
+            <th class="cell_w50">代理店</th>
+            <th class="cell_w100">代理店名</th>
+            <th><i class="fa-brands fa-creative-commons-nc-jp"></i></th>
+            <th><i class="fa-solid fa-user-large-slash"></i></th>
+            <th><i class="fa-solid fa-not-equal"></i></th>
+            <th><i class="fa-regular fa-calendar-xmark"></i></th>
             <th class="cell_w200">異常内容</th>
           </tr>
         </thead>
@@ -211,9 +226,29 @@ if($count > 0){
               <td class="cell_w150"><?= salescatletter($event['reservation_type']) ?></td>
               <td class="cell_w30"><?= htmlspecialchars($event['people']) ?></td>
               <td class="cell_w100"><?= number_format($event['net']) ?></td>
-              <td class="cell_w300"><?= htmlspecialchars(cleanLanternName($event['pic'])) ?></td>
-              <td class="cell_w200"><?= htmlspecialchars($event['agent_short']) ?></td>
-              <td><?= htmlspecialchars($event['agent_name2']) ?></td>
+              <td class="cell_w50"><?= htmlspecialchars(cleanLanternName($event['pic'])) ?></td>
+              <td class="cell_w50"><?= htmlspecialchars($event['agent_short']) ?></td>
+              <td class="cell_w100"><?= htmlspecialchars($event['agent_name2']) ?></td>
+              <td>
+                <?php if($event['errs']['net'] == 1): ?>
+                  ×
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($event['errs']['people'] == 1): ?>
+                  ×
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($event['errs']['sales_diff'] == 1): ?>
+                  ×
+                <?php endif; ?>
+              </td>
+              <td>
+                <?php if($event['errs']['due_over'] == 1): ?>
+                  ×
+                <?php endif; ?>
+              </td>
               <td class="cell_w300">
                 <?php foreach($event['errors'] as $error): ?>
                   <?= htmlspecialchars($error) ?><br>
