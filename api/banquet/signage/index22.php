@@ -12,12 +12,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$date = date('Y-m-d');
-$now = date('Y-m-d H:i:s');
-$hour = date('H');
-if($hour >= 22){
-  $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
+//dtのフォーマットはYYYYMMDDHHMM
+$dt = $_REQUEST['dt'] ?? '';
+
+if ($dt !== '' && preg_match('/^\d{12}$/', $dt)) {
+  $dtObj = DateTimeImmutable::createFromFormat('YmdHi', $dt);
+  if ($dtObj === false) {
+    http_response_code(400);
+    echo json_encode(['status'=>400,'message'=>'dt format error'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+} else {
+  $dtObj = new DateTimeImmutable();
 }
+
+// 22時以降は翌日扱い（dt指定時も同じルールで良いならこれでOK）
+$baseDateObj = ((int)$dtObj->format('H') >= 22)
+  ? $dtObj->modify('+1 day')
+  : $dtObj;
+
+$date = $baseDateObj->format('Y-m-d');
+$now  = $dtObj->format('Y-m-d H:i:00'); // 比較用の「今」
+$hour = $dtObj->format('H');
 
 $dateObj = new DateTime($date);
 $hizuke = $dateObj->format('Y年m月d日');
@@ -95,6 +111,10 @@ ORDER BY
   r.size DESC,               -- view_start同じなら面積が大きい順
   s.branch ASC               -- 最後に安定化（任意）
 SQL;
+
+
+
+
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute([

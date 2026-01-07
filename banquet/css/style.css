@@ -64,9 +64,10 @@ body.preview{
 }
 .eventbox_left{
   width: 75%;
-  font-size: 2.8em;
+  font-size: 2.2em;
   text-align: left;
   font-weight: 700;
+  line-height: 1.2em;
   
 }
 .eventbox_right{
