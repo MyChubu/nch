@@ -164,7 +164,7 @@ $subtotal_amount = $array['subtotal_amount'];
     <tr>
       <td><?=$event['reservation_id'] ?></td>
       <td><?=$event['branch'] ?></td>
-      <td><?=$event['event_name'] ?></td>
+      <td><?=str_replace("///", " ", $event['event_name']) ?></td>
       <td><a href="signage.php?event_date=<?=$event_date ?>"><?=$event['date'] ?></a></td>
       <td><?=$event['start'] ?></td>
       <td><?=$event['end'] ?></td>

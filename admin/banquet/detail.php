@@ -74,9 +74,10 @@ $tax_amount = $array['tax_amount'];
             $edate = $ed->format('Y-m-d');
             $ew = $ed->format('w');
             $ewd = $week[$ew];
-
-                 ?>
-                    <a href="./signage.php?event_date=<?= $ed->format('Y-m-d') ?>"><?= $ed->format('Y-m-d') ?>(<?=$ewd ?>)</a>
+          ?>
+            <a href="./signage.php?event_date=<?= $ed->format('Y-m-d') ?>"><?= $ed->format('Y-m-d') ?>(<?=$ewd ?>)</a>
+        <?php elseif($key == '行灯名称'): ?>
+          <?= str_replace("///", " ", $value) ?>
         <?php else: ?> 
           <?= $value ?>
         <?php endif; ?>
