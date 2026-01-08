@@ -334,13 +334,15 @@ function getKaEnList($date){
           );
         }
       }
+      
+      $event_name = str_replace("///", " ", $row['event_name']);
 
       // イベントデータ（共通部分）を配列に格納
       $event_common = array(
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'banquet_schedule_id' => $row['banquet_schedule_id'],
-        'event_name' => $row['event_name'],
+        'event_name' => $event_name,
         'date' => $dateObj->format('Y/m/d') . '(' . $week[(int)$dateObj->format('w')] . ')',
         'start' => $startObj->format('H:i'),
         'end' => $endObj->format('H:i'),
@@ -452,13 +454,16 @@ function getConnectionList($reservation_id){
       $room = $stmt2->fetch();
       $floor = $room['floor'];
 
+      $event_name = mb_convert_kana($row['event_name'], 'KVas');
+      $event_name= str_replace("///", " ", $event_name);
+
       // イベント情報を配列に追加
       $events[] = array(
         'banquet_schedule_id' => $sche_id,
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'resevation_name' => mb_convert_kana($row['reservation_name'], 'KVas'),
-        'event_name' => mb_convert_kana($row['event_name'], 'KVas'),
+        'event_name' => $event_name,
         'event_date' => $event_date,
         'date' => $event_date . '(' . $week[(int)$dateObj->format('w')] . ')',
         'start' => $event_start,
