@@ -244,13 +244,14 @@ if($count >0){
        
       }
 
+      $event_name = mb_convert_kana($row['event_name'], "KVas");
+      $event_name = str_replace('///', ' ', $event_name);
 
-      
       $events[] = array(
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'banquet_schedule_id' => $row['banquet_schedule_id'],
-        'event_name' => $row['event_name'],
+        'event_name' => $event_name,
         'start' => $event_start,
         'end' => $event_end,
         'people' => $row['people'],
@@ -286,7 +287,7 @@ if($count >0){
             'reservation_id' => $reservation_id,
             'branch' => $branch,
             'banquet_schedule_id' => $row['banquet_schedule_id'],
-            'event_name' => $row['event_name'],
+            'event_name' => $event_name,
             'start' => $event_start,
             'end' => $event_end,
             'people' => $row['people'],
@@ -327,7 +328,7 @@ if($count >0){
                 'reservation_id' => $reservation_id,
                 'branch' => $branch,
                 'banquet_schedule_id' => $row['banquet_schedule_id'],
-                'event_name' => $row['event_name'],
+                'event_name' => $event_name,
                 'start' => $event_start,
                 'end' => $event_end,
                 'people' => $row['people'],
@@ -364,7 +365,7 @@ if($count >0){
           'reservation_id' => $reservation_id,
           'branch' => $branch,
           'banquet_schedule_id' => $row['banquet_schedule_id'],
-          'event_name' => $row['event_name'],
+          'event_name' => $event_name,
           'start' => $event_start,
           'end' => $event_end,
           'people' => $row['people'],

@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のエラー出力を有効にする（本番環境では無効化すること）
-#ini_set('display_errors', 1);
-#ini_set('display_startup_errors', 1);
-#error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 require_once('../../../common/conf.php');
 
@@ -32,7 +32,7 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
 $hizuke .= '（' . $week[(int)$dateObj->format('w')] . '）';
 
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sql = 'select * from banquet_schedules where date = ? and additional_sales = ?  order by start ASC,reservation_id ASC, ASC';
+$sql = 'select * from banquet_schedules where date = ? and additional_sales = ?  order by start ASC,reservation_id ASC, branch ASC';
 $stmt = $dbh->prepare($sql);
 $stmt->execute([$date, 0]);
 $count = $stmt->rowCount();
@@ -239,13 +239,14 @@ if($count >0){
        
       }
 
-
+      $event_name = mb_convert_kana($row['event_name'], "KVas");
+      $event_name = str_replace('///', ' ', $event_name);
       
       $events[] = array(
         'reservation_id' => $reservation_id,
         'branch' => $branch,
         'banquet_schedule_id' => $row['banquet_schedule_id'],
-        'event_name' => $row['event_name'],
+        'event_name' => $event_name,
         'start' => $event_start,
         'end' => $event_end,
         'people' => $row['people'],
@@ -281,7 +282,7 @@ if($count >0){
             'reservation_id' => $reservation_id,
             'branch' => $branch,
             'banquet_schedule_id' => $row['banquet_schedule_id'],
-            'event_name' => $row['event_name'],
+            'event_name' => $event_name,
             'start' => $event_start,
             'end' => $event_end,
             'people' => $row['people'],
@@ -322,7 +323,7 @@ if($count >0){
                 'reservation_id' => $reservation_id,
                 'branch' => $branch,
                 'banquet_schedule_id' => $row['banquet_schedule_id'],
-                'event_name' => $row['event_name'],
+                'event_name' => $event_name,
                 'start' => $event_start,
                 'end' => $event_end,
                 'people' => $row['people'],
@@ -359,7 +360,7 @@ if($count >0){
           'reservation_id' => $reservation_id,
           'branch' => $branch,
           'banquet_schedule_id' => $row['banquet_schedule_id'],
-          'event_name' => $row['event_name'],
+          'event_name' => $event_name,
           'start' => $event_start,
           'end' => $event_end,
           'people' => $row['people'],
