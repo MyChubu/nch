@@ -172,7 +172,7 @@ foreach ($stmt as $row) {
         <?php foreach($events as $event){ ?>
           <div class="eventbox">
             <div class="eventbox_left">
-              <?=str_replace('$$', '<br>',$event['event_name']) ?>
+              <?=str_replace('///', '<br>',$event['event_name']) ?>
             </div>
             <div class="eventbox_right">
               <div class="eventbox_room">
