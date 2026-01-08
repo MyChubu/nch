@@ -68,6 +68,7 @@ SELECT
   COALESCE(ep.end,   s.end)        AS view_end,
   COALESCE(ep.event_name, s.event_name) AS view_event_name,
 
+  s.room_id,
   r.name    AS room_name,
   r.name_en AS room_name_en,
   r.floor,
@@ -117,6 +118,7 @@ foreach ($stmt as $row) {
     'date'          => $row['date'],
     'start'         => (new DateTime($row['view_start']))->format('H:i'),
     'end'           => (new DateTime($row['view_end']))->format('H:i'),
+    'room_id'       => $row['room_id'],
     'room_name'     => $row['room_name'],
     'room_name_en'  => $row['room_name_en'],
     'floor'         => $row['floor'],
