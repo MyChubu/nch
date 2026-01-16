@@ -1,4 +1,10 @@
 <?php
+// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+?>
+<?php
 require_once('../common/conf.php');
 $date = date('Y-m-d');
 if(isset($_REQUEST['event_date']) && $_REQUEST['event_date'] != '') {
@@ -40,6 +46,7 @@ ext_ranked AS (
     e.start,
     e.end,
     e.event_name,
+    e.subtitle,
     ROW_NUMBER() OVER (PARTITION BY e.sche_id ORDER BY e.start ASC, e.end ASC) AS rn
   FROM banquet_ext_sign e
   WHERE e.enable = 1
@@ -47,7 +54,7 @@ ext_ranked AS (
 ),
 -- 上のうち、sche_idごとに「採用する1件（rn=1）」だけ残す
 ext_pick AS (
-  SELECT sche_id, start, end, event_name
+  SELECT sche_id, start, end, event_name, subtitle
   FROM ext_ranked
   WHERE rn = 1
 ),
@@ -73,6 +80,7 @@ SELECT
   COALESCE(ep.start, s.start)      AS view_start,
   COALESCE(ep.end,   s.end)        AS view_end,
   COALESCE(ep.event_name, s.event_name) AS view_event_name,
+  COALESCE(ep.subtitle, '') AS view_subtitle,
 
   r.name    AS room_name,
   r.name_en AS room_name_en,
@@ -107,8 +115,18 @@ $stmt->execute([$now, $date, $now, 1, $date, $now, 1]);
 
 $events = [];
 foreach ($stmt as $row) {
+  $event_name = mb_convert_kana($row['view_event_name'], 'KVas');
+  $subtitle = mb_convert_kana($row['view_subtitle'], 'KVas');
+  if( !isset($row['view_subtitle']) ){
+    $row['view_subtitle'] = '';
+  }
+  if( $row['view_subtitle'] !='' ){
+    $event_full = $row['view_event_name'] . '<br>' . $row['view_subtitle']; 
+  }else{
+    $event_full = $row['view_event_name'];
+  }
   $events[] = [
-    'event_name'   => mb_convert_kana($row['view_event_name'], 'KVas'),
+    'event_name'   => $event_full,
     'date'         => $row['date'],
     'start'        => (new DateTime($row['view_start']))->format('H:i'),
     'end'          => (new DateTime($row['view_end']))->format('H:i'),
