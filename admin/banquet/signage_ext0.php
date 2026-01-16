@@ -88,8 +88,8 @@ if ($ext_count > 0) {
     $ext_signs[] = $ext_row;
   }
 }
+        
 
-$def_event_name = str_replace('///', ' ', $row['event_name']);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -123,7 +123,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
     
   </div>
   <div>
-    <h2><?=$def_event_name ?></h2>
+    <h2><?=$row['event_name'] ?></h2>
     <h3>基本表示</h3>
     <table class="event_table">
       <tr>
@@ -186,10 +186,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
       <tr class="event_tr_<?=$ext['enable'] ?>">
         <td><input type="time" name="v[<?=$i ?>][start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_starttime ?>" required></td>
         <td><input type="time" name="v[<?=$i ?>][end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_endtime ?>" required></td>
-        <td>
-          1行目 <input type="text" class="sign_title" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" maxlength="40" placeholder="<?= $row['event_name'] ?>" required><br>
-          2行目 <input type="text" class="sign_title" name="v[<?=$i ?>][subtitle]" value="<?=$ext['subtitle'] ?>" maxlength="40" placeholder="2行目の表示名（任意）">
-        </td>
+        <td><input type="text" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" placeholder="<?= $row['event_name'] ?>" required></td>
         <td><input type="hidden" name="v[<?=$i ?>][enable]" value="0"><input type="checkbox" name="v[<?=$i ?>][enable]" <?= $ext['enable'] == 1 ? 'checked' : '' ?>></td>
         <td><textarea name="v[<?=$i ?>][memo]"><?=$ext['memo'] ?></textarea></td>
         <input type="hidden" name="v[<?=$i ?>][sche_id]" value="<?= $scheid ?>">
@@ -224,10 +221,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
       <tr>
         <td><input type="time" name="n[start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$starttime ?>" required></td>
         <td><input type="time" name="n[end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$endtime ?>" required></td>
-        <td>
-          1行目 <input type="text" class="sign_title" name="n[event_name]" placeholder="<?=mb_substr($def_event_name, 0, 20) ?>" maxlength="40" required><br>
-          2行目 <input type="text" class="sign_title" name="n[subtitle]" maxlength="40" placeholder="2行目の表示名（任意）">
-        </td>
+        <td><input type="text" name="n[event_name]" placeholder="<?= $row['event_name'] ?>" required></td>
         <td><input type="hidden" name="n[enable]" value="0"><input type="checkbox" name="n[enable]" value="1" checked></td>
         <td><textarea name="n[memo]"></textarea></td>
       </tr>

@@ -39,7 +39,7 @@ if($cat == 1){
     $item = $v[$i];
     $er=array();
     $err=0;
-    $items=  array('sche_id','date','start','end','event_name','subtitle','enable','id','memo');
+    $items=  array('sche_id','date','start','end','event_name','enable','id','memo');
     $requireds = array('sche_id','date','start','end','event_name','id');
     foreach($items as $it){
       $item[$it] = isset($item[$it]) ? $item[$it] : '';
@@ -58,20 +58,10 @@ if($cat == 1){
       $end=$item['date'].' '.$item['end'].':00';
       $item['enable'] = ($item['enable'] == 'on') ? 1 : 0;
       $item['event_name'] = mb_convert_kana($item['event_name'],'KVas');
-      $item['event_name'] = trim($item['event_name']);
-      $item['event_name'] = str_replace('///','',$item['event_name']);
-      $item['subtitle'] = mb_convert_kana($item['subtitle'],'KVas');
-      $item['subtitle'] = trim($item['subtitle']);
-      $item['subtitle'] = str_replace('///','',$item['subtitle']);
-      $subtitle_f= str_replace([' ','　'], '', $item['subtitle']);
-      if($subtitle_f == ''){
-        $item['subtitle'] = '';
-      }
       $sqla = 'update banquet_ext_sign set
       start = :start,
       end = :end,
       event_name = :event_name,
-      subtitle = :subtitle,
       memo = :memo,
       enable = :enable,
       modified = now()
@@ -81,7 +71,6 @@ if($cat == 1){
       $stmta->bindParam(':start', $start, PDO::PARAM_STR);
       $stmta->bindParam(':end', $end, PDO::PARAM_STR);
       $stmta->bindParam(':event_name', $item['event_name'], PDO::PARAM_STR);
-      $stmta->bindParam(':subtitle', $item['subtitle'], PDO::PARAM_STR);
       $stmta->bindParam(':memo', $item['memo'], PDO::PARAM_STR);
       $stmta->bindParam(':enable', $item['enable'], PDO::PARAM_INT);
       $stmta->bindParam(':id', $item['id'], PDO::PARAM_INT);
@@ -97,7 +86,7 @@ if($cat == 1){
   $n=array();
   $er=array();
   $err=0;
-  $items=  array('sche_id','date','start','end','event_name','subtitle','enable','memo');
+  $items=  array('sche_id','date','start','end','event_name','enable','memo');
   $requireds = array('sche_id','date','start','end','event_name');
   foreach($items as $item){
     $n[$item] = isset($_POST['n'][$item]) ? $_POST['n'][$item] : '';
@@ -117,22 +106,12 @@ if($cat == 1){
   }
   $n['enable'] = ($n['enable'] == '1') ? 1 : 0;
   $n['event_name'] = mb_convert_kana($n['event_name'],'KVas');
-  $n['event_name'] = trim($n['event_name']);
-  $n['event_name'] = str_replace('///','',$n['event_name']);
-  $n['subtitle'] = mb_convert_kana($n['subtitle'],'KVas');
-  $n['subtitle'] = trim($n['subtitle']);
-  $n['subtitle'] = str_replace('///','',$n['subtitle']);
-  $subtitle_f= str_replace([' ','　'], '', $n['subtitle']);
-  if($subtitle_f == ''){
-    $n['subtitle'] = '';
-  }
   $sqln = 'insert into banquet_ext_sign (
   sche_id,
   date,
   start,
   end,
   event_name,
-  subtitle,
   memo,
   enable,
   added,
@@ -143,7 +122,6 @@ if($cat == 1){
   :start,
   :end,
   :event_name,
-  :subtitle,
   :memo,
   :enable,
   now(),
@@ -155,7 +133,6 @@ if($cat == 1){
   $stmtn->bindParam(':start', $start, PDO::PARAM_STR);
   $stmtn->bindParam(':end', $end, PDO::PARAM_STR);
   $stmtn->bindParam(':event_name', $n['event_name'], PDO::PARAM_STR);
-  $stmtn->bindParam(':subtitle', $n['subtitle'], PDO::PARAM_STR);
   $stmtn->bindParam(':memo', $n['memo'], PDO::PARAM_STR);
   $stmtn->bindParam(':enable', $n['enable'], PDO::PARAM_INT);
   $stmtn->execute(); 

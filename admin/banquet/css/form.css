@@ -56,6 +56,11 @@ input[type="datetime-local"].master_edit{
   padding: 3px;
 }
 
+input[type="text"].sign_title{
+  width:calc(100% - 50px);
+  max-width: 450px;
+}
+
 
 select#level{
   width: 200px;
