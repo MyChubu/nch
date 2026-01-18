@@ -108,7 +108,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
       </tr>
       <?php for($i=0; $i<sizeof($events); $i++ ) :?>
         <tr id="row_<?=$i ?>" class="event_tr_<?=$events[$i]['enable']  ?><?=$events[$i]['enable']==0?" non_disp":""; ?> ">
-          <td><a href="./connection_list.php?resid=<?=$events[$i]['reservation_id'] ?>"><?= $events[$i]['reservation_id'] ?></a></td>
+          <td><a href="./connection_list2.php?resid=<?=$events[$i]['reservation_id'] ?>"><?= $events[$i]['reservation_id'] ?></a></td>
           <td>
             <input type="text" name="events[<?=$i ?>][event_name]" value="<?= $events[$i]['event_name'] ?>">
           </td>

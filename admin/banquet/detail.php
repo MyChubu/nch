@@ -67,7 +67,7 @@ $tax_amount = $array['tax_amount'];
       <td><?= $key ?></td>
       <td>
         <?php if($key == 'NEHOPS予約ID'): ?>
-          <a href="./connection_list.php?resid=<?= $value ?>"><?= $value ?></a>
+          <a href="./connection_list2.php?resid=<?= $value ?>"><?= $value ?></a>
         <?php elseif($key == '利用日'): ?>
           <?php
             $ed = new DateTime($value);

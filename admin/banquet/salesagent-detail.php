@@ -245,7 +245,7 @@ if($count > 0) {
                 <td><?=cleanLanternName($row['pic']) ?></td>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$row['reservation_date'] ?></td>
-                <td><a href="connection_list.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
+                <td><a href="connection_list2.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
                 <td>
                   <?php if($row['additional_sales'] ==1): ?>

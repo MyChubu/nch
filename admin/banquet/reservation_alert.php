@@ -217,7 +217,7 @@ if($count > 0){
         <tbody>
           <?php foreach($events as $event): ?>
             <tr>
-              <td class="cell_w80"><a href="connection_list.php?resid=<?= $event['reservation_id'] ?>"><?= htmlspecialchars($event['reservation_id']) ?></td>
+              <td class="cell_w80"><a href="connection_list2.php?resid=<?= $event['reservation_id'] ?>"><?= htmlspecialchars($event['reservation_id']) ?></td>
               <td class="cell_w100"><?= htmlspecialchars($event['reservation_date']) ?></td>
               <td class="cell_w200"><?= htmlspecialchars(cleanLanternName($event['reservation_name'])) ?></td>
               <td class="cell_w30"><?= statusletter($event['status']) ?></td>

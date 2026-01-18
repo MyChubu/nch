@@ -260,7 +260,7 @@ if($count > 0) {
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$row['reservation_date'] ?></td>
-                <td><a href="connection_list.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
+                <td><a href="connection_list2.php?resid=<?=$row['reservation_id'] ?>"><?=$row['reservation_id'] ?></a></td>
                 <td><?=$row['agent_short'] ?></td>
                 <td><?=cleanLanternName($row['reservation_name']) ?></td>
                 <td>

@@ -196,7 +196,7 @@ function rsvOneLetter($s){
               <?php if($rsv['reservation_name'] != '朝食会場'): ?>
               <tr>
                 <td><?= statusletter($rsv['status']) ?></td>
-                <td><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+                <td><a href="connection_list2.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
                 <td><?= htmlspecialchars($rsv['reservation_date']) ?></td>
                 <td><?= htmlspecialchars($rsv['reservation_name']) ?></td>
                 <td><?= salescatletter($rsv['sales_category_id']) ?></td>

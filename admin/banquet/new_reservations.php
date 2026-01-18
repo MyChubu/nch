@@ -243,7 +243,7 @@ if($count > 0){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td class="num"><a href="connection_list2.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
                   <?php if($rsv['agent_id'] == 2999): ?>
@@ -364,7 +364,7 @@ if($count > 0){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td class="num"><a href="connection_list2.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
                   <?php if($rsv['agent_id'] == 2999): ?>
@@ -508,7 +508,7 @@ if($count > 0){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td class="num"><a href="connection_list2.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
                   <?php if($rsv['agent_id'] == 2999): ?>
@@ -652,7 +652,7 @@ if($count > 0){
                 <?php endif; ?>
               </td>
               <td><?= htmlspecialchars(cleanLanternName($rsv['pic'])) ?></td>
-              <td class="num"><a href="connection_list.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
+              <td class="num"><a href="connection_list2.php?resid=<?= htmlspecialchars($rsv['reservation_id']) ?>"><?= htmlspecialchars($rsv['reservation_id']) ?></a></td>
               <td>
                 <?php if($rsv['agent_id']): ?>
                   <?php if($rsv['agent_id'] == 2999): ?>

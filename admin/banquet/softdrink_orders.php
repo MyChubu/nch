@@ -189,7 +189,7 @@ if($count > 0){
                   <td><?=htmlspecialchars($order['date']) ?></td>
                   <td><?=statusletter($order['status']) ?></td>
                   <td><?=salescatletter($order['banquet_category_id']) ?></td>
-                  <td><a href="connection_list.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
+                  <td><a href="connection_list2.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
                   <td><?=cleanLanternName($order['reservation_name'],25) ?></td>
                   <td><?=htmlspecialchars($order['room_name']) ?></td>
                   <td><?=htmlspecialchars($order['item_name_short']) ?></td>
@@ -245,7 +245,7 @@ if($count > 0){
                   <td><?=htmlspecialchars($order['date']) ?></td>
                   <td><?=statusletter($order['status']) ?></td>
                   <td><?=salescatletter($order['banquet_category_id']) ?></td>
-                  <td><a href="connection_list.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
+                  <td><a href="connection_list2.php?resid=<?=htmlspecialchars($order['reservation_id']) ?>"><?=htmlspecialchars($order['reservation_id']) ?></a></td>
                   <td><?=cleanLanternName($order['reservation_name'],25) ?></td>
                   <td><?=htmlspecialchars($order['room_name']) ?></td>
                   <td><?=htmlspecialchars($order['item_name_short']) ?></td>
