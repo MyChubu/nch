@@ -34,6 +34,7 @@ ext_ranked AS (
     e.start,
     e.end,
     e.event_name,
+    e.subtitle,
     ROW_NUMBER() OVER (PARTITION BY e.sche_id ORDER BY e.start ASC, e.end ASC) AS rn
   FROM banquet_ext_sign e
   WHERE e.enable = 1
@@ -41,7 +42,7 @@ ext_ranked AS (
 ),
 -- 上のうち、sche_idごとに「採用する1件（rn=1）」だけ残す
 ext_pick AS (
-  SELECT sche_id, start, end, event_name
+  SELECT sche_id, start, end, event_name, subtitle
   FROM ext_ranked
   WHERE rn = 1
 ),
@@ -67,6 +68,7 @@ SELECT
   COALESCE(ep.start, s.start)      AS view_start,
   COALESCE(ep.end,   s.end)        AS view_end,
   COALESCE(ep.event_name, s.event_name) AS view_event_name,
+  COALESCE(ep.subtitle, '') AS view_subtitle,
 
   s.room_id,
   r.name    AS room_name,
@@ -97,6 +99,10 @@ ORDER BY
   s.branch ASC               -- 最後に安定化（任意）
 SQL;
 
+
+
+
+
 $stmt = $dbh->prepare($sql);
 $stmt->execute([
   $now,   // ext_ranked: e.end > ?
@@ -110,11 +116,21 @@ $stmt->execute([
 
 $events = [];
 foreach ($stmt as $row) {
+  if( !isset($row['view_subtitle']) ){
+    $row['view_subtitle'] = '';
+  }
+  if( $row['view_subtitle'] !='' ){
+    $event_full = $row['view_event_name'] . '<br>' . $row['view_subtitle']; 
+  }else{
+    $event_full = $row['view_event_name'];
+  }
   $events[] = [
     'id'            => $row['banquet_schedule_id'],
     'reservation_id'=> $row['reservation_id'],
     'branch'        => $row['branch'],
     'event_name'    => mb_convert_kana($row['view_event_name'], 'KVas'),
+    'subtitle'      => mb_convert_kana($row['view_subtitle'], 'KVas'),
+    'event_full'    => mb_convert_kana($event_full, 'KVas'),
     'date'          => $row['date'],
     'start'         => (new DateTime($row['view_start']))->format('H:i'),
     'end'           => (new DateTime($row['view_end']))->format('H:i'),

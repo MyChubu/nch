@@ -12,12 +12,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$date = date('Y-m-d');
-$now = date('Y-m-d H:i:s');
-$hour = date('H');
-if($hour >= 22){
-  $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
+//dtのフォーマットはYYYYMMDDHHMM
+$dt = $_REQUEST['dt'] ?? '';
+
+if ($dt !== '' && preg_match('/^\d{12}$/', $dt)) {
+  $dtObj = DateTimeImmutable::createFromFormat('YmdHi', $dt);
+  if ($dtObj === false) {
+    http_response_code(400);
+    echo json_encode(['status'=>400,'message'=>'dt format error'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+} else {
+  $dtObj = new DateTimeImmutable();
 }
+
+// 22時以降は翌日扱い（dt指定時も同じルールで良いならこれでOK）
+$baseDateObj = ((int)$dtObj->format('H') >= 22)
+  ? $dtObj->modify('+1 day')
+  : $dtObj;
+
+$date = $baseDateObj->format('Y-m-d');
+$now  = $dtObj->format('Y-m-d H:i:00'); // 比較用の「今」
+$hour = $dtObj->format('H');
 
 $dateObj = new DateTime($date);
 $hizuke = $dateObj->format('Y年m月d日');
@@ -34,6 +50,7 @@ ext_ranked AS (
     e.start,
     e.end,
     e.event_name,
+    e.subtitle,
     ROW_NUMBER() OVER (PARTITION BY e.sche_id ORDER BY e.start ASC, e.end ASC) AS rn
   FROM banquet_ext_sign e
   WHERE e.enable = 1
@@ -41,7 +58,7 @@ ext_ranked AS (
 ),
 -- 上のうち、sche_idごとに「採用する1件（rn=1）」だけ残す
 ext_pick AS (
-  SELECT sche_id, start, end, event_name
+  SELECT sche_id, start, end, event_name, subtitle
   FROM ext_ranked
   WHERE rn = 1
 ),
@@ -67,6 +84,7 @@ SELECT
   COALESCE(ep.start, s.start)      AS view_start,
   COALESCE(ep.end,   s.end)        AS view_end,
   COALESCE(ep.event_name, s.event_name) AS view_event_name,
+  COALESCE(ep.subtitle, '') AS view_subtitle,
 
   s.room_id,
   r.name    AS room_name,
@@ -97,6 +115,10 @@ ORDER BY
   s.branch ASC               -- 最後に安定化（任意）
 SQL;
 
+
+
+
+
 $stmt = $dbh->prepare($sql);
 $stmt->execute([
   $now,   // ext_ranked: e.end > ?
@@ -110,11 +132,21 @@ $stmt->execute([
 
 $events = [];
 foreach ($stmt as $row) {
+  if( !isset($row['view_subtitle']) ){
+    $row['view_subtitle'] = '';
+  }
+  if( $row['view_subtitle'] !='' ){
+    $event_full = $row['view_event_name'] . '<br>' . $row['view_subtitle']; 
+  }else{
+    $event_full = $row['view_event_name'];
+  }
   $events[] = [
     'id'            => $row['banquet_schedule_id'],
     'reservation_id'=> $row['reservation_id'],
     'branch'        => $row['branch'],
     'event_name'    => mb_convert_kana($row['view_event_name'], 'KVas'),
+    'subtitle'      => mb_convert_kana($row['view_subtitle'], 'KVas'),
+    'event_full'    => mb_convert_kana($event_full, 'KVas'),
     'date'          => $row['date'],
     'start'         => (new DateTime($row['view_start']))->format('H:i'),
     'end'           => (new DateTime($row['view_end']))->format('H:i'),
