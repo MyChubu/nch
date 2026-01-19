@@ -1,8 +1,33 @@
 <?php
 require_once('../../common/conf.php');
-require_once('functions/admin_banquet.php');
+$dbh = new PDO(DSN, DB_USER, DB_PASS);
+session_name('_NCH_ADMIN');
+session_start();
+$user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+$user_name = $_SESSION['name'];
 
-$month_array = array('4月','5月','6月', '7月','8月','9月','10月','11月','12月','1月','2月','3月');
+if (empty($user_id) || empty($user_name)) {
+  header('Location: ../login.php?error=2');
+  exit;
+}else{
+  $sql = "SELECT * FROM users WHERE user_id = :user_id AND status = 1";
+  $stmt = $dbh->prepare($sql);
+  $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+  $stmt->execute();
+  $u_count = $stmt->rowCount();
+  if ($u_count < 1) {
+    header('Location: ../login.php?error=3');
+    exit;
+  }
+}
+$user_mail = $_SESSION['mail'];
+$admin = $_SESSION['admin'];
+
+
+require_once('functions/admin_banquet.php');
+require_once('functions/admin_banquet_chart.php');
+
+
 
 $month = date('n');
 if($month < 4) {
@@ -16,344 +41,34 @@ $this_nendo = $nendo;
 if(isset($_REQUEST['nendo']) && $_REQUEST['nendo'] != '') {
   $nendo = $_REQUEST['nendo'];
 }
-
-$first_day = $nendo . '-04-01';
-$last_day = $nendo + 1 . '-03-31';
-
-$last_nendo = $nendo - 1;
-$last_first_day = $last_nendo . '-04-01';
-$last_last_day = $last_nendo + 1 . '-03-31';
-
 $before_nendo = $nendo - 1;
 $after_nendo = $nendo + 1;
 
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
-$sales = array();
-$sql = "SELECT 
-`sales`.`ym`,
-COUNT(`sales`.`reservation_id`) AS `count`,
-SUM(`sales`.`subtotal`) AS `subtotal`,
-SUM(`sales`.`gross`) AS `gross`,
-SUM(`sales`.`net`) AS `net`
-FROM (
-  SELECT 
-  `ym`,
-  `reservation_id`,
-  SUM(`subtotal`) AS `subtotal`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  GROUP BY `ym`,`reservation_id`
-  ORDER BY `ym`
- ) AS `sales`
- GROUP BY `ym`
- ORDER BY `ym`";
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-if($count > 0) {
-  foreach($results as $result) {
-    $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
-    $sales[] = array(
-      'ym' => $result['ym'],
-      'tuki' => $tuki,
-      'count' => $result['count'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net']
-    );
-  }
-}
-$sales_array = array();
-$sales_subtotal_array = array();
-$sales_subtotal=0;
-for($i = 0; $i < 12; $i++) {
-  $tuki = $month_array[$i];
-  foreach($sales as $sale) {
-    if($sale['tuki'] == $tuki) {
-      if(is_null($sale['net'])) {
-        $sales_array[$i] = 0;
-        $sales_subtotal += $sales_array[$i];
-        $sales_subtotal_array[$i] = $sales_subtotal;
-      }else{
-        $sales_array[$i] = round($sale['net']/1000,0);
-        $sales_subtotal += $sales_array[$i];
-        $sales_subtotal_array[$i] = $sales_subtotal;
-      }
-      break;
-    } else {
-        $sales_array[$i] = 0;
-        $sales_subtotal += $sales_array[$i];
-        $sales_subtotal_array[$i] = $sales_subtotal;
-    }
-
-  }
-}
-
-
-$last_year_sales = array();
-
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $last_first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-if($count > 0) {
-  foreach($results as $result) {
-    $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
-    $last_year_sales[] = array(
-      'ym' => $result['ym'],
-      'tuki' => $tuki,
-      'count' => $result['count'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net']
-    );
-  }
-}
-$last_year_sales_array = array();
-$last_year_sales_subtotal_array = array();
-$sales_subtotal=0;
-for($i = 0; $i < 12; $i++) {  
-  $tuki = $month_array[$i];
-  foreach($last_year_sales as $sale) {
-    if($sale['tuki'] == $tuki) {
-      if(is_null($sale['net'])) {
-        $last_year_sales_array[$i] = 0;
-        $sales_subtotal += $last_year_sales_array[$i];
-        $last_year_sales_subtotal_array[$i] = $sales_subtotal;
-      }else{
-        $last_year_sales_array[$i] = round($sale['net']/1000,0);
-        $sales_subtotal += $last_year_sales_array[$i];
-        $last_year_sales_subtotal_array[$i] = $sales_subtotal;
-      }
-      break;
-    } else {
-        $last_year_sales_array[$i] = 0;
-        $sales_subtotal += $last_year_sales_array[$i];
-        $last_year_sales_subtotal_array[$i] = $sales_subtotal;
-    }
-    
-  }
-}
-$this_nendo_sales =array();
-$this_determined_sales = array();
-$this_tentative_sales = array();
-$this_other_sales = array();
-$subtotal= 0;
-$determ=0;
-$this_nendo_subtotal = array();
-$this_nendo_determined_subtotal = array();
-$last_nendo_sales = array();
-$last_determined_sales = array();
-$last_nendo_subtotal = array();
-$lastsub=0;
-
-$sql = "SELECT 
-`sales`.`ym`,
-`sales`.`status`,
-COUNT(`sales`.`reservation_id`) AS `count`,
-SUM(`sales`.`gross`) AS `gross`,
-SUM(`sales`.`net`) AS `net`
-FROM (
-  SELECT 
-  `ym`,
-  `reservation_id`,
-  `status`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  GROUP BY `ym`,`reservation_id`,  `status`
-  ORDER BY `ym`
- ) AS `sales`
- GROUP BY `ym`, `status`
- ORDER BY `ym`";
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-foreach($results as $result) {
-  $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
-  $this_nendo_sales[] = array(
-    'ym' => $result['ym'],
-    'tuki' => $tuki,
-    'status' => $result['status'],
-    'count' => $result['count'],
-    'gross' => $result['gross'],
-    'net' => $result['net']
-  );
-}
-
-$sql = "SELECT 
-`sales`.`ym`,
-COUNT(`sales`.`reservation_id`) AS `count`,
-SUM(`sales`.`gross`) AS `gross`,
-SUM(`sales`.`net`) AS `net`
-FROM (
-  SELECT 
-  `ym`,
-  `reservation_id`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  AND `status` IN (1,2,3) 
-  GROUP BY `ym`,`reservation_id`
-  ORDER BY `ym`
- ) AS `sales`
- GROUP BY `ym`
- ORDER BY `ym`";
-
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $last_first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-foreach($results as $result) {
-  $tuki = (new DateTime($result['ym'] . '-01'))->format('n月');
-  $last_nendo_sales[] = array(
-    'ym' => $result['ym'],
-    'tuki' => $tuki,
-    'count' => $result['count'],
-    'gross' => $result['gross'],
-    'net' => $result['net']
-  );
-}
-
-for($i = 0; $i < 12; $i++) {
-  $tuki = $month_array[$i];
-  $this_determined_sales[$i] = 0;
-  $this_tentative_sales[$i] = 0;
-  $this_other_sales[$i] = 0;
-  foreach($this_nendo_sales as $sale) {
-    if($sale['tuki'] == $tuki) {
-      $ym = explode('-', $sale['ym']);
-      $cyear = $ym[0];
-      $cmonth = (int)$ym[1];
-      if($cmonth < 4) {
-        $c_nendo = $cyear - 1;
-      } else {
-        $c_nendo = $cyear;
-      }
-      if($c_nendo != $nendo) {
-        continue; // Skip if not the current fiscal year
-      }
-      if($sale['status'] == 1) {
-        if(isset($sale['net'])) {
-          $this_determined_sales[$i] = round($sale['net']/1000,0);
-        }
-        $subtotal += $this_determined_sales[$i];
-        $determ += $this_determined_sales[$i];
-        $this_nendo_subtotal[$i] = $subtotal;
-        $this_nendo_determined_subtotal[$i] = $determ;
-      }elseif($sale['status'] == 2) {
-        if(isset($sale['net'])) {
-          $this_tentative_sales[$i] = round($sale['net']/1000,0);
-        }
-        $subtotal += $this_tentative_sales[$i];
-        $this_nendo_subtotal[$i] = $subtotal;
-      }elseif($sale['status'] == 3) {
-        if(isset($sale['net'])) {
-          $this_other_sales[$i] = round($sale['net']/1000,0);
-        }
-        $subtotal += $this_other_sales[$i];
-        $this_nendo_subtotal[$i] = $subtotal;
-      }
-    }
-  }
-  if(!isset($this_nendo_subtotal[$i])) {
-    $this_nendo_subtotal[$i] = $subtotal;
-  }
-  if(!isset($this_nendo_determined_subtotal[$i])) {
-    $this_nendo_determined_subtotal[$i] = $determ;
-  }
-}
-
-for($i = 0; $i < 12; $i++) {
-  $tuki = $month_array[$i];
-  $last_determined_sales[$i] = 0;
-  foreach($last_nendo_sales as $sale) {
-    if($sale['tuki'] == $tuki) {
-      $ym = explode('-', $sale['ym']);
-      $cyear = $ym[0];
-      $cmonth = (int)$ym[1];
-      if($cmonth < 4) {
-        $c_nendo = $cyear - 1;
-      } else {
-        $c_nendo = $cyear;
-      }
-      if($c_nendo != $last_nendo) {
-        continue; // Skip if not the last fiscal year
-      }
-      if(isset($sale['net'])) {
-        $last_determined_sales[$i] = round($sale['net']/1000,0);
-      }
-      $lastsub += $last_determined_sales[$i];
-      $last_nendo_subtotal[$i] = $lastsub;
-    }
-  }
-  if(!isset($last_nendo_subtotal[$i])) {
-    $last_nendo_subtotal[$i] = $lastsub;
-  }
-}
-
-
-//エージェント・直販比率
-$direct = 0;
-$agent = 0;
-$d_count = 0;
-$a_count = 0;
-$da_total=0;
-$agents= array();
-$agent_sales = array();
-$agent_count = array();
-$sql="SELECT
-`S`.`agent_id`,
-`S`.`agent_name`,
-COUNT(`S`.`reservation_id`) AS `count`,
-SUM(`S`.`gross`) AS `gross`,
-SUM(`S`.`net`) AS `net`
-FROM(
-  SELECT 
-  `agent_id`,
-  `agent_name`,
-  `reservation_id`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :firsr_day AND :last_day
-  GROUP BY `reservation_id`
-  ORDER BY `gross` DESC) AS `S`
-GROUP BY `agent_id`
-ORDER BY `gross` DESC";
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':firsr_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach($results as $result) {
-  if($result['agent_id'] == 0 ) {
-    $direct += $result['net'];
-    $d_count += $result['count'];
-  } else {
-    $agent += $result['net'];
-    $a_count += $result['count'];
-    array_push($agents, $result['agent_name']);
-    array_push($agent_sales, $result['net']);
-    array_push($agent_count, $result['count']);
-  }
-  $da_total += $result['net'];
-}
-$d_a=array($direct, $agent);
-$d_a_count = array($d_count, $a_count);
+$chartdata = getChartData($nendo);
+$last_nendo = $chartdata['last_nendo'];
+$months = $chartdata['months'];
+$sales_subtotal_array = $chartdata['sales_subtotal'];
+$last_year_sales_subtotal_array = $chartdata['last_year_sales_subtotal'];
+$sales_array = $chartdata['sales'];
+$last_year_sales_array = $chartdata['last_year_sales'];
+$this_nendo_subtotal = $chartdata['this_nendo_subtotal'];
+$this_nendo_determined_subtotal = $chartdata['this_nendo_determined_subtotal'];
+$last_nendo_subtotal = $chartdata['last_nendo_subtotal'];
+$this_determined_sales = $chartdata['this_determined_sales'];
+$this_tentative_sales = $chartdata['this_tentative_sales'];
+$this_other_sales = $chartdata['this_other_sales'];
+$last_determined_sales = $chartdata['last_determined_sales'];
+$d_a = $chartdata['d_a'];
+$d_a_count = $chartdata['d_a_count'];
+$agent_sales = $chartdata['agent_sales'];
+$agent_count = $chartdata['agent_count'];
+$agents = $chartdata['agents'];
+$category_sales = $chartdata['category_sales'];
+$category_subtotals = $chartdata['category_subtotals'];
+$category_counts = $chartdata['category_counts'];
+$category_s = $chartdata['category_s'];
+$category_total_sales = $chartdata['category_total_sales'];
+$category_total_counts = $chartdata['category_total_counts'];
 
 ?>
 <!DOCTYPE html>
@@ -367,6 +82,7 @@ $d_a_count = array($d_count, $a_count);
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/form.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -379,13 +95,41 @@ $d_a_count = array($d_count, $a_count);
       flex-wrap: wrap;
       gap: 10px;
     }
+    .graph_charts {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+      align-items: stretch;
+      align-content: stretch;
+    }
     .chartbox {
-      width: calc(48% - 10px)  ;
+      width: calc(100% - 10px)  ;
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+    .cb_half {
+      width: calc(48% - 10px);
+    }
+    .cb_quarter {
+      width: calc(24% - 10px);
+    }
+
+
+  @media screen and (max-width: 1370px) {
+    
+    .cb_half {
+      width: calc(100% - 10px);
+    }
+    .cb_quarter {
+      width: calc(48% - 10px);
+    } 
+    
+  }
   </style>
 </head>
 <body>
@@ -393,32 +137,75 @@ $d_a_count = array($d_count, $a_count);
 <main>
 <div class="wrapper">
   <div>
-    <h2>売上推移</h2>
-    <canvas id="myChart"></canvas>
-    <div>税・サービス料抜(単位：千円)</div>
+    <form  enctype="multipart/form-data" id="schedate_change">
+      <select name="nendo" id="nendo">
+        <option value=""></option>
+        <?php for($i = 2024; $i<= date('Y') + 3; $i++): ?>
+          <option value="<?=$i ?>" <?=($nendo == $i)?"selected":"" ?>><?=$i ?></option>
+        <?php endfor; ?>
+      </select>年度
+      
+      <button type="submit">変更</button>
+    </form>
+    <div id="controller_year">
+      <div id="before_year"><a href="?nendo=<?= $before_nendo ?>"><i class="fa-solid fa-arrow-left"></i>前年度</a></div>
+      <div id="this_year"><a href="?nendo=<?= $this_nendo ?>">今年度</a></div>
+      <div id="after_year"><a href="?nendo=<?= $after_nendo ?>">翌年度<i class="fa-solid fa-arrow-right"></i></a></div>
+    
+    </div>
   </div>
-
-  <div>
-    <h2>売上推移2</h2>
-    <canvas id="myChart2"></canvas>
-    <div>税・サービス料抜(単位：千円)</div>
-
+  <h1><?=$nendo ?>年度推移</h1>
+  <div class="graph_charts">
+    <div class="chartbox cb_half">
+      <h2>売上推移</h2>
+      <canvas id="myChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+    <div class="chartbox cb_half">
+      <h2>売上推移2</h2>
+      <canvas id="myChart2"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+  </div>
+  <div class="pie_charts">
+    <div class="chartbox cb_half">
+      <h2>カテゴリー別（金額）</h2>
+      <canvas id="catSalesChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+    <div class="chartbox cb_half">
+      <h2>カテゴリー別（件数）</h2>
+      <canvas id="catCountChart"></canvas>
+    </div>
+  </div>
+  <div class="pie_charts">
+    <div class="chartbox cb_quarter">
+      <h2>カテゴリー別 売上比率</h2>
+      <canvas id="catSalesDoughnutChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
+    </div>
+    <div class="chartbox cb_quarter">
+      <h2>カテゴリー別 件数比率</h2>
+      <canvas id="catCountDoughnutChart"></canvas>
+    </div>
   </div>
 
   <div class="pie_charts">
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>販売経路（金額）</h2>
       <canvas id="daChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>販売経路（件数）</h2>
       <canvas id="dacChart"></canvas>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>代理店シェア（金額）</h2>
       <canvas id="agentChart"></canvas>
+      <div class="text_right">税・サービス料抜(単位：千円)</div>
     </div>
-    <div class="chartbox">
+    <div class="chartbox cb_quarter">
       <h2>代理店シェア（件数）</h2>
       <canvas id="agentcChart"></canvas>
     </div>
@@ -432,20 +219,10 @@ $d_a_count = array($d_count, $a_count);
 <?php include("footer.php"); ?>
 <script type="text/javascript">
   const ctx = document.getElementById('myChart').getContext('2d');
-  const labels = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $month_array)) ?>];
+  const labels = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
   const data = {
     labels: labels,
     datasets: [
-      // 折れ線グラフ（2025年度累計）
-      {
-        label: '<?=$nendo ?>年度累計',
-        data: [<?= implode(',', $sales_subtotal_array) ?>],
-        borderColor: 'rgba(255, 99, 132, 1)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        type: 'line',
-        fill: false,
-        yAxisID: 'y-axis-2'
-      },
       // 折れ線グラフ（2024年度累計）
       {
         label: '<?=$last_nendo ?>年度累計',
@@ -456,15 +233,15 @@ $d_a_count = array($d_count, $a_count);
         fill: false,
         yAxisID: 'y-axis-2'
       },
-      // 棒グラフ（2025年度）
+      // 折れ線グラフ（2025年度累計）
       {
-        label: '<?=$nendo ?>年度',
-        data: [<?= implode(',', $sales_array) ?>],
-        backgroundColor: 'rgba(0, 246, 143, 0.5)',
-        borderColor: 'rgb(0, 246, 143)',
-        type: 'bar',
+        label: '<?=$nendo ?>年度累計',
+        data: [<?= implode(',', $sales_subtotal_array) ?>],
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        type: 'line',
         fill: false,
-        yAxisID: 'y-axis-1'
+        yAxisID: 'y-axis-2'
       },
       // 棒グラフ（2024年度）
       {
@@ -475,8 +252,17 @@ $d_a_count = array($d_count, $a_count);
         type: 'bar',
         fill: false,
         yAxisID: 'y-axis-1'
+      },
+      // 棒グラフ（2025年度）
+      {
+        label: '<?=$nendo ?>年度',
+        data: [<?= implode(',', $sales_array) ?>],
+        backgroundColor: 'rgba(0, 246, 143, 0.5)',
+        borderColor: 'rgb(0, 246, 143)',
+        type: 'bar',
+        fill: false,
+        yAxisID: 'y-axis-1'
       }
-      
     ]
   };
   const config = {
@@ -527,7 +313,7 @@ $d_a_count = array($d_count, $a_count);
 </script>
 <script>
     const ctx2 = document.getElementById('myChart2').getContext('2d');
-    const labels2 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $month_array)) ?>];
+    const labels2 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
     const data2 = {
       labels: labels2,
       datasets: [
@@ -561,7 +347,14 @@ $d_a_count = array($d_count, $a_count);
           fill: false,
           yAxisID: 'y-right'
         },
-
+        // 2024棒グラフ
+        {
+          label: '<?=$last_nendo ?> 実績',
+          data: [<?= implode(',', $last_determined_sales) ?>],
+          backgroundColor: 'rgba(255, 99, 132, 0.4)',
+          stack: '<?=$last_nendo ?>',
+          yAxisID: 'y-left'
+        },
 
         // 2025棒グラフ
         {
@@ -584,16 +377,7 @@ $d_a_count = array($d_count, $a_count);
           backgroundColor: 'rgba(54, 235, 151, 0.5)',
           stack: '<?=$nendo ?>',
           yAxisID: 'y-left'
-        },
-        // 2024棒グラフ
-        {
-          label: '<?=$last_nendo ?> 実績',
-          data: [<?= implode(',', $last_determined_sales) ?>],
-          backgroundColor: 'rgba(255, 99, 132, 0.4)',
-          stack: '<?=$last_nendo ?>',
-          yAxisID: 'y-left'
         }
-        
         
       ]
     };
@@ -643,236 +427,332 @@ $d_a_count = array($d_count, $a_count);
     new Chart(ctx2, config2);
 </script>
 <script>
-  // 代理店・直販比率の円グラフ
   const ctx3 = document.getElementById('daChart').getContext('2d');
-  const daData = {
-    labels: ['直販', '代理店'],
-    datasets: [{
-      label: '売上比率',
-      data: [<?= $d_a[0] ?>, <?= $d_a[1] ?>],
-      backgroundColor: [
-        'rgba(0, 246, 143, 0.8)',
-        'rgba(54, 162, 235, 0.8)'
-      ],
-      borderColor: [
-        'rgba(0, 246, 143, 1)',
-        'rgba(54, 162, 235, 1)'
-      ],
-      borderWidth: 1
-    }]
+
+  // データ（外：売上、内：件数）
+  const salesData = [<?= $d_a[0] ?>, <?= $d_a[1] ?>].map(v => Math.round(v / 1000)); // 千円
+  const countData = [<?= $d_a_count[0] ?>, <?= $d_a_count[1] ?>];
+
+  const salesTotal = salesData.reduce((a, b) => a + b, 0); // 千円
+  const countTotal = countData.reduce((a, b) => a + b, 0);
+
+  // 中央テキスト描画プラグイン
+  const centerTextPlugin = {
+    id: 'centerTextPlugin',
+    afterDraw(chart, args, pluginOptions) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+
+      const lines = pluginOptions?.lines ?? [];
+      const lineGap = pluginOptions?.lineGap ?? 18;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = pluginOptions?.color ?? '#333';
+
+      if (lines[0]) {
+        ctx.font = pluginOptions?.fontTop ?? 'bold 16px sans-serif';
+        ctx.fillText(lines[0], cx, cy - lineGap / 2);
+      }
+      if (lines[1]) {
+        ctx.font = pluginOptions?.fontBottom ?? 'bold 14px sans-serif';
+        ctx.fillText(lines[1], cx, cy + lineGap / 2);
+      }
+
+      ctx.restore();
+    }
   };
-  const daConfig = {
+
+  const data3 = {
+    labels: ['直販', '代理店'],
+    datasets: [
+      // 外側：売上
+      {
+        label: '売上（千円）',
+        data: salesData,
+        backgroundColor: [
+          'rgba(0, 246, 143, 0.85)',
+          'rgba(54, 162, 235, 0.85)'
+        ],
+        borderColor: [
+          'rgba(0, 246, 143, 1)',
+          'rgba(54, 162, 235, 1)'
+        ],
+        borderWidth: 1,
+        radius: '100%',
+        cutout: '62%'
+      },
+      // 内側：件数
+      {
+        label: '件数',
+        data: countData,
+        backgroundColor: [
+          'rgba(0, 246, 143, 0.35)',
+          'rgba(54, 162, 235, 0.35)'
+        ],
+        borderColor: [
+          'rgba(0, 246, 143, 1)',
+          'rgba(54, 162, 235, 1)'
+        ],
+        borderWidth: 1,
+        radius: '58%',
+        cutout: '30%'
+      }
+    ]
+  };
+
+  const config3 = {
     type: 'doughnut',
-    data: daData,
+    data:data3,
     options: {
       responsive: true,
       plugins: {
         legend: {
           position: 'top',
+          labels: {
+            generateLabels(chart) {
+              const labels = chart.data.labels || [];
+              const colors = chart.data.datasets[0].backgroundColor;
+              return labels.map((text, i) => ({
+                text,
+                fillStyle: colors[i],
+                strokeStyle: colors[i],
+                hidden: false,
+                index: i
+              }));
+            }
+          },
+          onClick(e, legendItem, legend) {
+            const index = legendItem.index;
+            const chart = legend.chart;
+
+            chart.data.datasets.forEach((ds, di) => {
+              const meta = chart.getDatasetMeta(di);
+              if (meta.data[index]) {
+                meta.data[index].hidden =
+                  meta.data[index].hidden === true ? false : true;
+              }
+            });
+
+            chart.update();
+          }
         },
         title: {
           display: true,
           text: '代理店・直販比率'
         },
-        datalabels: {
-          formatter: (value, context) => {
-            const data = context.chart.data.datasets[0].data;
-            const total = data.reduce((a, b) => a + b, 0);
-            const percentage = (value / total * 100).toFixed(1);
-            return percentage + '%';
-          },
-          color: '#fff',
-          font: {
-            weight: 'bold',
-            size: 14
-          }
-        }
-      }
-    },
-    plugins: [ChartDataLabels]
-  };
-  new Chart(ctx3, daConfig);
-</script>
-<script>
-  // 代理店・直販比率の円グラフ
-  const ctx5 = document.getElementById('dacChart').getContext('2d');
-  const dacData = {
-    labels: ['直販', '代理店'],
-    datasets: [{
-      label: '件数比率',
-      data: [<?= $d_a_count[0] ?>, <?= $d_a_count[1] ?>],
-      backgroundColor: [
-        'rgba(0, 246, 143, 0.8)',
-        'rgba(54, 162, 235, 0.8)'
-      ],
-      borderColor: [
-        'rgba(0, 246, 143, 1)',
-        'rgba(54, 162, 235, 1)'
-      ],
-      borderWidth: 1
-    }]
-  };
-  const dacConfig = {
-    type: 'doughnut',
-    data: dacData,
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        title: {
+        subtitle: {
           display: true,
-          text: '代理店・直販比率(件数)'
+          text: '外側：売上（千円） / 内側：件数',
+          padding: { bottom: 6 }
         },
         datalabels: {
           formatter: (value, context) => {
-            const data = context.chart.data.datasets[0].data;
-            const total = data.reduce((a, b) => a + b, 0);
-            const percentage = (value / total * 100).toFixed(1);
-            return percentage + '%';
+            const ds = context.dataset.data;
+            const total = ds.reduce((a, b) => a + b, 0);
+            return total
+              ? (value / total * 100).toFixed(1) + '%'
+              : '0.0%';
           },
           color: '#fff',
-          font: {
-            weight: 'bold',
-            size: 14
-          }
+          font: { weight: 'bold', size: 12 }
+        },
+        centerTextPlugin: {
+          lines: [
+            `売上合計 ${salesTotal.toLocaleString()} 千円`,
+            `件数合計 ${countTotal.toLocaleString()} 件`
+          ],
+          color: '#333',
+          fontTop: 'bold 16px sans-serif',
+          fontBottom: 'bold 14px sans-serif',
+          lineGap: 20
         }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: [ChartDataLabels, centerTextPlugin]
   };
-  new Chart(ctx5, dacConfig);
+
+  new Chart(ctx3, config3);
 </script>
+
 <script>
-  // 代理店ごとの売上シェアの円グラフ
+  // ===== canvas =====
   const ctx4 = document.getElementById('agentChart').getContext('2d');
-  const agentData = {
-    labels: [<?= implode(',', array_map(function($agent) { return '"' . $agent . '"'; }, $agents)) ?>],
-    datasets: [{
-      label: '代理店売上シェア',
-      data: [<?= implode(',', $agent_sales) ?>],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)',
-        'rgba(0, 246, 143, 0.8)',
-        'rgba(54, 235, 151, 0.8)',
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(255, 206, 86, 0.5)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(153, 102, 255, 0.5)',
-        'rgba(255, 159, 64, 0.5)',
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(0, 246, 143, 1)', 
-        'rgba(54, 235, 151, 1)',
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)',
-      ],
-      borderWidth: 1
-    }]
+
+  // ===== 元データ =====
+  const agentLabels = [<?= implode(',', array_map(fn($a) => '"' . $a . '"', $agents)) ?>];
+
+  const agtSalesData = [<?= implode(',', $agent_sales) ?>].map(v => Math.round(v / 1000)); // 千円
+  const agtCountData = [<?= implode(',', $agent_count) ?>];
+
+  const agtSalesTotal = agtSalesData.reduce((a, b) => a + b, 0);
+  const agtCountTotal = agtCountData.reduce((a, b) => a + b, 0);
+
+  // ===== カラーパレット（共通）=====
+  const agtBgColors = [
+    'rgba(255, 99, 132, 0.85)',
+    'rgba(54, 162, 235, 0.85)',
+    'rgba(255, 206, 86, 0.85)',
+    'rgba(75, 192, 192, 0.85)',
+    'rgba(153, 102, 255, 0.85)',
+    'rgba(255, 159, 64, 0.85)',
+    'rgba(0, 246, 143, 0.85)',
+    'rgba(54, 235, 151, 0.85)',
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(54, 162, 235, 0.5)',
+    'rgba(255, 206, 86, 0.5)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(255, 159, 64, 0.5)',
+  ];
+
+  // ===== 中央テキストプラグイン =====
+  const agtCenterTextPlugin = {
+    id: 'agtCenterTextPlugin',
+    afterDraw(chart, args, opts) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const x = (chartArea.left + chartArea.right) / 2;
+      const y = (chartArea.top + chartArea.bottom) / 2;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#333';
+
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(`売上合計 ${agtSalesTotal.toLocaleString()} 千円`, x, y - 10);
+
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(`件数合計 ${agtCountTotal.toLocaleString()} 件`, x, y + 12);
+
+      ctx.restore();
+    }
   };
+
+  // ===== data4 =====
+  const data4 = {
+    labels: agentLabels,
+    datasets: [
+      // 外側：売上
+      {
+        label: '売上（千円）',
+        data: agtSalesData,
+        backgroundColor: agtBgColors,
+        borderColor: agtBgColors.map(c => c.replace(/0\.\d+\)/, '1)')),
+        borderWidth: 1,
+        radius: '100%',
+        cutout: '65%'
+      },
+      // 内側：件数
+      {
+        label: '件数',
+        data: agtCountData,
+        backgroundColor: agtBgColors.map(c => c.replace('0.85', '0.35')),
+        borderColor: agtBgColors.map(c => c.replace(/0\.\d+\)/, '1)')),
+        borderWidth: 1,
+        radius: '60%',
+        cutout: '35%'
+      }
+    ]
+  };
+
+  // ===== config =====
   const agentConfig = {
     type: 'doughnut',
-    data: agentData,
+    data: data4,
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          position: 'top',
-        },
         title: {
           display: true,
-          text: '代理店ごとの売上シェア'
+          text: '代理店ごとのシェア（外：売上 / 内：件数）'
+        },
+        subtitle: {
+          display: true,
+          text: '色：代理店別'
+        },
+        legend: {
+          position: 'top'
         },
         datalabels: {
           formatter: (value, context) => {
-            const data = context.chart.data.datasets[0].data;
-            const total = data.reduce((a, b) => a + b, 0);
-            const percentage = (value / total * 100).toFixed(1);
-            if (isNaN(percentage)) {
-              return ''; // NaNの場合は表示しない
-            }
-            else if (percentage < 3) {
-              return ''; // 3%未満は表示しない
-            }else{
-              return percentage + '%';
-            }
-            
+            const ds = context.dataset.data;
+            const total = ds.reduce((a, b) => a + b, 0);
+            const pct = total ? (value / total * 100) : 0;
+
+            if (pct < 3) return '';   // 3%未満は非表示
+            return pct.toFixed(1) + '%';
           },
           color: '#fff',
           font: {
             weight: 'bold',
-            size: 14
+            size: 12
           }
         }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: [ChartDataLabels, agtCenterTextPlugin]
   };
+
   new Chart(ctx4, agentConfig);
 </script>
+
+
 <script>
-  // 代理店ごとの売上シェアの円グラフ
-  const ctx6 = document.getElementById('agentcChart').getContext('2d');
-  const agentcData = {
-    labels: [<?= implode(',', array_map(function($agent) { return '"' . $agent . '"'; }, $agents)) ?>],
-    datasets: [{
-      label: '代理店売上シェア(件数)',
-      data: [<?= implode(',', $agent_count) ?>],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)',
-        'rgba(0, 246, 143, 0.8)',
-        'rgba(54, 235, 151, 0.8)',
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(255, 206, 86, 0.5)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(153, 102, 255, 0.5)',
-        'rgba(255, 159, 64, 0.5)',
-      ],
-      borderColor: [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(0, 246, 143, 1)', 
-        'rgba(54, 235, 151, 1)',
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 206, 86, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-        'rgba(255, 159, 64, 0.8)',
-      ],
-      borderWidth: 1
-    }]
+  const ctx7 = document.getElementById('catSalesChart').getContext('2d');
+
+  const labels7 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
+  const catSalesData = {
+    labels: labels7,
+    datasets: [
+      {
+        label: '会',
+        data: [<?= implode(',', $category_sales['cat_1']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 赤
+        stack: '売上'
+      },
+      {
+        label: '宴',
+        data: [<?= implode(',', $category_sales['cat_2']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 青
+        stack: '売上'
+      },
+      {
+        label: '食',
+        data: [<?= implode(',', $category_sales['cat_3']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(75, 192, 192, 0.7)', // 緑
+        stack: '売上'
+      },
+      {
+        label: '会/宴',
+        data: [<?= implode(',', $category_sales['cat_4']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 206, 86, 0.7)', // 黄
+        stack: '売上'
+      },
+      {
+        label: '会/食',
+        data: [<?= implode(',', $category_sales['cat_5']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(153, 102, 255, 0.7)', // 紫
+        stack: '売上'
+      },
+      {
+        label: '会/宴/食',
+        data: [<?= implode(',', $category_sales['cat_6']) ?>].map(v => Math.round(v / 1000)),
+        backgroundColor: 'rgba(255, 159, 64, 0.7)', // オレンジ
+        stack: '売上'
+      }
+    ]
   };
-  const agentcConfig = {
-    type: 'doughnut',
-    data: agentcData,
+
+  const catSalesConfig = {
+    type: 'bar',
+    data: catSalesData,
     options: {
       responsive: true,
       plugins: {
@@ -881,35 +761,281 @@ $d_a_count = array($d_count, $a_count);
         },
         title: {
           display: true,
-          text: '代理店ごとの件数シェア'
+          text: 'カテゴリ別 売上（積み上げグラフ）'
+        }
+      },
+      scales: {
+        x: {
+          stacked: true
         },
-        datalabels: {
-          formatter: (value, context) => {
-            const data = context.chart.data.datasets[0].data;
-            const total = data.reduce((a, b) => a + b, 0);
-            const percentage = (value / total * 100).toFixed(1);
-            if (isNaN(percentage)) {
-              return ''; // NaNの場合は表示しない
-            }
-            else if (percentage < 3) {
-              return ''; // 3%未満は表示しない
-            }else{
-              return percentage + '%';
-            }
-            
-          },
-          color: '#fff',
-          font: {
-            weight: 'bold',
-            size: 14
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '売上金額'
           }
         }
       }
     },
-    plugins: [ChartDataLabels]
+    plugins: [{
+      id: 'totalLabelPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea: { top }, data, scales: { x, y } } = chart;
+        const totals = [];
+
+        // 合計を計算
+        data.datasets.forEach((ds, dsIndex) => {
+          ds.data.forEach((v, i) => {
+            totals[i] = (totals[i] || 0) + v;
+          });
+        });
+
+        // 合計ラベルを描画
+        totals.forEach((total, i) => {
+          const xPos = x.getPixelForValue(i);
+          const yPos = y.getPixelForValue(total);
+
+          ctx.save();
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.fillText(total.toLocaleString() , xPos, yPos - 5);
+          ctx.restore();
+        });
+      }
+    }]
   };
-  new Chart(ctx6, agentcConfig);
+
+  new Chart(ctx7, catSalesConfig);
 </script>
+<script>
+  const ctx8 = document.getElementById('catCountChart').getContext('2d');
+
+  const labels8 = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];
+  const catCountData = {
+    labels: labels8,
+    datasets: [
+      {
+        label: '会',
+        data: [<?= implode(',', $category_counts['cat_1']) ?>],
+        backgroundColor: 'rgba(255, 99, 132, 0.7)', // 赤
+        stack: '売上'
+      },
+      {
+        label: '宴',
+        data: [<?= implode(',', $category_counts['cat_2']) ?>],
+        backgroundColor: 'rgba(54, 162, 235, 0.7)', // 青
+        stack: '売上'
+      },
+      {
+        label: '食',
+        data: [<?= implode(',', $category_counts['cat_3']) ?>],
+        backgroundColor: 'rgba(75, 192, 192, 0.7)', // 緑
+        stack: '売上'
+      },
+      {
+        label: '会/宴',
+        data: [<?= implode(',', $category_counts['cat_4']) ?>],
+        backgroundColor: 'rgba(255, 206, 86, 0.7)', // 黄
+        stack: '売上'
+      },
+      {
+        label: '会/食',
+        data: [<?= implode(',', $category_counts['cat_5']) ?>],
+        backgroundColor: 'rgba(153, 102, 255, 0.7)', // 紫
+        stack: '売上'
+      },
+      {
+        label: '会/宴/食',
+        data: [<?= implode(',', $category_counts['cat_6']) ?>],
+        backgroundColor: 'rgba(255, 159, 64, 0.7)', // オレンジ
+        stack: '売上'
+      }
+    ]
+  };
+
+  const catCountConfig = {
+    type: 'bar',
+    data: catCountData,
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'カテゴリ別 件数（積み上げグラフ）'
+        }
+      },
+      scales: {
+        x: {
+          stacked: true
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: '受注件数'
+          }
+        }
+      }
+    },
+    plugins: [{
+      id: 'totalLabelPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea: { top }, data, scales: { x, y } } = chart;
+        const totals = [];
+
+        // 合計を計算
+        data.datasets.forEach((ds, dsIndex) => {
+          ds.data.forEach((v, i) => {
+            totals[i] = (totals[i] || 0) + v;
+          });
+        });
+
+        // 合計ラベルを描画
+        totals.forEach((total, i) => {
+          const xPos = x.getPixelForValue(i);
+          const yPos = y.getPixelForValue(total);
+
+          ctx.save();
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.fillText(total.toLocaleString() , xPos, yPos - 5);
+          ctx.restore();
+        });
+      }
+    }]
+  };
+
+  new Chart(ctx8, catCountConfig);
+</script>
+<script>
+  // カテゴリ別（外：売上 / 内：件数）2重ドーナツ
+  const ctx9 = document.getElementById('catSalesDoughnutChart').getContext('2d');
+
+  const catLabels = ['会', '宴', '食', '会/宴', '会/食', '会/宴/食'];
+
+  const catSalesDoughData = [<?= implode(',', $category_total_sales) ?>].map(v => Math.round(v / 1000)); // 千円
+  const catCountDoughData = [<?= implode(',', $category_total_counts) ?>];
+
+  const catSalesDoughTotal = catSalesDoughData.reduce((a, b) => a + b, 0);
+  const catCountDoughTotal = catCountDoughData.reduce((a, b) => a + b, 0);
+
+  // 6カテゴリなので6色で十分（余分があっても問題ないですが整理）
+  const doughBgColors = [
+    'rgba(255, 99, 132, 0.85)',
+    'rgba(54, 162, 235, 0.85)',
+    'rgba(75, 192, 192, 0.85)',
+    'rgba(255, 206, 86, 0.85)',
+    'rgba(153, 102, 255, 0.85)',
+    'rgba(255, 159, 64, 0.85)'
+  ];
+  const doughBorderColors = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'
+  ];
+
+  // 中央テキストプラグイン
+  const doughCenterTextPlugin = {
+    id: 'doughCenterTextPlugin',
+    afterDraw(chart) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+
+      const x = (chartArea.left + chartArea.right) / 2;
+      const y = (chartArea.top + chartArea.bottom) / 2;
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#333';
+
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(`売上合計 ${catSalesDoughTotal.toLocaleString()} 千円`, x, y - 10);
+
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(`件数合計 ${catCountDoughTotal.toLocaleString()} 件`, x, y + 12);
+
+      ctx.restore();
+    }
+  };
+
+  // data9
+  const data9 = {
+    labels: catLabels,
+    datasets: [
+      // 外側：売上
+      {
+        label: '売上（千円）',
+        data: catSalesDoughData,
+        backgroundColor: doughBgColors,
+        borderColor: doughBorderColors,
+        borderWidth: 1,
+        radius: '100%',
+        cutout: '65%'
+      },
+      // 内側：件数（同色で薄く）
+      {
+        label: '件数',
+        data: catCountDoughData,
+        backgroundColor: doughBgColors.map(c => c.replace('0.85', '0.35')),
+        borderColor: doughBorderColors,
+        borderWidth: 1,
+        radius: '60%',
+        cutout: '35%'
+      }
+    ]
+  };
+
+  const config9 = {
+    type: 'doughnut',
+    data: data9,
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'カテゴリ別シェア（外：売上 / 内：件数）'
+        },
+        subtitle: {
+          display: true,
+          text: '色：カテゴリ別'
+        },
+        legend: {
+          position: 'top'
+        },
+        datalabels: {
+          formatter: (value, context) => {
+            const ds = context.dataset.data;
+            const total = ds.reduce((a, b) => a + b, 0);
+            const pct = total ? (value / total * 100) : 0;
+
+            if (pct < 3) return ''; // 3%未満は表示しない
+            return pct.toFixed(1) + '%';
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 12
+          }
+        }
+      }
+    },
+    plugins: [ChartDataLabels, doughCenterTextPlugin]
+  };
+
+  new Chart(ctx9, config9);
+</script>
+
 
 </body>
 </html>
