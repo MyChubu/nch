@@ -42,6 +42,9 @@
 .cb_quarter {
   width: calc(24% - 10px);
 }
+.cb_third {
+  width: calc(32% - 5px);
+}
 
 
 @media screen and (max-width: 1370px) {
