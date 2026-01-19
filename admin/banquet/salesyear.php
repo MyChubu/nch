@@ -70,7 +70,7 @@ FROM (
   SUM(`ex-ts`) AS `ex-ts`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` != :next_ym
+  AND `ym` BETWEEN :ym_start AND :ym_end
   AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`reservation_id`, `additional_sales`
   ORDER BY `ym`
@@ -80,7 +80,8 @@ FROM (
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
 $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->bindValue(':next_ym', $next_ym, PDO::PARAM_STR);
+$stmt->bindValue(':ym_start', $nendo."-04", PDO::PARAM_STR);
+$stmt->bindValue(':ym_end', ($nendo+1)."-03", PDO::PARAM_STR);
 $stmt->execute();
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
@@ -109,7 +110,8 @@ $last_last_day = $last_nendo + 1 . '-03-31';
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':first_day', $last_first_day, PDO::PARAM_STR);
 $stmt->bindValue(':last_day', $last_last_day, PDO::PARAM_STR);
-$stmt->bindValue(':next_ym', ($last_nendo + 1) . '-04', PDO::PARAM_STR);
+$stmt->bindValue(':ym_start', $last_nendo."-04", PDO::PARAM_STR);
+$stmt->bindValue(':ym_end', ($last_nendo+1)."-03", PDO::PARAM_STR);
 $stmt->execute();
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
@@ -162,7 +164,7 @@ FROM(
   SUM(`ex-ts`) AS `ex-ts`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` != :next_ym
+  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
   AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`reservation_id`,`pic`,`pic_id`
   ORDER BY `pic`,`ym`
@@ -173,7 +175,6 @@ ORDER BY `pic`,`ym`";
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
 $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->bindValue(':next_ym', $next_ym, PDO::PARAM_STR);
 $stmt->execute();
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
@@ -217,7 +218,7 @@ $sql = "SELECT
     SUM(`ex-ts`) AS `ex-ts`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` != :next_ym
+  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
   AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`banquet_category_id`,`banquet_category_name`
   ORDER BY `banquet_category_id`,`ym`";
@@ -225,7 +226,6 @@ $sql = "SELECT
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
 $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->bindValue(':next_ym', $next_ym, PDO::PARAM_STR);
 $stmt->execute();
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $count = $stmt->rowCount();
@@ -279,7 +279,7 @@ FROM(
     SUM(`ex-ts`) AS `ex-ts`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` != :next_ym
+  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
   AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`sales_category_id`,`sales_category_name`,`reservation_id`
   ORDER BY `sales_category_id`,`ym`
@@ -289,7 +289,6 @@ FROM(
  $stmt = $dbh->prepare($sql);
  $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
  $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
- $stmt->bindValue(':next_ym', $next_ym, PDO::PARAM_STR);
  $stmt->execute();
  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
  $count = $stmt->rowCount();
