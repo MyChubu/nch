@@ -31,6 +31,7 @@ function getChartData($nendo){
     FROM `view_daily_subtotal`
     WHERE `date` BETWEEN :first_day AND :last_day
     AND `ym` != :next_ym
+    AND `sales_category_id` IN (1,2,3,4,5,6)
     GROUP BY `ym`,`reservation_id`
     ORDER BY `ym`
   ) AS `sales`
@@ -159,6 +160,7 @@ function getChartData($nendo){
       FROM `view_daily_subtotal`
       WHERE `date` BETWEEN :first_day AND :last_day
       AND `ym` != :next_ym
+      AND `sales_category_id` IN (1,2,3,4,5,6)
       GROUP BY `ym`,`reservation_id`,  `status`
       ORDER BY `ym`
     ) AS `sales`
@@ -198,6 +200,7 @@ function getChartData($nendo){
       FROM `view_daily_subtotal`
       WHERE `date` BETWEEN :first_day AND :last_day
       AND `ym` != :next_ym
+      AND `sales_category_id` IN (1,2,3,4,5,6)
       AND `status` IN (1,2,3) 
       GROUP BY `ym`,`reservation_id`
       ORDER BY `ym`
@@ -324,6 +327,8 @@ function getChartData($nendo){
       SUM(`net`) AS `net`
       FROM `view_daily_subtotal`
       WHERE `date` BETWEEN :firsr_day AND :last_day
+      AND `ym` != :next_nendo
+      AND `sales_category_id` IN (1,2,3,4,5,6)
       GROUP BY `reservation_id`
       ORDER BY `gross` DESC) AS `S`
     GROUP BY `agent_id`
@@ -331,6 +336,7 @@ function getChartData($nendo){
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(':firsr_day', $first_day, PDO::PARAM_STR);
   $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
+  $stmt->bindValue(':next_nendo', $next_ym, PDO::PARAM_STR);
   $stmt->execute();
   $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -377,8 +383,8 @@ function getChartData($nendo){
       SUM(`net`) AS `net`
     FROM `view_daily_subtotal`
     WHERE `date` BETWEEN :first_day AND :last_day
-    AND `sales_category_id` IS NOT NULL
     AND `ym` != :next_ym
+    AND `sales_category_id` IN (1,2,3,4,5,6)
     GROUP BY `ym`,`sales_category_id`,`sales_category_name`,`reservation_id`
     ORDER BY `sales_category_id`,`ym`
   ) AS `sales`
