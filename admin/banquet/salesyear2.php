@@ -1,8 +1,8 @@
 <?php
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 ?>
 <?php
 require_once('../../common/conf.php');
@@ -80,6 +80,7 @@ FROM (
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` != :next_nendo
+  AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`reservation_id`, `additional_sales`
   ORDER BY `ym`
  ) AS `sales`
@@ -110,35 +111,7 @@ if($count > 0) {
   }
 }
 
-$last_year_sales = array();
 
- $last_nendo = $nendo - 1;
-$last_first_day = $last_nendo . '-04-01';
-$last_last_day = $last_nendo + 1 . '-03-31';
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $last_first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_last_day, PDO::PARAM_STR);
-$stmt->bindValue(':next_nendo', ($last_nendo +1).'-04', PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-if($count > 0) {
-  foreach($results as $result) {
-    $last_year_sales[] = array(
-      'ym' => $result['ym'],
-      'count' => $result['count'],
-      'additional_sales' => $result['additional_sales'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net'],
-      'service_fee' => $result['service_fee'],
-      'tax' => $result['tax'],
-      'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts'],
-      'people' => $result['people']
-    );
-  }
-}
 
 
 $individual_sales =array();
@@ -175,6 +148,7 @@ FROM(
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` != :next_nendo
+  AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`reservation_id`,`pic`,`pic_id`
   ORDER BY `pic`,`ym`
 ) AS `sales`
@@ -229,6 +203,7 @@ $sql = "SELECT
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` != :next_nendo
+  AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`banquet_category_id`,`banquet_category_name`
   ORDER BY `banquet_category_id`,`ym`";
 
@@ -293,6 +268,7 @@ FROM(
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` != :next_nendo
+  AND `sales_category_id` IN (1,2,3,4,5,6)
   GROUP BY `ym`,`sales_category_id`,`sales_category_name`,`reservation_id`
   ORDER BY `sales_category_id`,`ym`
   ) AS `sales`
