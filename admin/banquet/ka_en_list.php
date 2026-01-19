@@ -120,7 +120,7 @@ $week_after = $dt_week_after->format('Y-m-d');
       <?php for($i=0; $i<sizeof($events_en); $i++ ) :?>
         <?php if($events_en[$i]['status'] !=5):  ?>
         <tr id="row_<?=$i ?>">
-          <td><a href="./connection_list.php?resid=<?=$events_en[$i]['reservation_id'] ?>" title="<?= $events_en[$i]['reservation_id'] ?>"><?= $events_en[$i]['reservation_id'] ?></a></td>
+          <td><a href="./connection_list2.php?resid=<?=$events_en[$i]['reservation_id'] ?>" title="<?= $events_en[$i]['reservation_id'] ?>"><?= $events_en[$i]['reservation_id'] ?></a></td>
           <td>
             <?php
               $agent_name ="";
@@ -212,7 +212,7 @@ $week_after = $dt_week_after->format('Y-m-d');
         <?php if($events_ka[$i]['status'] !=5):  ?>
           
         <tr id="row_<?=$i ?>">
-          <td><a href="./connection_list.php?resid=<?=$events_ka[$i]['reservation_id'] ?>" title="<?=$events_ka[$i]['reservation_id'] ?>"><?= $events_ka[$i]['reservation_id'] ?></a></td>
+          <td><a href="./connection_list2.php?resid=<?=$events_ka[$i]['reservation_id'] ?>" title="<?=$events_ka[$i]['reservation_id'] ?>"><?= $events_ka[$i]['reservation_id'] ?></a></td>
           <td>
             <?php
               $agent_name ="";
@@ -278,7 +278,7 @@ $week_after = $dt_week_after->format('Y-m-d');
       <?php for($i=0; $i<sizeof($events_other); $i++ ) :?>
         <?php if($events_other[$i]['status'] !=5):  ?>
         <tr id="row_<?=$i ?>">
-          <td><a href="./connection_list.php?resid=<?=$events_other[$i]['reservation_id'] ?>" title="<?=$events_other[$i]['reservation_id'] ?>"><?= $events_other[$i]['reservation_id'] ?></a></td>
+          <td><a href="./connection_list2.php?resid=<?=$events_other[$i]['reservation_id'] ?>" title="<?=$events_other[$i]['reservation_id'] ?>"><?= $events_other[$i]['reservation_id'] ?></a></td>
           <td>
             <?php
               $agent_name ="";

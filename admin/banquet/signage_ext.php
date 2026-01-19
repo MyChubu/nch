@@ -225,7 +225,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
         <td><input type="time" name="n[start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$starttime ?>" required></td>
         <td><input type="time" name="n[end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$endtime ?>" required></td>
         <td>
-          1行目 <input type="text" class="sign_title" name="n[event_name]" placeholder="<?=mb_substr($def_event_name, 0, 20) ?>" maxlength="40" required><br>
+          1行目 <input type="text" class="sign_title" name="n[event_name]" placeholder="<?=mb_substr($def_event_name, 0, 20) ?>" maxlength="40" value="<?=sizeof($ext_signs)==0 ? trim(mb_substr($def_event_name, 0, 20)) : '' ?>" required><br>
           2行目 <input type="text" class="sign_title" name="n[subtitle]" maxlength="40" placeholder="2行目の表示名（任意）">
         </td>
         <td><input type="hidden" name="n[enable]" value="0"><input type="checkbox" name="n[enable]" value="1" checked></td>

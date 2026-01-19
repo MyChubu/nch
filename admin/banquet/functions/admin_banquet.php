@@ -585,7 +585,6 @@ function getDetail2($reservation_id) {
   // 曜日配列（0〜6: 日〜土）
   $week = array('日', '月', '火', '水', '木', '金', '土');
  
-
   // DB接続
   $dbh = new PDO(DSN, DB_USER, DB_PASS);
 
@@ -703,6 +702,317 @@ function getDetail2($reservation_id) {
   }
   return $detail; // 詳細情報を返す（空の場合もある）
 }
+
+function getConnectionList2($reservation_id){
+  // 曜日配列（0〜6: 日〜土）
+  $week = array('日', '月', '火', '水', '木', '金', '土');
+  // DB接続
+  $dbh = new PDO(DSN, DB_USER, DB_PASS);
+
+  // 宴会スケジュールの取得
+  $sql ='SELECT
+    reservation_id,
+    MAX(people) AS people,
+    reservation_name,
+    reservation_date,
+    MIN(date) AS start_date,
+    MAX(date) AS end_date,
+    MIN(status) AS status,
+    due_date,
+    cancel_date,
+    nehops_d_created,
+    nehops_d_decided,
+    nehops_d_tentative,
+    nehops_mod_date,
+    pic,
+    pic_id,
+    agent_id,
+    agent_name,
+    reserver,
+    additional_sales,
+    sales_dept_id,
+    sales_dept_name
+    FROM banquet_schedules
+    WHERE reservation_id = ? GROUP BY reservation_id';
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([$reservation_id]);
+  $count = $stmt->rowCount();
+  if($count > 0){
+    $data = $stmt->fetch();
+    // 各種基本情報の取得
+    
+    $start_date = new DateTime($data['start_date']);
+    $end_date = new DateTime($data['end_date']);
+    if($start_date->format('Y-m-d') == $end_date->format('Y-m-d')) {
+      $event_date = $start_date->format('Y/m/d') . '(' . $week[(int)$start_date->format('w')] . ')';
+    } else {
+      $event_date = $start_date->format('Y/m/d') . '(' . $week[(int)$start_date->format('w')] . ') ~ ' .
+                    $end_date->format('Y/m/d') . '(' . $week[(int)$end_date->format('w')] . ')';
+    }
+
+    if($data['due_date'] != '0000-00-00' or $data['due_date'] != ''){
+      $due_date = new DateTime($data['due_date']);
+      $due_date = $due_date->format('Y/m/d');
+    } else {
+      $due_date = '';
+    }
+    if($data['cancel_date'] != '0000-00-00' && $data['cancel_date'] != '' && $data['cancel_date'] != null){
+      $cancel_date = new DateTime($data['cancel_date']);
+      $cancel_date = $cancel_date->format('Y/m/d');
+    } else {
+      $cancel_date = '';
+    }
+    if($data['nehops_d_created'] != '0000-00-00' && $data['nehops_d_created'] != '' && $data['nehops_d_created'] != null){
+      $nehops_d_c = new DateTime($data['nehops_d_created']);
+      $nehops_d_created = $nehops_d_c->format('Y/m/d');
+    } else {
+      $nehops_d_created = '';
+    } 
+    if($data['nehops_d_decided'] != '0000-00-00' && $data['nehops_d_decided'] != '' && $data['nehops_d_decided'] != null){
+      $nehops_d_d = new DateTime($data['nehops_d_decided']);
+      $nehops_d_decided = $nehops_d_d->format('Y/m/d');
+    } else {
+      $nehops_d_decided = '';
+    }
+    if($data['nehops_d_tentative'] != '0000-00-00' && $data['nehops_d_tentative'] != '' && $data['nehops_d_tentative'] != null){
+      $nehops_d_t = new DateTime($data['nehops_d_tentative']);
+      $nehops_d_tentative = $nehops_d_t->format('Y/m/d');
+    } else {
+      $nehops_d_tentative = '';
+    } 
+    $nehops_d_mod = $data['nehops_mod_date'];
+    if($nehops_d_mod != '0000-00-00' && $nehops_d_mod != '' && $nehops_d_mod != null){
+      $nehops_d_m = new DateTime($data['nehops_mod_date']);
+      $nehops_d_mod = $nehops_d_m->format('Y/m/d');
+    } else {
+      $nehops_d_mod = '';
+    }
+
+    $sql2 = 'SELECT * FROM banquet_sales_dept WHERE sales_dept_id = ?';
+    $stmt2 = $dbh->prepare($sql2);
+    $stmt2->execute([$data['sales_dept_id']]);
+    $sales_dept = $stmt2->fetch();
+    $category_id = $sales_dept['category_id'];
+    
+    $detail= array(
+      'reservation_id' => $data['reservation_id'], // 予約ID
+      'reservation_name' => $data['reservation_name'], // 予約名
+      'people' => $data['people'], // 人数
+      'event_date' => $event_date, // イベント日付
+      'status' => $data['status'], // ステータスコード
+      'due_date' => $due_date, // 仮予約期限
+      'cancel_date' => $cancel_date, // キャンセル日
+      'nehops_d_created' => $nehops_d_created, // NEHOPS登録日
+      'nehops_d_decided' => $nehops_d_decided, // NEHOPS決定日
+      'nehops_d_tentative' => $nehops_d_tentative, // NEHOPS仮予約日
+      'nehops_d_mod' => $nehops_d_mod, // NEHOPS最終更新日
+      'pic' => $data['pic'], // 担当者名（全角変換）
+      'pic_id' => $data['pic_id'], // 担当者ID
+      'agent_id' => $data['agent_id'], // エージェントID
+      'agent_name' => mb_convert_kana($data['agent_name'], 'KVas'), // エージェント名（全角変換）
+      'reserver' => mb_convert_kana($data['reserver'], 'KVas'), // 申込会社名（全角変換）
+      'additional_sales' => $data['additional_sales'], // 追加売上フラグ
+      'sales_dept_id' => $data['sales_dept_id'], // 営業部門ID
+      'sales_dept_name' => mb_convert_kana($data['sales_dept_name'], 'KVas'), // 営業部門名（全角変換）
+      'sales_category_id' => $category_id // 営業部門カテゴリID
+    );
+    
+  }else{
+    $detail = array(); // 予約がない場合は空の配列を返す
+  }
+
+  // 宴会スケジュールを取得
+  $sql = 'select * from banquet_schedules where reservation_id = ? order by start ASC, branch ASC';
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([$reservation_id]);
+  $count = $stmt->rowCount();
+
+  // 初期化
+  $events = array();
+  $charges = array();
+  $total_amount = 0;
+  $service_amount = 0;
+  $tax_amount = 0;
+  $discount_amount = 0;
+  $subtotal_amount = 0;
+  $total_amount2 = 0;
+  $service_amount2 = 0;
+  $tax_amount2 = 0;
+  $discount_amount2 = 0;
+  $subtotal_amount2 = 0;
+
+  if($count > 0){
+    foreach ($stmt as $row) {
+      $sche_id = $row['banquet_schedule_id'];
+      $branch = $row['branch'];
+      $status = $row['status'];
+      $pic = mb_convert_kana($row['pic'], 'KVas'); // 担当者名を全角変換
+
+      // 日付・時間をDateTimeで処理
+      $dateObj = new DateTime($row['date']);
+      $startObj = new DateTime($row['start']);
+      $endObj = new DateTime($row['end']);
+      $dueObj = new DateTime($row['due_date']);
+      $event_date = $dateObj->format('Y/m/d');
+      $event_start = $startObj->format('H:i');
+      $event_end = $endObj->format('H:i');
+      $due_date = $dueObj->format('Y/m/d');
+
+      // 会場（部屋）情報の取得
+      $sql2 = 'select * from banquet_rooms where banquet_room_id = ?';
+      $stmt2 = $dbh->prepare($sql2);
+      $stmt2->execute([$row['room_id']]);
+      $room = $stmt2->fetch();
+      $floor = $room['floor'];
+
+      $event_name = mb_convert_kana($row['event_name'], 'KVas');
+      $event_name= str_replace("///", " ", $event_name);
+
+      // イベント情報を配列に追加
+      $events[] = array(
+        'banquet_schedule_id' => $sche_id,
+        'reservation_id' => $reservation_id,
+        'branch' => $branch,
+        'resevation_name' => mb_convert_kana($row['reservation_name'], 'KVas'),
+        'event_name' => $event_name,
+        'event_date' => $event_date,
+        'date' => $event_date . '(' . $week[(int)$dateObj->format('w')] . ')',
+        'start' => $event_start,
+        'end' => $event_end,
+        'due_date' => $due_date,
+        'room_name' => $row['room_name'],
+        'floor' => $floor,
+        'status' => $status,
+        'status_name' => mb_convert_kana($row['status_name'], 'KVas'),
+        'enable' => $row['enable'],
+        'pic' => $pic,
+      );
+
+      // ====================
+      // パッケージ料金の取得
+      // ====================
+      $sql4 = 'select * from view_package_charges where reservation_id = ? and branch = ?';
+      $stmt4 = $dbh->prepare($sql4);
+      $stmt4->execute([$reservation_id, $branch]);
+
+      foreach ($stmt4 as $row4) {
+        $unit_price = intval($row4['UnitP']);
+        $qty = intval($row4['Qty']);
+        $subtotal = $unit_price * $qty;
+        $gross = intval($row4['Gross']);
+        $service_fee = intval($row4['ServiceFee']);
+        $tax = intval($row4['Tax']);
+        $discount = intval($row4['Discount']);
+
+        // 金額集計
+        $total_amount += $gross;
+        $service_amount += $service_fee;
+        $tax_amount += $tax;
+        $discount_amount += $discount;
+        $subtotal_amount += $subtotal;
+        if($status != 5){ // キャンセル以外
+          $total_amount2 += $gross;
+          $service_amount2 += $service_fee;
+          $tax_amount2 += $tax;
+          $discount_amount2 += $discount;
+          $subtotal_amount2 += $subtotal;
+        }
+
+        // パッケージ料金を追加
+        $charges[] = array(
+          'reservation_id' => $reservation_id,
+          'branch' => $branch,
+          'status' => $status,
+          'date' => $event_date,
+          'item_group_id' => $row4['package_category'],
+          'item_group_name' => mb_convert_kana($row4['PackageName2'], 'KVas'),
+          'item_id' => $row4['package_id'],
+          'item_name' => mb_convert_kana($row4['NameShort'], 'KVas'),
+          'name_short' => mb_convert_kana($row4['NameShort'], 'KVas'),
+          'unit_price' => $unit_price,
+          'qty' => $qty,
+          'subtotal' => $subtotal,
+          'discount' => $discount,
+          'service_fee' => $service_fee,
+          'tax' => $tax,
+          'gross' => $gross
+        );
+      }
+
+      // ========================
+      // 単品（非パッケージ）料金
+      // ========================
+      $sql3 = "select * from view_charges
+        where reservation_id = ? and branch = ?
+        and item_group_id NOT LIKE 'X%' 
+        and package_category NOT LIKE 'F%'";
+      $stmt3 = $dbh->prepare($sql3);
+      $stmt3->execute([$reservation_id, $branch]);
+
+      foreach ($stmt3 as $row2) {
+        $unit_price = intval($row2['unit_price']);
+        $qty = intval($row2['qty']);
+        $subtotal = $unit_price * $qty;
+        $gross = intval($row2['amount_gross']);
+        $service_fee = intval($row2['service_fee']);
+        $tax = intval($row2['tax']);
+        $discount = intval($row2['discount_amount']);
+
+        // 金額集計
+        $total_amount += $gross;
+        $service_amount += $service_fee;
+        $tax_amount += $tax;
+        $discount_amount += $discount;
+        $subtotal_amount += $subtotal;
+
+        if($status != 5){ // キャンセル以外
+          $total_amount2 += $gross;
+          $service_amount2 += $service_fee;
+          $tax_amount2 += $tax;
+          $discount_amount2 += $discount;
+          $subtotal_amount2 += $subtotal;
+        }
+
+        // 単品料金を追加
+        $charges[] = array(
+          'reservation_id' => $reservation_id,
+          'branch' => $branch,
+          'status' => $status,
+          'date' => $event_date,
+          'item_group_id' => $row2['item_group_id'],
+          'item_group_name' => mb_convert_kana($row2['item_group_name'], 'KVas'),
+          'item_id' => $row2['item_id'],
+          'item_name' => mb_convert_kana($row2['item_name'], 'KVas'),
+          'name_short' => mb_convert_kana($row2['name_short'], 'KVas'),
+          'unit_price' => $unit_price,
+          'qty' => $qty,
+          'subtotal' => $subtotal,
+          'service_fee' => $service_fee,
+          'tax' => $tax,
+          'discount' => $discount,
+          'gross' => $gross,
+        );
+      }
+    }
+  }
+    // 結果配列を返却
+  return array(
+    'detail' => $detail,
+    'events' => $events,
+    'charges' => $charges,
+    'total_amount' => $total_amount,
+    'service_amount' => $service_amount,
+    'tax_amount' => $tax_amount,
+    'discount_amount' => $discount_amount,
+    'subtotal_amount' => $subtotal_amount,
+    'total_amount2' => $total_amount2,
+    'service_amount2' => $service_amount2,
+    'tax_amount2' => $tax_amount2,
+    'discount_amount2' => $discount_amount2,
+    'subtotal_amount2' => $subtotal_amount2
+  );
+}
+
 
 function getDetail($scheid) {
   // 曜日配列（0〜6: 日〜土）

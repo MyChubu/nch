@@ -347,7 +347,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?=htmlspecialchars($rsv['date']) ?></td>
                 <td><?=statusletter($rsv['status']) ?></td>
                 <td><?= salescatletter($rsv['banquet_category_id']) ?></td>
-                <td><a href="connection_list.php?resid=<?=$rsv['reservation_id'] ?>"><?=htmlspecialchars($rsv['reservation_id']) ?></a></td>
+                <td><a href="connection_list2.php?resid=<?=$rsv['reservation_id'] ?>"><?=htmlspecialchars($rsv['reservation_id']) ?></a></td>
                 <td><a href="detail.php?scheid=<?= $rsv['sche_id'] ?>"><?=htmlspecialchars($rsv['branch']) ?></td>
                 <td><?=cleanLanternName2(htmlspecialchars($rsv['reservation_name']),30) ?></td>
                 <td><?=htmlspecialchars($rsv['room_name']) ?></td>
