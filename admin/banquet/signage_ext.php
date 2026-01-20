@@ -101,12 +101,12 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
   <title>デジサイ拡張表示設定（<?=$row['event_name'] ?>）</title>
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/form.css">
-  <link rel="stylesheet" href="css/table_sort.css">
+  <link rel="stylesheet" href="css/style.css?<?=date('YmdHis') ?>">
+  <link rel="stylesheet" href="css/form.css?<?=date('YmdHis') ?>">
+  <link rel="stylesheet" href="css/table_sort.css?<?=date('YmdHis') ?>">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <script src="js/admin_banquet.js"></script>
+  <script src="js/admin_banquet.js?<?=date('YmdHis') ?>"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -187,8 +187,8 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
         <td><input type="time" name="v[<?=$i ?>][start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_starttime ?>" required></td>
         <td><input type="time" name="v[<?=$i ?>][end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$ext_endtime ?>" required></td>
         <td>
-          1行目 <input type="text" class="sign_title" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" maxlength="40" placeholder="<?= $row['event_name'] ?>" required><br>
-          2行目 <input type="text" class="sign_title" name="v[<?=$i ?>][subtitle]" value="<?=$ext['subtitle'] ?>" maxlength="40" placeholder="2行目の表示名（任意）">
+          1行目 <input type="text" class="sign_title js-count" name="v[<?=$i ?>][event_name]" value="<?=$ext['event_name'] ?>" data-max="20" placeholder="<?= $row['event_name'] ?>" required> [<span class="char-count"></span>]<br>
+          2行目 <input type="text" class="sign_title js-count" name="v[<?=$i ?>][subtitle]" value="<?=$ext['subtitle'] ?>" data-max="20" placeholder="2行目の表示名（任意）"> [<span class="char-count"></span>]
         </td>
         <td><input type="hidden" name="v[<?=$i ?>][enable]" value="0"><input type="checkbox" name="v[<?=$i ?>][enable]" <?= $ext['enable'] == 1 ? 'checked' : '' ?>></td>
         <td><textarea name="v[<?=$i ?>][memo]"><?=$ext['memo'] ?></textarea></td>
@@ -225,8 +225,8 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
         <td><input type="time" name="n[start]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$starttime ?>" required></td>
         <td><input type="time" name="n[end]" min="<?=$starttime ?>" max="<?=$endtime ?>" value="<?=$endtime ?>" required></td>
         <td>
-          1行目 <input type="text" class="sign_title" name="n[event_name]" placeholder="<?=mb_substr($def_event_name, 0, 20) ?>" maxlength="40" value="<?=sizeof($ext_signs)==0 ? trim(mb_substr($def_event_name, 0, 20)) : '' ?>" required><br>
-          2行目 <input type="text" class="sign_title" name="n[subtitle]" maxlength="40" placeholder="2行目の表示名（任意）">
+          1行目 <input type="text" class="sign_title js-count" name="n[event_name]" placeholder="<?=mb_substr($def_event_name, 0, 20) ?>" data-max="20" value="<?=sizeof($ext_signs)==0 ? trim(mb_substr($def_event_name, 0, 20)) : '' ?>" required> [<span class="char-count"></span>]<br>
+          2行目 <input type="text" class="sign_title js-count" name="n[subtitle]" data-max="20" placeholder="2行目の表示名（任意）"> [<span class="char-count"></span>]
         </td>
         <td><input type="hidden" name="n[enable]" value="0"><input type="checkbox" name="n[enable]" value="1" checked></td>
         <td><textarea name="n[memo]"></textarea></td>
@@ -245,6 +245,67 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
 <?php include("aside.php"); ?>
 </main>
 <?php include("footer.php"); ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  function calcZenkakuLength(str) {
+    let len = 0;
+    for (const ch of str) {
+      // 半角判定（ASCII + 半角ｶﾅ）
+      if (
+        ch.match(/[\x00-\x7F]/) ||
+        ch.match(/[\uFF61-\uFF9F]/)
+      ) {
+        len += 0.5;
+      } else {
+        len += 1;
+      }
+    }
+    return len;
+  }
+
+  document.querySelectorAll('.js-count').forEach(input => {
+    const counter = input.nextElementSibling;
+    const max = Number(input.dataset.max || 20);
+
+    const update = () => {
+      let value = input.value;
+      let current = calcZenkakuLength(value);
+
+      // 超過していたらカット
+      if (current > max) {
+        let trimmed = '';
+        let len = 0;
+
+        for (const ch of value) {
+          const add =
+            (ch.match(/[\x00-\x7F]/) || ch.match(/[\uFF61-\uFF9F]/))
+              ? 0.5
+              : 1;
+
+          if (len + add > max) break;
+          trimmed += ch;
+          len += add;
+        }
+
+        input.value = trimmed;
+        current = len;
+      }
+
+      counter.textContent = `${current} / ${max}`;
+      counter.style.color = current >= max ? '#d00' : '#666';
+    };
+
+    // 初期表示
+    update();
+
+    // 入力・IME確定時
+    input.addEventListener('input', update);
+    input.addEventListener('compositionend', update);
+  });
+});
+</script>
+
 
 </body>
 </html>
