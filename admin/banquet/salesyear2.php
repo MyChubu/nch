@@ -49,188 +49,6 @@ $last_day = $nendo + 1 . '-03-31';
 $before_nendo = $nendo - 1;
 $after_nendo = $nendo + 1;
 
-$next_nendo = $after_nendo.'-04';
-
-$sales = array();
-$sql = "SELECT 
-`sales`.`ym`,
-COUNT(`sales`.`reservation_id`) AS `count`,
-SUM(`sales`.`additional_sales`) AS `additional_sales`,
-SUM(`sales`.`subtotal`) AS `subtotal`,
-SUM(`sales`.`gross`) AS `gross`,
-SUM(`sales`.`net`) AS `net`,
-SUM(`sales`.`service_fee`) AS `service_fee`,
-SUM(`sales`.`tax`) AS `tax`,
-SUM(`sales`.`discount`) AS `discount`,
-SUM(`sales`.`ex-ts`) AS `ex-ts`,
-SUM(`sales`.`people`) AS `people`
-FROM (
-  SELECT 
-  `ym`,
-  `reservation_id`,
-  `additional_sales`,
-  SUM(`subtotal`) AS `subtotal`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`,
-  SUM(`service_fee`) AS `service_fee`,
-  SUM(`tax`) AS `tax`,
-  SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`,
-  MAX(`people`) AS `people`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
-  AND `sales_category_id` IN (1,2,3,4,5,6)
-  GROUP BY `ym`,`reservation_id`, `additional_sales`
-  ORDER BY `ym`
- ) AS `sales`
- GROUP BY `ym`
- ORDER BY `ym`";
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-if($count > 0) {
-  foreach($results as $result) {
-    $sales[] = array(
-      'ym' => $result['ym'],
-      'count' => $result['count'],
-      'additional_sales' => $result['additional_sales'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net'],
-      'service_fee' => $result['service_fee'],
-      'tax' => $result['tax'],
-      'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts'],
-      'people' => $result['people']
-    );
-  }
-}
-
-
-
-
-$individual_sales =array();
-
-$sql = "SELECT 
-`sales`.`ym`,
-`sales`.`pic`,
-`sales`.`pic_id`,
-COUNT(`sales`.`reservation_id`) AS `count`,
-SUM(`sales`.`additional_sales`) AS `additional_sales`,
-SUM(`sales`.`subtotal`) AS `subtotal`,
-SUM(`sales`.`gross`) AS `gross`,
-SUM(`sales`.`net`) AS `net`,
-SUM(`sales`.`service_fee`) AS `service_fee`,
-SUM(`sales`.`tax`) AS `tax`,
-SUM(`sales`.`discount`) AS `discount`,
-SUM(`sales`.`ex-ts`) AS `ex-ts`,
-SUM(`sales`.`people`) AS `people`
-FROM(
-  SELECT 
-  `ym`,
-  `reservation_id`,
-  `additional_sales`,
-  `pic`,
-  `pic_id`,
-  SUM(`subtotal`) AS `subtotal`,
-  SUM(`gross`) AS `gross`,
-  SUM(`net`) AS `net`,
-  SUM(`service_fee`) AS `service_fee`,
-  SUM(`tax`) AS `tax`,
-  SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`,
-  MAX(`people`) AS `people`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
-  AND `sales_category_id` IN (1,2,3,4,5,6)
-  GROUP BY `ym`,`reservation_id`,`pic`,`pic_id`
-  ORDER BY `pic`,`ym`
-) AS `sales`
-GROUP BY `ym`,`pic`,`pic_id`
-ORDER BY `pic`,`ym`";
-
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-
-if($count > 0) {
-  foreach($results as $result) {
-    $individual_sales[] = array(
-      'ym' => $result['ym'],
-      'pic' => mb_convert_kana($result['pic'],'KVas'),
-      'pic_id' => $result['pic_id'],
-      'banquet_category_id' => $result['banquet_category_id'],
-      'banquet_category_name' => $result['banquet_category_name'],
-      'count' => $result['count'],
-      'additional_sales' => $result['additional_sales'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net'],
-      'service_fee' => $result['service_fee'],
-      'tax' => $result['tax'],
-      'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
-    );
-  }
-}
-
-
-$category_sales = array();
-
-$sql = "SELECT
-    `ym`,
-    `banquet_category_id`,
-    `banquet_category_name`,
-    COUNT(`reservation_id`) AS `count`,
-    SUM('additional_sales') AS `additional_sales`,
-    SUM(`subtotal`) AS `subtotal`,
-    SUM(`gross`) AS `gross`,
-    SUM(`net`) AS `net`,
-    SUM(`service_fee`) AS `service_fee`,
-    SUM(`tax`) AS `tax`,
-    SUM(`discount`) AS `discount`,
-    SUM(`ex-ts`) AS `ex-ts`
-  FROM `view_daily_subtotal`
-  WHERE `date` BETWEEN :first_day AND :last_day
-  AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
-  AND `sales_category_id` IN (1,2,3,4,5,6)
-  GROUP BY `ym`,`banquet_category_id`,`banquet_category_name`
-  ORDER BY `banquet_category_id`,`ym`";
-
-$stmt = $dbh->prepare($sql);
-$stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
-$stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-$count = $stmt->rowCount();
-if($count > 0) {
-  foreach($results as $result) {
-    $category_sales[] = array(
-      'ym' => $result['ym'],
-      'banquet_category_id' => $result['banquet_category_id'],
-      'banquet_category_name' => $result['banquet_category_name'],
-      'count' => $result['count'],
-      'additional_sales' => $result['additional_sales'],
-      'subtotal' => $result['subtotal'],
-      'gross' => $result['gross'],
-      'net' => $result['net'],
-      'service_fee' => $result['service_fee'],
-      'tax' => $result['tax'],
-      'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
-    );
-  }
-}
-
-
 $sales_category_sales = array();
 $sql = "SELECT 
   `sales`.`ym`,
@@ -246,7 +64,6 @@ $sql = "SELECT
   SUM(`discount`) AS `discount`,
   SUM(`ex-ts`) AS `ex-ts`,
   SUM(`people`) AS `people`
-
 FROM(
   SELECT 
     `ym`,
@@ -270,34 +87,76 @@ FROM(
   ORDER BY `sales_category_id`,`ym`
   ) AS `sales`
   GROUP BY `ym`,`sales_category_id`,`sales_category_name`
-  ORDER BY `sales_category_id`,`ym`";
+  ORDER BY `ym`,`sales_category_id`";
  $stmt = $dbh->prepare($sql);
  $stmt->bindValue(':first_day', $first_day, PDO::PARAM_STR);
  $stmt->bindValue(':last_day', $last_day, PDO::PARAM_STR);
  $stmt->execute();
  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
- $count = $stmt->rowCount();
- if($count > 0) {
-   foreach($results as $result) {
-     $sales_category_sales[] = array(
-       'ym' => $result['ym'],
-       'sales_category_id' => $result['sales_category_id'],
-       'sales_category_name' => $result['sales_category_name'],
-       'count' => $result['count'],
-        'additional_sales' => $result['additional_sales'],
-       'subtotal' => $result['subtotal'],
-       'gross' => $result['gross'],
-       'net' => $result['net'],
-       'service_fee' => $result['service_fee'],
-       'tax' => $result['tax'],
-       'discount' => $result['discount'],
-       'ex-ts' => $result['ex-ts'],
-       'people' => $result['people']
-     );
-   }
- }
-
  
+ $indexed = [];
+foreach ($results as $r) {
+  $ym = $r['ym'];
+  $cat = (int)$r['sales_category_id'];
+  $indexed[$ym][$cat] = [
+    'ym' => $ym,
+    'sales_category_id' => $cat,
+    'sales_category_name' => $r['sales_category_name'],
+    'count' => (int)$r['count'],
+    'additional_sales' => (int)$r['additional_sales'],
+    'subtotal' => (int)$r['subtotal'],
+    'gross' => (int)$r['gross'],
+    'net' => (int)$r['net'],
+    'service_fee' => (int)$r['service_fee'],
+    'tax' => (int)$r['tax'],
+    'discount' => (int)$r['discount'],
+    'ex-ts' => (int)$r['ex-ts'],
+    'people' => (int)$r['people'],
+  ];
+}
+
+$ymList = [];
+$start = new DateTimeImmutable(sprintf('%d-04-01', $nendo));
+for ($i=0; $i<12; $i++) {
+  $ymList[] = $start->modify("+{$i} months")->format('Y-m');
+}
+$catMaster = [
+  1 => '会議',
+  2 => '宴会',
+  3 => '食事',
+  4 => '会議/宴会',
+  5 => '会議/食事',
+  6 => '会議/宴会/食事'
+];
+
+$sales_category_sales = [];
+
+foreach ($ymList as $ym) {
+  foreach (range(1,6) as $cat) {
+    if (isset($indexed[$ym][$cat])) {
+      $sales_category_sales[] = $indexed[$ym][$cat];
+    } else {
+      // 値が無い組み合わせは0で行を作る
+      $sales_category_sales[] = [
+        'ym' => $ym,
+        'sales_category_id' => $cat,
+        'sales_category_name' => $catMaster[$cat] ?? '',
+        'count' => 0,
+        'additional_sales' => 0,
+        'subtotal' => 0,
+        'gross' => 0,
+        'net' => 0,
+        'service_fee' => 0,
+        'tax' => 0,
+        'discount' => 0,
+        'ex-ts' => 0,
+        'people' => 0,
+      ];
+    }
+  }
+}
+
+
 
 ?>
 <!DOCTYPE html>
@@ -339,92 +198,6 @@ FROM(
   </div>
   <h1><?=$nendo ?>年度売上</h1>
   <div>
-    <div>
-      <h2>月別売上</h2>
-      <?php if(sizeof($sales) > 0): ?>
-        <?php
-          
-          $total_count = 0;
-          $total_sales_count = 0;
-          $total_additional_sales = 0;
-          $total_subtotal = 0;
-          $total_gross = 0;
-          $total_net = 0;
-          $total_service_fee = 0;
-          $total_tax = 0;
-          $total_discount = 0;
-          $total_ex_ts = 0;
-          $total_people = 0;
-        ?>
-        <table>
-          <thead>
-            <tr>
-              <th>年月</th>
-              <th>件数</th>
-              <!--<th>追加</th>-->
-              <th>&#9312;&nbsp;金額</th>
-              <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
-              <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
-              <th>&#9315;&nbsp;サービス料</th>
-              <th>&#9316;&nbsp;消費税</th>
-              <th>&#9317;&nbsp;割引</th>
-              <th>人数</th>
-              <!--<th>税・サ抜</th>-->
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach($sales as $row): ?>
-              <?php $sales_count = $row['count'] - $row['additional_sales']; ?>
-              <tr>
-                <td><?=$row['ym'] ?></td>
-                <td><?=number_format($sales_count) ?></td>
-                <!--<td><?=number_format($row['additional_sales']) ?></td>-->
-                <td><?=number_format($row['subtotal']) ?></td>
-                <td><?=number_format($row['gross']) ?></td>
-                <td><?=number_format($row['net']) ?></td>
-                <td><?=number_format($row['service_fee']) ?></td>
-                <td><?=number_format($row['tax']) ?></td>
-                <td><?=number_format($row['discount']) ?></td>
-                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
-                <td><?=number_format($row['people']) ?></td>
-              </tr>
-              <?php
-                $total_count += $row['count'];
-                $total_additional_sales += $row['additional_sales'];
-                $total_sales_count += $sales_count;
-                $total_subtotal += $row['subtotal'];
-                $total_gross += $row['gross'];
-                $total_net += $row['net'];
-                $total_service_fee += $row['service_fee'];
-                $total_tax += $row['tax'];
-                $total_discount += $row['discount'];
-                $total_ex_ts += $row['ex-ts'];
-                $total_people += $row['people'];
-              ?>
-            <?php endforeach; ?>
-            <tr>
-              <td>合計</td>
-              <td><?=number_format($total_sales_count) ?></td>
-              <!--<td><?=number_format($total_additional_sales) ?></td>-->
-              <td><?=number_format($total_subtotal) ?></td>
-              <td><?=number_format($total_gross) ?></td>
-              <td><?=number_format($total_net) ?></td>
-              <td><?=number_format($total_service_fee) ?></td>
-              <td><?=number_format($total_tax) ?></td>
-              <td><?=number_format($total_discount) ?></td>
-              <!--<td><?=number_format($total_ex_ts) ?></td>-->
-              <td><?=number_format($total_people) ?></td>
-            </tr>
-          </tbody>
-        </table>
-      <?php else: ?>
-        <p>売上データはありません。</p>
-      <?php endif; ?>
-    </div>
-
-
-  
-
     <div id="sales_category">
       <h2>カテゴリー別</h2>
       <?php if(sizeof($sales_category_sales) > 0): ?>
@@ -442,7 +215,6 @@ FROM(
           $total_discount = 0;
           $total_ex_ts = 0;
           $total_people = 0;
-
           $c_count = 0;
           $c_additional_sales = 0;
           $c_sales_count = 0;
@@ -455,81 +227,44 @@ FROM(
           $c_ex_ts =0;
           $c_people =0;
         ?>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>年</th>
+                <th>月</th>
+                <!-- <th>部門ID</th> -->
+                <th>部門</th>
+                <th>人数</th>
+                <th>件数</th>
+                <th>料理</th>
+                <th>飲料</th>
+                <th>会場</th>
+                <th>ミスク</th>
+                <th>他</th>
+                <th>純売上</th>
+              </tr>
+            </thead>
+            <tbody>
         <?php foreach($sales_category_sales as $row): ?>
           <?php
             $cat = $row['sales_category_id'];
+            $ym= explode("-", $row['ym']);
             $sales_count = $row['count'] - $row['additional_sales'];
-        if($catg != $cat){
-              $catg = $cat;
-              if($counter > 0) {
-                ?>
-                <tr>
-                  <td colspan="2">合計</td>
-                  <td><?=number_format($c_sales_count) ?></td>
-                  <!--<td><?=number_format($c_additional_sales) ?></td>-->
-                  <td><?=number_format($c_subtotal) ?></td>
-                  <td><?=number_format($c_gross) ?></td>
-                  <td><?=number_format($c_net) ?></td>
-                  <td><?=number_format($c_service) ?></td>
-                  <td><?=number_format($c_tax) ?></td>
-                  <td><?=number_format($c_discount) ?></td>
-                  <!--<td><?=number_format($c_ex_ts) ?></td>-->
-                  <td><?=number_format($c_people) ?></td>
-                </tr>
-              </tbody>
-              </table>
-                </div>
-              <?php
-                  $c_count = 0;
-                  $c_additional_sales = 0;
-                  $c_sales_count = 0;
-                  $c_subtotal = 0;
-                  $c_gross = 0;
-                  $c_net = 0;
-                  $c_service = 0;
-                  $c_tax = 0;
-                  $c_discount =0;
-                  $c_ex_ts =0;
-                  $c_people =0;
-                }
-              ?>
-  
-                <div>
-                  <h4><?=$catg==""?"部門なし":"<a href='salescategory.php?nendo=".$nendo."&amp;cat=".$row['sales_category_id']."'>".$row['sales_category_name']."</a>" ?></h4>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>年月</th>
-                        <!--<th>部門ID</th>-->
-                        <th>部門</th>
-                        <th>件数</th>
-                        <!--<th>追加</th>-->
-                        <th>&#9312;&nbsp;金額</th>
-                        <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
-                        <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
-                        <th>&#9315;&nbsp;サービス料</th>
-                        <th>&#9316;&nbsp;消費税</th>
-                        <th>&#9317;&nbsp;割引</th>
-                        <th>人数</th>
-                        <!--<th>税・サ抜</th>-->
-                      </tr>
-                    </thead>
-                    <tbody>
-             <?php  } ?>
+         ?>
               <tr>
-                <td><?=$row['ym'] ?></td>
-                <td><?= salescatletter($row['sales_category_id']) ?></td>
-                <!--<td><?=$row['sales_category_name'] ?></td>-->
-                <td><?=$sales_count ?></td>
-                <!--<td><?=number_format($row['additional_sales']) ?></td>-->
-                <td><?=number_format($row['subtotal']) ?></td>
-                <td><?=number_format($row['gross']) ?></td>
-                <td><?=number_format($row['net']) ?></td>
-                <td><?=number_format($row['service_fee']) ?></td>
-                <td><?=number_format($row['tax']) ?></td>
-                <td><?=number_format($row['discount']) ?></td>
-                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
+                <td><?=$ym[0] ?></td>
+                <td><?=$ym[1] ?></td>
+                <!-- <td><?=$row['sales_category_id'] ?></td> -->
+                <td><?=str_replace("/","・",$row['sales_category_name']) ?></td>
                 <td><?=number_format($row['people']) ?></td>
+                <td><?=$sales_count ?></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><?=number_format($row['net']) ?></td>
               </tr>
               <?php
                 $total_count += $row['count'];
@@ -543,7 +278,6 @@ FROM(
                 $total_discount += $row['discount'];
                 $total_ex_ts += $row['ex-ts'];
                 $total_people += $row['people'];
-
                 $c_count += $row['count'];
                 $c_additional_sales += $row['additional_sales'];
                 $c_sales_count += $sales_count;
@@ -559,59 +293,21 @@ FROM(
               ?>
             <?php endforeach; ?>
             <tr>
-              <td colspan="2">合計</td>
-              <td><?=number_format($c_sales_count) ?></td>
-              <!--<td><?=number_format($c_additional_sales) ?></td>-->
-              <td><?=number_format($c_subtotal) ?></td>
-              <td><?=number_format($c_gross) ?></td>
-              <td><?=number_format($c_net) ?></td>
-              <td><?=number_format($c_service) ?></td>
-              <td><?=number_format($c_tax) ?></td>
-              <td><?=number_format($c_discount) ?></td>
-              <!--<td><?=number_format($c_ex_ts) ?></td>-->
+              <td colspan="3">合計</td>
               <td><?=number_format($c_people) ?></td>
+              <td><?=number_format($c_sales_count) ?></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><?=number_format($c_net) ?></td>
             </tr>
           </tbody>
         </table>
         </div>
         
-        <div>
-            <h4>合計</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>年月</th>
-                  <!--<th>部門ID</th>-->
-                  <th>部門</th>
-                  <th>件数</th>
-                  <!--<th>追加</th>-->
-                  <th>&#9312;&nbsp;金額</th>
-                  <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
-                  <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
-                  <th>&#9315;&nbsp;サービス料</th>
-                  <th>&#9316;&nbsp;消費税</th>
-                  <th>&#9317;&nbsp;割引</th>
-                  <th>人数</th>
-                  <!--<th>税・サ抜</th>-->
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="2">合計</td>
-                  <td><?=number_format($total_sales_count) ?></td>
-                  <!--<td><?=number_format($total_additional_sales) ?></td>-->
-                  <td><?=number_format($total_subtotal) ?></td>
-                  <td><?=number_format($total_gross) ?></td>
-                  <td><?=number_format($total_net) ?></td>
-                  <td><?=number_format($total_service_fee) ?></td>
-                  <td><?=number_format($total_tax) ?></td>
-                  <td><?=number_format($total_discount) ?></td>
-                  <!--<td><?=number_format($total_ex_ts) ?></td>-->
-                  <td><?=number_format($total_people) ?></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+       
 
       <?php else: ?>
         <p>売上データはありません。</p>
