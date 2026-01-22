@@ -29,6 +29,7 @@
   <ul>
     <li><i class="fa-solid fa-chart-area"></i><a href="../banquet/chart.php">グラフ(β)</a></li>
     <li><i class="fa-solid fa-calculator"></i><a href="../banquet/salesyear.php">年間累計</a></li>
+    <li><i class="fa-solid fa-hand-point-right"></i><a href="../banquet/salesyear2.php">予算用実績(β)</a></li>
     <li><i class="fa-solid fa-building-circle-arrow-right"></i><a href="../banquet/salesagents.php">エージェント別</a></li>
     <li><i class="fa-solid fa-square-h"></i><a href="../banquet/salesdirect.php">直販</a></li>
   </ul>

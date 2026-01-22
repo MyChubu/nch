@@ -193,8 +193,9 @@ foreach ($ymList as $ym) {
       <div id="before_year"><a href="?nendo=<?= $before_nendo ?>"><i class="fa-solid fa-arrow-left"></i>前年度</a></div>
       <div id="this_year"><a href="?nendo=<?= $this_nendo ?>">今年度</a></div>
       <div id="after_year"><a href="?nendo=<?= $after_nendo ?>">翌年度<i class="fa-solid fa-arrow-right"></i></a></div>
-    
+      <div><a id="copybtn"><i class="fa-solid fa-copy"></i>コピー</a></div>
     </div>
+    
   </div>
   <h1><?=$nendo ?>年度売上</h1>
   <div>
@@ -226,6 +227,7 @@ foreach ($ymList as $ym) {
           $c_discount =0;
           $c_ex_ts =0;
           $c_people =0;
+          $csvtxt = "";
         ?>
         <div>
           <table>
@@ -289,6 +291,10 @@ foreach ($ymList as $ym) {
                 $c_discount += $row['discount'];
                 $c_ex_ts += $row['ex-ts'];
                 $c_people += $row['people'];
+                if($counter > 0) {
+                  $csvtxt .= "\n";
+                }
+                $csvtxt .= $ym[0].",".$ym[1].",".str_replace("/","・",$row['sales_category_name']).",".$row['people'].",".$sales_count.",,,,,,".$row['net'];
                 $counter++;
               ?>
             <?php endforeach; ?>
@@ -306,7 +312,6 @@ foreach ($ymList as $ym) {
           </tbody>
         </table>
         </div>
-        
        
 
       <?php else: ?>
@@ -323,6 +328,23 @@ foreach ($ymList as $ym) {
 <?php include("aside.php"); ?>
 </main>
 <?php include("footer.php"); ?>
+<script>
+  const btn = document.getElementById('copybtn');
+  const txt = <?= json_encode($csvtxt, JSON_UNESCAPED_UNICODE) ?>;
+  btn.addEventListener('click', () => {
+  if (!navigator.clipboard) {
+    alert("残念。このブラウザは対応していません...");
+    return;
+  }
 
+  navigator.clipboard.writeText(txt).then(
+    () => {
+      alert('コピー成功👍');
+    },
+    () => {
+      alert('コピー失敗😭');
+    });
+  });
+</script>
 </body>
 </html>
