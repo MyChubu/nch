@@ -82,7 +82,7 @@ if ($count == 0) {
     $reservation_name = $row['reservation_name'];
     $pic = mb_convert_kana($row['pic'], "KVas");
     $pic = explode(' ', $pic);
-    $event_name = $row['event_name'];
+    $event_name = str_replace('///', ' ', $row['event_name']);
     $start = $row['start'];
     $end = $row['end'];
     $people = $row['people'];
