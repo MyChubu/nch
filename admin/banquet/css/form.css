@@ -60,6 +60,9 @@ input[type="text"].sign_title{
   width:calc(100% - 120px);
   max-width: 450px;
 }
+input[type="text"].sign_title2{
+  width:calc(100% - 80px);
+}
 
 
 select#level{

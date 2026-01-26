@@ -160,7 +160,7 @@ if($cat == 1){
   $stmtn->bindParam(':enable', $n['enable'], PDO::PARAM_INT);
   $stmtn->execute(); 
 
-  header('Location: ../banquet/signage_ext.php?scheid='.$scheid);
+  header('Location: ../banquet/signage_ext.php?scheid='.$scheid.'&sccess=1');
   exit;
 }else{
   //不正アクセス

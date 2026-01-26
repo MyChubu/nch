@@ -53,11 +53,11 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
   <title>デジサイ表示設定（<?=$date ?>）</title>
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/form.css">
+  <link rel="stylesheet" href="css/style.css?<?=date('YmdHis') ?>">
+  <link rel="stylesheet" href="css/form.css?<?=date('YmdHis') ?>">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <script src="js/admin_banquet.js"></script>
+  <script src="js/admin_banquet.js?<?=date('YmdHis') ?>"></script>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -109,8 +109,8 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
       <?php for($i=0; $i<sizeof($events); $i++ ) :?>
         <tr id="row_<?=$i ?>" class="event_tr_<?=$events[$i]['enable']  ?><?=$events[$i]['enable']==0?" non_disp":""; ?> ">
           <td><a href="./connection_list2.php?resid=<?=$events[$i]['reservation_id'] ?>"><?= $events[$i]['reservation_id'] ?></a></td>
-          <td>
-            <input type="text" name="events[<?=$i ?>][event_name]" value="<?= $events[$i]['event_name'] ?>">
+          <td class="align_l">
+            <input type="text" name="events[<?=$i ?>][event_name]" value="<?= $events[$i]['event_name'] ?>" class="sign_title2 js-count"> [<span class="char-count"></span>]
           </td>
           <td><?= $events[$i]['date'] ?></td>
           <td><?= $events[$i]['start'] ?></td>
@@ -152,6 +152,65 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
 <?php include("aside.php"); ?>
 </main>
 <?php include("footer.php"); ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
+  function calcZenkakuLength(str) {
+    let len = 0;
+    for (const ch of str) {
+      // 半角判定（ASCII + 半角ｶﾅ）
+      if (
+        ch.match(/[\x00-\x7F]/) ||
+        ch.match(/[\uFF61-\uFF9F]/)
+      ) {
+        len += 0.5;
+      } else {
+        len += 1;
+      }
+    }
+    return len;
+  }
+
+  document.querySelectorAll('.js-count').forEach(input => {
+    const counter = input.nextElementSibling;
+    const max = Number(20);
+
+    const update = () => {
+      let value = input.value;
+      let current = calcZenkakuLength(value);
+
+      // 超過していたらカット
+      if (current > max) {
+        let trimmed = '';
+        let len = 0;
+
+        for (const ch of value) {
+          const add =
+            (ch.match(/[\x00-\x7F]/) || ch.match(/[\uFF61-\uFF9F]/))
+              ? 0.5
+              : 1;
+
+          trimmed += ch;
+          len += add;
+        }
+
+        input.value = trimmed;
+        current = len;
+      }
+
+      counter.textContent = `${current}`;
+      counter.style.color = current > max ? '#d00' : '#666';
+      counter.style.fontWeight = current >= max ? 'bold' : 'normal';
+    };
+
+    // 初期表示
+    update();
+
+    // 入力・IME確定時
+    input.addEventListener('input', update);
+    input.addEventListener('compositionend', update);
+  });
+});
+</script>
 </body>
 </html>

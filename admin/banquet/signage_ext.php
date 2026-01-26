@@ -245,6 +245,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
 <?php include("aside.php"); ?>
 </main>
 <?php include("footer.php"); ?>
+<div id="success-dialog">更新しました</div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -293,7 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       counter.textContent = `${current} / ${max}`;
-      counter.style.color = current >= max ? '#d00' : '#666';
+      counter.style.color = current > max ? '#d00' : '#666';
+      counter.style.fontWeight = current >= max ? 'bold' : 'normal';
     };
 
     // 初期表示
@@ -304,6 +306,25 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('compositionend', update);
   });
 });
+</script>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get('success') === '1') {
+    const dialog = document.getElementById('success-dialog');
+
+    // 表示
+    dialog.classList.add('show');
+
+    // 2秒後にフェードアウト
+    setTimeout(() => {
+      dialog.classList.remove('show');
+    }, 5000);
+
+    // URLから success=1 を消す（再表示防止）
+    history.replaceState(null, '', location.pathname);
+  }
 </script>
 
 
