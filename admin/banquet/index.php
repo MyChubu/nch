@@ -123,7 +123,7 @@ $category_total_counts = $chartdata['category_total_counts'];
   <link rel="icon" type="image/jpeg" href="../images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/index2.css?202601191644">
+  <link rel="stylesheet" href="css/index2.css?<?= date('YmdHis') ?>">
   <script src="https://cdn.skypack.dev/@oddbird/css-toggles@1.1.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -140,21 +140,30 @@ $category_total_counts = $chartdata['category_total_counts'];
     <div id="controller">
 
     </div>
-    <div>
+    <div class="margin">
       <h1>会議・宴会サマリー</h1>
-      <p>本日は<?= $date ?>（<?= $wd ?>）です。</p>
-      <p>会議・宴会の予約状況を確認できます。</p>
-
     </div>
-    <div>
-      <div class="update_info">
-        <p>最終更新日時（スケジュール）: <?= $last_sche_update ? $last_sche_update : '未更新' ?></p>
-        <p>最終更新日時（料金）: <?= $last_charge_update ? $last_charge_update : '未更新' ?></p>
+    <div class="flex_001">
+      <div>
+        <p>本日は<?= $date ?>（<?= $wd ?>）です。</p>
+        <p>会議・宴会の予約状況を確認できます。</p>
+        <div class="update_info">
+          <p>最終更新日時（スケジュール）: <?= $last_sche_update ? $last_sche_update : '未更新' ?></p>
+          <p>最終更新日時（料金）: <?= $last_charge_update ? $last_charge_update : '未更新' ?></p>
+        </div>
+        <div class="date_info">
+          <p>表示可能期間: <?= $min_date ?> 〜 <?= $max_date ?></p>
+          <p>表示可能な日付は、スケジュールの更新により変動する場合があります。</p>
+          <p>システムの性質上、表示されたデータが最新ではない場合あります。最新データはNEHOPSでご確認ください。</p>
+        </div>
       </div>
-      <div class="date_info">
-        <p>表示可能期間: <?= $min_date ?> 〜 <?= $max_date ?></p>
-        <p>表示可能な日付は、スケジュールの更新により変動する場合があります。</p>
-        <p>システムの性質上、表示されたデータが最新ではない場合あります。最新データはNEHOPSでご確認ください。</p>
+      <div>
+        <div class="iframe-wrap">
+          <iframe
+            src="https://sign.nagoyacrown.co.jp/signage/"
+            frameborder="0"
+          ></iframe>
+        </div>
       </div>
     </div>
     <div class="top_sche_area">
@@ -182,6 +191,7 @@ $category_total_counts = $chartdata['category_total_counts'];
       </div>
  
     </div>
+
 
     <div>
       <div class="graph_charts">

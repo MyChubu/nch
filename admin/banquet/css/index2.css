@@ -45,7 +45,29 @@
 .cb_third {
   width: calc(32% - 5px);
 }
+.flex_001 {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+  align-content: stretch;
+}
 
+.iframe-wrap {
+  width: 360px;
+  height: 640px;
+  overflow: hidden;
+  border: 1px solid #ccc;
+}
+
+.iframe-wrap iframe {
+  width: 1080px;
+  height: 1920px;
+  transform: scale(0.3333);
+  transform-origin: top left;
+  border: none;
+}
 
 @media screen and (max-width: 1370px) {
   
