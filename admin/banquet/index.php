@@ -157,14 +157,7 @@ $category_total_counts = $chartdata['category_total_counts'];
           <p>システムの性質上、表示されたデータが最新ではない場合あります。最新データはNEHOPSでご確認ください。</p>
         </div>
       </div>
-      <div>
-        <div class="iframe-wrap">
-          <iframe
-            src="https://sign.nagoyacrown.co.jp/signage/"
-            frameborder="0"
-          ></iframe>
-        </div>
-      </div>
+      
     </div>
     <div class="top_sche_area">
       <div class="top_shcedule">
@@ -191,8 +184,9 @@ $category_total_counts = $chartdata['category_total_counts'];
       </div>
  
     </div>
-
-
+    <div class="flex_001">
+      <div id="iframe-area" class="iframe-wrap"></div>
+    </div>
     <div>
       <div class="graph_charts">
         <div class="chartbox cb_half">
@@ -1064,5 +1058,19 @@ $category_total_counts = $chartdata['category_total_counts'];
 
   new Chart(ctx9, config9);
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 少し遅らせたい場合（体感改善）
+  setTimeout(() => {
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://sign.nagoyacrown.co.jp/signage/';
+    iframe.loading = 'lazy'; // 念のため
+    iframe.setAttribute('aria-hidden', 'true');
+
+    document.getElementById('iframe-area').appendChild(iframe);
+  }, 500); // 0〜500msくらいが実務的
+});
+</script>
+
 </body>
 </html>

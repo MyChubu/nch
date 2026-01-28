@@ -55,7 +55,8 @@ SUM(`sales`.`net`) AS `net`,
 SUM(`sales`.`service_fee`) AS `service_fee`,
 SUM(`sales`.`tax`) AS `tax`,
 SUM(`sales`.`discount`) AS `discount`,
-SUM(`sales`.`ex-ts`) AS `ex-ts`
+SUM(`sales`.`ex-ts`) AS `ex-ts`,
+SUM(`sales`.`people`) AS `people`
 FROM (
   SELECT 
   `ym`,
@@ -67,7 +68,8 @@ FROM (
   SUM(`service_fee`) AS `service_fee`,
   SUM(`tax`) AS `tax`,
   SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`
+  SUM(`ex-ts`) AS `ex-ts`,
+  SUM(`people`) AS `people`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` BETWEEN :ym_start AND :ym_end
@@ -97,7 +99,8 @@ if($count > 0) {
       'service_fee' => $result['service_fee'],
       'tax' => $result['tax'],
       'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
+      'ex-ts' => $result['ex-ts'],
+      'people' => $result['people']
     );
   }
 }
@@ -127,7 +130,8 @@ if($count > 0) {
       'service_fee' => $result['service_fee'],
       'tax' => $result['tax'],
       'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
+      'ex-ts' => $result['ex-ts'],
+      'people' => $result['people']
     );
   }
 }
@@ -147,7 +151,8 @@ SUM(`sales`.`net`) AS `net`,
 SUM(`sales`.`service_fee`) AS `service_fee`,
 SUM(`sales`.`tax`) AS `tax`,
 SUM(`sales`.`discount`) AS `discount`,
-SUM(`sales`.`ex-ts`) AS `ex-ts`
+SUM(`sales`.`ex-ts`) AS `ex-ts`,
+SUM(`sales`.`people`) AS `people`
 FROM(
   SELECT 
   `ym`,
@@ -161,7 +166,8 @@ FROM(
   SUM(`service_fee`) AS `service_fee`,
   SUM(`tax`) AS `tax`,
   SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`
+  SUM(`ex-ts`) AS `ex-ts`,
+  SUM(`people`) AS `people`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
@@ -195,7 +201,8 @@ if($count > 0) {
       'service_fee' => $result['service_fee'],
       'tax' => $result['tax'],
       'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
+      'ex-ts' => $result['ex-ts'],
+      'people' => $result['people']
     );
   }
 }
@@ -215,7 +222,8 @@ $sql = "SELECT
     SUM(`service_fee`) AS `service_fee`,
     SUM(`tax`) AS `tax`,
     SUM(`discount`) AS `discount`,
-    SUM(`ex-ts`) AS `ex-ts`
+    SUM(`ex-ts`) AS `ex-ts`,
+    SUM(`people`) AS `people`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
@@ -243,7 +251,8 @@ if($count > 0) {
       'service_fee' => $result['service_fee'],
       'tax' => $result['tax'],
       'discount' => $result['discount'],
-      'ex-ts' => $result['ex-ts']
+      'ex-ts' => $result['ex-ts'],
+      'people' => $result['people']
     );
   }
 }
@@ -262,7 +271,8 @@ $sql = "SELECT
   SUM(`service_fee`) AS `service_fee`,
   SUM(`tax`) AS `tax`,
   SUM(`discount`) AS `discount`,
-  SUM(`ex-ts`) AS `ex-ts`
+  SUM(`ex-ts`) AS `ex-ts`,
+  SUM(`people`) AS `people`
 FROM(
   SELECT 
     `ym`,
@@ -276,7 +286,8 @@ FROM(
     SUM(`service_fee`) AS `service_fee`,
     SUM(`tax`) AS `tax`,
     SUM(`discount`) AS `discount`,
-    SUM(`ex-ts`) AS `ex-ts`
+    SUM(`ex-ts`) AS `ex-ts`,
+    SUM(`people`) AS `people`
   FROM `view_daily_subtotal`
   WHERE `date` BETWEEN :first_day AND :last_day
   AND `ym` BETWEEN '".$nendo."-04' AND '".($nendo+1)."-03'
@@ -306,7 +317,8 @@ FROM(
        'service_fee' => $result['service_fee'],
        'tax' => $result['tax'],
        'discount' => $result['discount'],
-       'ex-ts' => $result['ex-ts']
+       'ex-ts' => $result['ex-ts'],
+        'people' => $result['people']
      );
    }
  }
@@ -368,12 +380,14 @@ FROM(
           $total_tax = 0;
           $total_discount = 0;
           $total_ex_ts = 0;
+          $total_people = 0;
         ?>
         <table>
           <thead>
             <tr>
               <th>年月</th>
               <th>件数</th>
+              <th>人数</th>
               <!--<th>追加</th>-->
               <th>&#9312;&nbsp;金額</th>
               <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
@@ -390,6 +404,7 @@ FROM(
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?=number_format($sales_count) ?></td>
+                <td><?=number_format($row['people']) ?></td>
                 <!--<td><?=number_format($row['additional_sales']) ?></td>-->
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
@@ -410,11 +425,13 @@ FROM(
                 $total_tax += $row['tax'];
                 $total_discount += $row['discount'];
                 $total_ex_ts += $row['ex-ts'];
+                $total_people += $row['people'];
               ?>
             <?php endforeach; ?>
             <tr>
               <td>合計</td>
               <td><?=number_format($total_sales_count) ?></td>
+              <td><?=number_format($total_people) ?></td>
               <!--<td><?=number_format($total_additional_sales) ?></td>-->
               <td><?=number_format($total_subtotal) ?></td>
               <td><?=number_format($total_gross) ?></td>
@@ -444,12 +461,14 @@ FROM(
           $total_tax = 0;
           $total_discount = 0;
           $total_ex_ts = 0;
+          $total_people = 0;
         ?>
         <table>
           <thead>
             <tr>
               <th>年月</th>
               <th>件数</th>
+              <th>人数</th>
               <!--<th>追加</th>-->
               <th>&#9312;&nbsp;金額</th>
               <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
@@ -466,6 +485,7 @@ FROM(
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?=$sales_count ?></td>
+                <td><?=number_format($row['people']) ?></td>
                 <!--<td><?=number_format($row['additional_sales']) ?></td>-->
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
@@ -486,11 +506,13 @@ FROM(
                 $total_tax += $row['tax'];
                 $total_discount += $row['discount'];
                 $total_ex_ts += $row['ex-ts'];
+                $total_people += $row['people'];
               ?>
             <?php endforeach; ?>
             <tr>
               <td>合計</td>
               <td><?=number_format($total_sales_count) ?></td>
+              <td><?=number_format($total_people) ?></td>
               <!--<td><?=number_format($total_additional_sales) ?></td>-->
               <td><?=number_format($total_subtotal) ?></td>
               <td><?=number_format($total_gross) ?></td>
@@ -524,6 +546,7 @@ FROM(
           $total_tax = 0;
           $total_discount = 0;
           $total_ex_ts = 0;
+          $total_people = 0;
           $counter =0;
 
           $i_count = 0;
@@ -536,6 +559,7 @@ FROM(
           $i_tax = 0;
           $i_discount =0;
           $i_ex_ts =0;
+          $i_people =0;
         ?>
         <?php foreach($individual_sales as $row):
           $pic = mb_convert_kana($row['pic'],'KVas');
@@ -549,14 +573,14 @@ FROM(
               <tr>
                 <td colspan="2">合計</td>
                 <td><?=number_format($i_sales_count) ?></td>
-                <!--<td><?=number_format($i_additional_sales) ?></td>-->
+                <td><?=number_format($i_people) ?></td>
+
                 <td><?=number_format($i_subtotal) ?></td>
                 <td><?=number_format($i_gross) ?></td>
                 <td><?=number_format($i_net) ?></td>
                 <td><?=number_format($i_service) ?></td>
                 <td><?=number_format($i_tax) ?></td>
                 <td><?=number_format($i_discount) ?></td>
-                <!--<td><?=number_format($i_ex_ts) ?></td>-->
               </tr>
             </tbody>
           </table>
@@ -573,6 +597,7 @@ FROM(
             $i_tax = 0;
             $i_discount =0;
             $i_ex_ts =0;
+            $i_people =0;
             
             echo "<div><h4>";
             echo "<a href=\"salesindividual.php?pic=".$pic_id."&nendo=".$nendo."\">";
@@ -585,6 +610,7 @@ FROM(
               <th>年月</th>
               <th>担当</th>
               <th>件数</th>
+              <th>人数</th>
               <!--<th>追加</th>-->
               <th>&#9312;&nbsp;金額</th>
               <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
@@ -603,14 +629,13 @@ FROM(
                 <td><?=$row['ym'] ?></td>
                 <td><?=cleanLanternName($row['pic']) ?></td>
                 <td><?=$sales_count ?></td>
-                <!--<td><?=number_format($row['additional_sales']) ?></td>-->
+                <td><?=number_format($row['people']) ?></td>
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
               </tr>
               <?php
                 $total_count += $row['count'];
@@ -623,6 +648,7 @@ FROM(
                 $total_tax += $row['tax'];
                 $total_discount += $row['discount'];
                 $total_ex_ts += $row['ex-ts'];
+                $total_people += $row['people'];
 
                 $i_count += $row['count'];
                 $i_additional_sales += $row['additional_sales'];
@@ -634,6 +660,7 @@ FROM(
                 $i_tax += $row['tax'];
                 $i_discount += $row['discount'];
                 $i_ex_ts += $row['ex-ts'];
+                $i_people += $row['people'];
                 $counter++;
               ?>
               
@@ -641,15 +668,15 @@ FROM(
             <?php endforeach; ?>
             <tr>
                 <td colspan="2">合計</td>
-                <td><?=number_format($i_sales_count) ?></td>
-                <!--<td><?=number_format($i_additional_sales) ?></td>-->
-                <td><?=number_format($i_subtotal) ?></td>
-                <td><?=number_format($i_gross) ?></td>
-                <td><?=number_format($i_net) ?></td>
-                <td><?=number_format($i_service) ?></td>
-                <td><?=number_format($i_tax) ?></td>
-                <td><?=number_format($i_discount) ?></td>
-                <!--<td><?=number_format($i_ex_ts) ?></td>-->
+                <td class="i1"><?=number_format($i_sales_count) ?></td>
+                <td class="i2"><?=number_format($i_people) ?></td>
+                <td class="i3"><?=number_format($i_subtotal) ?></td>
+                <td class="i4"><?=number_format($i_gross) ?></td>
+                <td class="i5"><?=number_format($i_net) ?></td>
+                <td class="i6"><?=number_format($i_service) ?></td>
+                <td class="i7"><?=number_format($i_tax) ?></td>
+                <td class="i8"><?=number_format($i_discount) ?></td>
+
               </tr>
             </tbody>
           </table>
@@ -663,28 +690,27 @@ FROM(
                   <th>年月</th>
                   <th>担当</th>
                   <th>件数</th>
-                  <!--<th>追加</th>-->
+                  <th>人数</th>
                   <th>&#9312;&nbsp;金額</th>
                   <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
                   <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
                   <th>&#9315;&nbsp;サービス料</th>
                   <th>&#9316;&nbsp;消費税</th>
                   <th>&#9317;&nbsp;割引</th>
-                  <!--<th>税・サ抜</th>-->
+
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td colspan="2">合計</td>
-                  <td><?=number_format($total_sales_count) ?></td>
-                  <!--<td><?=number_format($total_additional_sales) ?></td>-->
-                  <td><?=number_format($total_subtotal) ?></td>
-                  <td><?=number_format($total_gross) ?></td>
-                  <td><?=number_format($total_net) ?></td>
-                  <td><?=number_format($total_service_fee) ?></td>
-                  <td><?=number_format($total_tax) ?></td>
-                  <td><?=number_format($total_discount) ?></td>
-                  <!--<td><?=number_format($total_ex_ts) ?></td>-->
+                  <td class="i11"><?=number_format($total_sales_count) ?></td>
+                  <td class="i22"><?=number_format($total_people) ?></td>
+                  <td class="i33"><?=number_format($total_subtotal) ?></td>
+                  <td class="i44"><?=number_format($total_gross) ?></td>
+                  <td class="i55"><?=number_format($total_net) ?></td>
+                  <td class="i66"><?=number_format($total_service_fee) ?></td>
+                  <td class="i77"><?=number_format($total_tax) ?></td>
+                  <td class="i88"><?=number_format($total_discount) ?></td>
                 </tr>
               </tbody>
             </table>
@@ -711,6 +737,7 @@ FROM(
           $total_tax = 0;
           $total_discount = 0;
           $total_ex_ts = 0;
+          $total_people = 0;
 
           $c_count = 0;
           $c_additional_sales = 0;
@@ -722,6 +749,7 @@ FROM(
           $c_tax = 0;
           $c_discount =0;
           $c_ex_ts =0;
+          $c_people =0;
         ?>
         <?php foreach($sales_category_sales as $row): ?>
           <?php
@@ -734,14 +762,14 @@ FROM(
                 <tr>
                   <td colspan="2">合計</td>
                   <td><?=number_format($c_sales_count) ?></td>
-                  <!--<td><?=number_format($c_additional_sales) ?></td>-->
+                  <td><?=number_format($c_people) ?></td>
                   <td><?=number_format($c_subtotal) ?></td>
                   <td><?=number_format($c_gross) ?></td>
                   <td><?=number_format($c_net) ?></td>
                   <td><?=number_format($c_service) ?></td>
                   <td><?=number_format($c_tax) ?></td>
                   <td><?=number_format($c_discount) ?></td>
-                  <!--<td><?=number_format($c_ex_ts) ?></td>-->
+
                 </tr>
               </tbody>
               </table>
@@ -757,6 +785,7 @@ FROM(
                   $c_tax = 0;
                   $c_discount =0;
                   $c_ex_ts =0;
+                  $c_people =0;
                 }
               ?>
   
@@ -766,17 +795,17 @@ FROM(
                     <thead>
                       <tr>
                         <th>年月</th>
-                        <!--<th>部門ID</th>-->
+
                         <th>部門</th>
                         <th>件数</th>
-                        <!--<th>追加</th>-->
+                        <th>人数</th>
+
                         <th>&#9312;&nbsp;金額</th>
                         <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
                         <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
                         <th>&#9315;&nbsp;サービス料</th>
                         <th>&#9316;&nbsp;消費税</th>
                         <th>&#9317;&nbsp;割引</th>
-                        <!--<th>税・サ抜</th>-->
                       </tr>
                     </thead>
                     <tbody>
@@ -784,16 +813,16 @@ FROM(
               <tr>
                 <td><?=$row['ym'] ?></td>
                 <td><?= salescatletter($row['sales_category_id']) ?></td>
-                <!--<td><?=$row['sales_category_name'] ?></td>-->
+
                 <td><?=$sales_count ?></td>
-                <!--<td><?=number_format($row['additional_sales']) ?></td>-->
+                <td><?=number_format($row['people']) ?></td>
                 <td><?=number_format($row['subtotal']) ?></td>
                 <td><?=number_format($row['gross']) ?></td>
                 <td><?=number_format($row['net']) ?></td>
                 <td><?=number_format($row['service_fee']) ?></td>
                 <td><?=number_format($row['tax']) ?></td>
                 <td><?=number_format($row['discount']) ?></td>
-                <!--<td><?=number_format($row['ex-ts']) ?></td>-->
+
               </tr>
               <?php
                 $total_count += $row['count'];
@@ -806,6 +835,7 @@ FROM(
                 $total_tax += $row['tax'];
                 $total_discount += $row['discount'];
                 $total_ex_ts += $row['ex-ts'];
+                $total_people += $row['people'];
 
                 $c_count += $row['count'];
                 $c_additional_sales += $row['additional_sales'];
@@ -817,20 +847,21 @@ FROM(
                 $c_tax += $row['tax'];
                 $c_discount += $row['discount'];
                 $c_ex_ts += $row['ex-ts'];
+                $c_people += $row['people'];
                 $counter++;
               ?>
             <?php endforeach; ?>
             <tr>
               <td colspan="2">合計</td>
               <td><?=number_format($c_sales_count) ?></td>
-              <!--<td><?=number_format($c_additional_sales) ?></td>-->
+              <td><?=number_format($c_people) ?></td>
               <td><?=number_format($c_subtotal) ?></td>
               <td><?=number_format($c_gross) ?></td>
               <td><?=number_format($c_net) ?></td>
               <td><?=number_format($c_service) ?></td>
               <td><?=number_format($c_tax) ?></td>
               <td><?=number_format($c_discount) ?></td>
-              <!--<td><?=number_format($c_ex_ts) ?></td>-->
+
             </tr>
           </tbody>
         </table>
@@ -842,31 +873,29 @@ FROM(
               <thead>
                 <tr>
                   <th>年月</th>
-                  <!--<th>部門ID</th>-->
                   <th>部門</th>
                   <th>件数</th>
-                  <!--<th>追加</th>-->
+                  <th>人数</th>
                   <th>&#9312;&nbsp;金額</th>
                   <th>&#9313;&nbsp;売上（&#9312; - &#9317;）</th>
                   <th>&#9314;&nbsp;純売上（&#9313; - &#9315; - &#9316;）</th>
                   <th>&#9315;&nbsp;サービス料</th>
                   <th>&#9316;&nbsp;消費税</th>
                   <th>&#9317;&nbsp;割引</th>
-                  <!--<th>税・サ抜</th>-->
+
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td colspan="2">合計</td>
                   <td><?=number_format($total_sales_count) ?></td>
-                  <!--<td><?=number_format($total_additional_sales) ?></td>-->
+                  <td><?=number_format($total_people) ?></td>
                   <td><?=number_format($total_subtotal) ?></td>
                   <td><?=number_format($total_gross) ?></td>
                   <td><?=number_format($total_net) ?></td>
                   <td><?=number_format($total_service_fee) ?></td>
                   <td><?=number_format($total_tax) ?></td>
                   <td><?=number_format($total_discount) ?></td>
-                  <!--<td><?=number_format($total_ex_ts) ?></td>-->
                 </tr>
               </tbody>
             </table>
