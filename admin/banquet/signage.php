@@ -126,7 +126,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
             <?php if($events[$i]['additional_sales'] == 1): ?>
               <span class="additional_sales">追</span>
               <?php elseif($events[$i]['ext_sign'] == 1) : ?>
-                <span class="ext_sign_1"><i class="fa-solid fa-folder-tree"></i></span>
+                <span class="ext_sign_1"><i class="fa-solid fa-fire-flame-curved"></i></span>
               <?php else: ?>
                 &nbsp;
             <?php endif; ?>
