@@ -11,6 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     header("HTTP/1.1 204 No Content");
     exit;
 }
+
+// 表示時間帯制限
+// $start = 8; // 表示開始時間（時）
+// $end = 17;  // 表示終了時間（時）
+// $hour = date('H');
+// if ($hour < $start || $hour >= $end) {
+//     echo json_encode([]); // 空の配列を返す
+//     exit;
+// }
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 $sql = <<<SQL
 SELECT * FROM jsons WHERE json_kind = 1 ORDER BY json_id DESC LIMIT 1
