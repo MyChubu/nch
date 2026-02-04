@@ -70,7 +70,7 @@ if (is_uploaded_file($temp_file)) {
 <div class="wrapper">
 
 <?= $msg ?>
-<div><a href="../banquet/csvupload.php">戻る</a></div>
+<div><a href="../guestrooms/csvupload.php">戻る</a></div>
 
 
   

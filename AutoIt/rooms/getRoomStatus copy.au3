@@ -1,6 +1,6 @@
 ; ======================================================================
-; NEHOPS ルームインジ（全館表示）をドラッグ選択→コピー→TXT保存→JSON生成→WEBアップロード
-; Win7 / 低スペック向け：待ち多め・ログ多め
+; NEHOPS ルームインジ（全館表示）をドラッグ選択→コピー→TXT保存→JSON生成
+; Win7 / 低スペック向け：待ち多め・ログ多め・正規表現の重い処理は使わない
 ; ======================================================================
 
 #include <Date.au3>
@@ -20,39 +20,35 @@ Global Const $LOG_PATH = $LOG_DIR & "\roomindi_" & @YEAR & @MON & @MDAY & "_" & 
 Global Const $ROOMINDI_DIR      = "C:\Users\PC008\Documents\roomindi"
 Global Const $ROOMINDI_JSON_DIR = "C:\Users\PC008\Documents\roomindi\jsons"
 
-; ===================== WebDriver / サイトURL =====================
+; WebDriver / サイトURL
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
 Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/banquet/"
-Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
+Global Const $UP_URL     = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
 
-
-; ===================== 認証（secrets.ini があれば優先） =====================
+; ===================== NEHOPS 認証（secrets.ini があれば優先） =====================
 Local $INI         = @ScriptDir & "\secrets.ini"
-
-; NEHOPS
 Local $NEHOPS_USER = IniRead($INI, "nehops", "user", "s035")
 Local $NEHOPS_PASS = IniRead($INI, "nehops", "pass", "0515")
 
-; WEB（secrets.ini 優先。無ければここは空にしてエラーにする）
-Local $LOGIN_USER = IniRead($INI, "auth", "user", "takeichi@nagoyacrown.co.jp")
-Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "nCh@6633")
+; 認証情報（secrets.ini 優先、無ければ直書き）
+Local $LOGIN_USER = IniRead($INI, "auth", "user", "")
+Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "")
+If $LOGIN_USER = "" Then $LOGIN_USER = "takeichi@nagoyacrown.co.jp" ; ←必要なら変更
+If $LOGIN_PASS = "" Then $LOGIN_PASS = "nCh@6633"                   ; ←必要なら変更
 
-; ===================== セレクタ =====================
-; ログイン（複数候補）
-Global Const $SEL_USER = "#username"
-Global Const $SEL_PASS = "#password"
-Global Const $SEL_BTN  = "form#loginForm button[type='submit']"
+; セレクタ（ログインは以前と同じ方針：複数候補）
+Global Const $SEL_USER = "#login_id, input[name='login_id'], input[name='username'], #username"
+Global Const $SEL_PASS = "#password, input[name='password'], input[type='password']"
+Global Const $SEL_BTN  = "button[type='submit'], input[type='submit'], #loginBtn"
 
-; JSONアップロード（質問文のformを反映：name="jsonfile"）
-Global Const $SEL_JSON_FILE   = "input[type='file'][name='jsonfile'], input[name='jsonfile'], input[type='file']"
-Global Const $SEL_JSON_SUBMIT = "form#json_form button[type='submit'], #json_form button[type='submit'], button[type='submit'], input[type='submit']"
+; JSONアップロードページ（候補を多めに）
+Global Const $SEL_JSON_FILE   = "input[type='file'], #jsonfile, #file, input[name='json'], input[name='file']"
+Global Const $SEL_JSON_SUBMIT = "button#upload, input#upload, button[type='submit'], input[type='submit']"
 
-; 成功判定（rooms_jsonupload.php に表示される文言）
-Global Const $UPLOAD_SUCCESS_TEXT = "アップロードしました。"
-
-; ヘッドレス
+; ヘッドレス（必要なら True）
 Global Const $HEADLESS_CHROME = True
+
 
 ; ===================== 動作の安定化（低スペック向け） =====================
 Opt("WinTitleMatchMode", 2)      ; タイトル部分一致
@@ -60,14 +56,6 @@ Opt("SendKeyDelay", 30)
 Opt("SendKeyDownDelay", 10)
 Opt("WinWaitDelay", 250)
 Opt("MouseCoordMode", 1)         ; マウス座標：画面座標（ドラッグ固定座標のため）
-
-; ===================== グローバル（後始末用） =====================
-Global $g_WD_Session = ""        ; WebDriver セッション
-Global $g_WD_Started = False     ; WebDriver 起動済み
-Global $g_Nehops_Tried = False   ; NEHOPS 起動を試した（終了処理の目安）
-
-; どんな終了でも Cleanup を走らせる（エラーで Exit しても走る）
-OnAutoItExitRegister("CleanupOnExit")
 
 ; ======================================================================
 ; エントリーポイント
@@ -85,12 +73,7 @@ If Not FileExists($NEHOPS_EXE) Then
     Die("NEHOPS exe なし", $NEHOPS_EXE)
 EndIf
 
-If Not FileExists($CHROMEDRIVER) Then
-    Die("chromedriver.exe なし", $CHROMEDRIVER)
-EndIf
-
-; メイン処理
-If Not StartNehopsCopyJsonAndUpload() Then
+If Not StartNehopsCopyAndJson() Then
     Die("処理失敗", "どこかで失敗しました。ログを確認してください。")
 EndIf
 
@@ -114,51 +97,27 @@ EndFunc
 
 
 ; ======================================================================
-; メイン：NEHOPS → TXT → JSON → WEBアップロード
-; ======================================================================
-Func StartNehopsCopyJsonAndUpload()
-    ; ① NEHOPS 起動→ログイン→全館コピー→TXT→JSON
-    Local $jsonPath = StartNehopsCopyAndJson()
-    If $jsonPath = "" Then
-        _LogMsg("[ERROR] JSON生成まで失敗")
-        Return False
-    EndIf
-
-    ; ② WEBアップロード（ヘッドレス）
-    If Not WebUploadJson($jsonPath) Then
-        _LogMsg("[ERROR] WebUploadJson 失敗")
-        Return False
-    EndIf
-
-    _LogMsg("[INFO] Upload completed OK: " & $jsonPath)
-    Return True
-EndFunc
-
-
-; ======================================================================
-; NEHOPS：起動→ログイン→全館コピー→TXT保存→JSON保存（成功時 jsonPath を返す）
+; メイン：NEHOPS 起動→ログイン→全館コピー→TXT保存→JSON保存
 ; ======================================================================
 Func StartNehopsCopyAndJson()
-    $g_Nehops_Tried = True
-
     _LogMsg("[INFO] NEHOPS 起動: " & $NEHOPS_EXE)
     Run($NEHOPS_EXE, $NEHOPS_DIR)
 
     ; ① ログイン画面待ち → 入力 → OK
     If Not WinWait("ログイン", "", 30) Then
         _LogMsg("[ERROR] ログイン画面が出ません")
-        Return ""
+        Return False
     EndIf
 
     If Not TypeLoginCreds($NEHOPS_USER, $NEHOPS_PASS) Then
         _LogMsg("[ERROR] ログイン入力に失敗")
-        Return ""
+        Return False
     EndIf
 
     ; ② メニュー選択へ
     If Not WinWait("メニュー選択", "", 30) Then
         _LogMsg("[ERROR] メニュー選択が出ません")
-        Return ""
+        Return False
     EndIf
     WinActivate("メニュー選択")
     WinWaitActive("メニュー選択", "", 10)
@@ -168,34 +127,37 @@ Func StartNehopsCopyAndJson()
     ; ③ NEHOPS メニューへ
     If Not WinWait("NEHOPS メニュー", "", 30) Then
         _LogMsg("[ERROR] NEHOPS メニューが出ません")
-        Return ""
+        Return False
     EndIf
     WinActivate("NEHOPS メニュー")
     WinWaitActive("NEHOPS メニュー", "", 10)
     Sleep(500)
 
-    ; ④ 全館表示→ドラッグ選択→コピー→TXT保存（成功時は txtパス）
+    ; ④ 全館表示→ドラッグ選択→コピー→TXT保存（成功時は txtパスを返す）
     Local $txtPath = DragByFixedMousePosAndCopy()
     If $txtPath = "" Then
         _LogMsg("[ERROR] コピー→TXT保存に失敗")
-        Return ""
+        Return False
     EndIf
     _LogMsg("[INFO] txtPath=" & $txtPath)
 
-    ; ⑤ JSON化（成功時は jsonパス）
+    ; ⑤ JSON化（成功時は jsonパスを返す）
     Local $jsonPath = ConvertRoomIndiTxtToJson($txtPath)
     If $jsonPath = "" Then
         _LogMsg("[ERROR] JSON化に失敗。@error=" & @error)
-        Return ""
+        Return False
     EndIf
 
     If Not FileExists($jsonPath) Then
         _LogMsg("[ERROR] JSONパスは返ったがファイルが存在しない: " & $jsonPath)
-        Return ""
+        Return False
     EndIf
 
+    ; ★ここで NEHOPS を閉じる
+    CloseNehops()
+
     _LogMsg("[INFO] JSON saved: " & $jsonPath)
-    Return $jsonPath
+    Return True
 EndFunc
 
 
@@ -311,7 +273,8 @@ EndFunc
 
 ; ======================================================================
 ; JSON化：TXT -> JSON
-; 「部屋番号とステータスが改行で分断」されるため状態機械で拾う
+; ★重要：NEHOPSのコピーは「部屋番号とステータスが改行で分断」されるため、
+;        正規表現を重く使わず「状態機械」で拾う（4桁→次のステータス）
 ; ======================================================================
 Func ParseDateTimeFromFilename($path, ByRef $outDate, ByRef $outTime)
     Local $name = StringTrimLeft($path, StringInStr($path, "\", 0, -1))
@@ -393,13 +356,20 @@ Func ConvertRoomIndiTxtToJson($txtPath, $jsonPath = "")
         Return SetError(3, 0, "")
     EndIf
 
+    ; 改行を統一
     $text = StringReplace($text, @CRLF, @LF)
     $text = StringReplace($text, @CR, @LF)
+
+    ; 余計なダブルクォートは消す（"2001 などが混ざるため）
     $text = StringReplace($text, '"', "")
+
+    ; タブはスペース化（トークン分割を安定させる）
     $text = StringReplace($text, @TAB, " ")
 
+    ; 1行ずつ処理
     Local $lines = StringSplit($text, @LF, 1)
 
+    ; floor -> rooms の格納
     Local $dict = ObjCreate("Scripting.Dictionary")
     If Not IsObj($dict) Then
         _LogMsg("[ERROR] Scripting.Dictionary を作れません（COM無効の可能性）")
@@ -407,35 +377,45 @@ Func ConvertRoomIndiTxtToJson($txtPath, $jsonPath = "")
     EndIf
 
     Local $curFloor = ""
-    Local $pendingRoom = ""
+    Local $pendingRoom = "" ; 「部屋番号を見つけたが、まだステータスが来ていない」状態
+
     Local $pairsTotal = 0
 
     For $i = 1 To $lines[0]
         Local $ln = StringStripWS($lines[$i], 3)
         If $ln = "" Then ContinueLoop
 
+        ; 行頭に3桁があれば「フロア行」とみなす（030 / 029 など）
         Local $fm = StringRegExp($ln, "^\s*(\d{3})\b", 1)
         If Not @error And IsArray($fm) Then
             $curFloor = $fm[0]
+            ; フロアが切り替わったら、保留中の部屋番号は捨てる（安全策）
             $pendingRoom = ""
         EndIf
 
+        ; フロアが未確定なら解析しない
         If $curFloor = "" Then ContinueLoop
 
+        ; 行内の「4桁」または「ステータスっぽい英数(1-6)」を順に拾う
+        ; 例：2001 / XN / OPN / VPU など
         Local $tokens = StringRegExp($ln, "(\d{4}|[A-Z0-9]{1,6})", 3)
         If @error Or Not IsArray($tokens) Then ContinueLoop
 
         For $t = 0 To UBound($tokens) - 1
             Local $tk = $tokens[$t]
 
+            ; 4桁 → 部屋番号として保留
             If StringRegExp($tk, "^\d{4}$") Then
                 $pendingRoom = $tk
                 ContinueLoop
             EndIf
 
+            ; ステータス → 直前に部屋番号があればペア成立
             If $pendingRoom <> "" Then
+                ; ステータスは大文字英数だけに整形
                 Local $st = StringUpper($tk)
                 $st = StringRegExpReplace($st, "[^A-Z0-9]", "")
+
                 _AddRoom($dict, $curFloor, $pendingRoom, $st)
                 $pairsTotal += 1
                 $pendingRoom = ""
@@ -445,11 +425,13 @@ Func ConvertRoomIndiTxtToJson($txtPath, $jsonPath = "")
 
     _LogMsg("[INFO] parsed pairs total=" & $pairsTotal & " floors=" & $dict.Count)
 
+    ; 何も取れなかったら失敗扱い（空JSON防止）
     If $dict.Count = 0 Or $pairsTotal = 0 Then
         _LogMsg("[ERROR] rooms/status が1件も解析できませんでした")
         Return SetError(20, 0, "")
     EndIf
 
+    ; ---- JSON組み立て ----
     Local $json = "{"
     $json &= @LF & '  "date": "' & $date & '",'
     $json &= @LF & '  "time": "' & $time & '",'
@@ -479,236 +461,28 @@ Func ConvertRoomIndiTxtToJson($txtPath, $jsonPath = "")
     $json &= @LF & "  ]"
     $json &= @LF & "}" & @LF
 
+    ; JSON書き込み（戻り値チェック）
     Local $w = FileWrite($jsonPath, $json)
     _LogMsg("[INFO] FileWrite(json) ret=" & $w & " jsonLen=" & StringLen($json))
 
     If $w = 0 Then
-        _LogMsg("[ERROR] JSON書き込み失敗: " & $jsonPath)
+        _LogMsg("[ERROR] JSON書き込み失敗（権限/パス/フォルダ）: " & $jsonPath)
         Return SetError(9, 0, "")
+    EndIf
+
+    If Not FileExists($jsonPath) Then
+        _LogMsg("[ERROR] JSONを書いたはずだが存在しない: " & $jsonPath)
+        Return SetError(11, 0, "")
     EndIf
 
     Return $jsonPath
 EndFunc
 
-
-; ======================================================================
-; WEBアップロード（ヘッドレス）：LOGIN_URL → SUCCESS_URL確認 → UP_URL → JSONアップロード → 成功文言確認
-; ======================================================================
-Func WebUploadJson($jsonPath)
-    _LogMsg("[INFO] WebUploadJson begin: " & $jsonPath)
-
-    If $LOGIN_USER = "" Or $LOGIN_PASS = "" Then
-        _LogMsg("[ERROR] WEBログインID/パスワードが未設定です（secrets.ini の [auth] を確認）")
-        Return False
-    EndIf
-
-    If Not FileExists($jsonPath) Then
-        _LogMsg("[ERROR] jsonが存在しない: " & $jsonPath)
-        Return False
-    EndIf
-
-    ; --- WebDriver起動 ---
-    _WD_Option('Driver', $CHROMEDRIVER)
-    _WD_Option('Port', 9515)
-    _WD_Option('DriverParams', '--verbose --log-path="' & @ScriptDir & '\chromedriver.log"')
-
-    Local $r = _WD_Startup()
-    $g_WD_Started = True
-    _LogMsg("[INFO] _WD_Startup ret=" & $r)
-
-    _WD_CapabilitiesStartup()
-    _WD_CapabilitiesAdd('alwaysMatch', 'chrome')
-    _WD_CapabilitiesAdd('w3c', True)
-    _WD_CapabilitiesAdd('args', '--window-size=1280,900')
-
-    If $HEADLESS_CHROME Then
-        _WD_CapabilitiesAdd('args', '--headless')
-        _WD_CapabilitiesAdd('args', '--disable-gpu')
-    EndIf
-
-    Local $caps = _WD_CapabilitiesGet()
-    $g_WD_Session = _WD_CreateSession($caps)
-    If @error Or $g_WD_Session = "" Then
-        _LogMsg("[ERROR] _WD_CreateSession 失敗 @error=" & @error)
-        Return False
-    EndIf
-    _LogMsg("[INFO] WD session created")
-
-    ; --- LOGIN_URLへ ---
-    _WD_Navigate($g_WD_Session, $LOGIN_URL)
-    _WD_LoadWait($g_WD_Session, 250, 30000)
-
-    ; 要素待ち
-    Local $eUser = WaitAnySelector($g_WD_Session, $SEL_USER, 25000)
-    Local $ePass = WaitAnySelector($g_WD_Session, $SEL_PASS, 25000)
-    Local $eBtn  = WaitAnySelector($g_WD_Session, $SEL_BTN , 25000)
-
-    If (Not $eUser) Or (Not $ePass) Or (Not $eBtn) Then
-        _LogMsg("[ERROR] ログイン要素が見つかりません")
-        Return False
-    EndIf
-
-    _WD_ElementAction($g_WD_Session, $eUser, 'value', $LOGIN_USER)
-    _WD_ElementAction($g_WD_Session, $ePass, 'value', $LOGIN_PASS)
-    _WD_ElementAction($g_WD_Session, $eBtn , 'click')
-    _WD_LoadWait($g_WD_Session, 250, 30000)
-
-    ; SUCCESS_URL への遷移確認
-    If Not WaitUrlContains($g_WD_Session, $SUCCESS_URL, 30000, 300) Then
-        _LogMsg("[ERROR] ログイン後にSUCCESS_URLになりません: " & $SUCCESS_URL)
-        Return False
-    EndIf
-    _LogMsg("[INFO] Login OK → SUCCESS_URL")
-
-    ; --- UP_URLへ ---
-    _WD_Navigate($g_WD_Session, $UP_URL)
-    _WD_LoadWait($g_WD_Session, 250, 30000)
-
-    ; ファイル入力取得
-    Local $eFile = WaitAnySelector($g_WD_Session, $SEL_JSON_FILE, 25000)
-    If Not $eFile Then
-        _LogMsg("[ERROR] JSONファイル入力が見つかりません")
-        Return False
-    EndIf
-
-    ; ファイルパスを設定（value→sendkeysの順で試す）
-    If Not SetFileInput($g_WD_Session, $eFile, $jsonPath) Then
-        _LogMsg("[ERROR] ファイル入力にパスを設定できませんでした: " & $jsonPath)
-        Return False
-    EndIf
-
-    ; 送信ボタン取得＆クリック
-    Local $eSubmit = WaitAnySelector($g_WD_Session, $SEL_JSON_SUBMIT, 25000)
-    If Not $eSubmit Then
-        _LogMsg("[ERROR] JSON送信ボタンが見つかりません")
-        Return False
-    EndIf
-
-    _WD_ElementAction($g_WD_Session, $eSubmit, 'click')
-    _WD_LoadWait($g_WD_Session, 250, 30000)
-
-    ; 成功文言をページ本文から検出
-    If Not WaitBodyContainsText($g_WD_Session, $UPLOAD_SUCCESS_TEXT, 30000, 400) Then
-        _LogMsg("[ERROR] 成功文言が確認できません: " & $UPLOAD_SUCCESS_TEXT)
-        Return False
-    EndIf
-
-    _LogMsg("[INFO] Upload success text detected: " & $UPLOAD_SUCCESS_TEXT)
-    Return True
-EndFunc
-
-
-; ======================================================================
-; WebDriver 補助
-; ======================================================================
-Func WaitAnySelector($sSession, $sCSSList, $iTimeout = 15000, $iInterval = 250)
-    Local $aList = StringSplit($sCSSList, ",")
-    Local $t = TimerInit()
-
-    While TimerDiff($t) < $iTimeout
-        For $i = 1 To $aList[0]
-            Local $css = StringStripWS($aList[$i], 3)
-            If $css = "" Then ContinueLoop
-            Local $h = _WD_FindElement($sSession, $_WD_LOCATOR_ByCSSSelector, $css)
-            If @error = $_WD_ERROR_Success And $h <> "" Then Return $h
-        Next
-        Sleep($iInterval)
-    WEnd
-    Return 0
-EndFunc
-
-Func WaitUrlContains($sSession, $sNeedle, $iTimeout = 15000, $iInterval = 250)
-    Local $t = TimerInit()
-    While TimerDiff($t) < $iTimeout
-        Local $url = _WD_ExecuteScript($sSession, "return location.href;")
-        If StringInStr($url, $sNeedle, 0) > 0 Then Return True
-        Sleep($iInterval)
-    WEnd
-    Return False
-EndFunc
-
-Func FileChosen($sSession, $eFile)
-    Local $js = "var el=arguments[0]; return el && el.files && el.files.length>0;"
-    Local $ret = _WD_ExecuteScript($sSession, $js, $eFile)
-    Return ($ret = True)
-EndFunc
-
-Func SetFileInput($sSession, $eFile, $sPath)
-    ; まず value で試す
-    _WD_ElementAction($sSession, $eFile, 'value', $sPath)
-    Sleep(200)
-    If FileChosen($sSession, $eFile) Then Return True
-
-    ; ダメなら sendkeys
-    _WD_ElementAction($sSession, $eFile, 'sendkeys', $sPath)
-    Sleep(200)
-    If FileChosen($sSession, $eFile) Then Return True
-
-    Return False
-EndFunc
-
-Func WaitBodyContainsText($sSession, $needle, $iTimeout = 20000, $iInterval = 300)
-    Local $t = TimerInit()
-    While TimerDiff($t) < $iTimeout
-        Local $txt = _WD_ExecuteScript($sSession, "return document.body ? document.body.innerText : '';")
-        If StringInStr($txt, $needle, 0) > 0 Then Return True
-        Sleep($iInterval)
-    WEnd
-    Return False
-EndFunc
-
-
-; ======================================================================
-; NEHOPS 終了
-; ======================================================================
+; ===================== NEHOPS 終了 =====================
 Func CloseNehops()
-    ; 画面が無い/アクティブでない等で失敗することがあるので、安全に
-    _LogMsg("[INFO] Closing NEHOPS (Alt+F4)")
-    WinActivate("NEHOPS メニュー")
-    Sleep(200)
-
+    _LogMsg("[INFO] NEHOPS 終了処理")
     Send("!{F4}")
-    Sleep(300)
-    ; 終了確認が出る想定：TAB→ENTER
     Send("{TAB}")
-    Sleep(200)
     Send("{ENTER}")
-    Sleep(400)
 EndFunc
 
-
-; ======================================================================
-; どんな終了でも実行：NEHOPS終了・WebDriverセッション削除・WebDriver停止
-; ======================================================================
-Func CleanupOnExit()
-    _LogMsg("[INFO] === Exit Cleanup Start ===")
-
-    ; 1) WebDriver セッション削除 → Shutdown（ヘッドレスを確実に閉じる）
-    If $g_WD_Session <> "" Then
-        _LogMsg("[INFO] WD delete session")
-        _WD_DeleteSession($g_WD_Session)
-        $g_WD_Session = ""
-    EndIf
-
-    If $g_WD_Started Then
-        _LogMsg("[INFO] WD shutdown")
-        _WD_Shutdown()
-        $g_WD_Started = False
-    EndIf
-
-    ; 2) NEHOPS を閉じる（起動を試した場合のみ）
-    If $g_Nehops_Tried Then
-        ; ウィンドウが存在する時だけ終了処理
-        If WinExists("NEHOPS メニュー") Then
-            CloseNehops()
-        ElseIf WinExists("メニュー選択") Then
-            WinActivate("メニュー選択")
-            Send("!{F4}")
-        ElseIf WinExists("ログイン") Then
-            WinActivate("ログイン")
-            Send("!{F4}")
-        EndIf
-    EndIf
-
-    _LogMsg("[INFO] === Exit Cleanup End ===")
-EndFunc
