@@ -1,0 +1,21 @@
+NEHOPS起動
+C:\NEHOPS\ExecClient\bin\FWS90500_CL.exe
+作業フォルダ C:\NEHOPS\ExecClient\bin
+
+「ログイン」ウインドウを待つ
+「ログイン」ウィンドウをアクティブにする
+S035 ENTER
+0515 ENTER
+少し待つ
+
+「宿泊」ボタンを押す（デフォで選択されているのでEnterキーでOK）
+「NEHOPS　メニュー」ウインドウを待つ
+「NEHOPS　メニュー」ウィンドウをアクティブにする
+
+ALT ＋ F7 (ルームインジケーション)
+少し待つ
+ALT ＋ 3 (全館表示)
+
+枠内をドラックで選択（instance 23）
+Ctrl ＋ C (コピー)
+
