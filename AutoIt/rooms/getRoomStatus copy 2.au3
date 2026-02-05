@@ -1,7 +1,6 @@
 ; ======================================================================
 ; NEHOPS ルームインジ（全館表示）をドラッグ選択→コピー→TXT保存→JSON生成→WEBアップロード
 ; Win7 / 低スペック向け：待ち多め・ログ多め
-; ★アップロード後に止まっても「必ず NEHOPS/ブラウザを閉じる」完成形
 ; ======================================================================
 
 #include <Date.au3>
@@ -27,34 +26,44 @@ Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/banquet/"
 Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
 
-Global $g_ChromeDriverPID = 0
 
 ; ===================== 認証（secrets.ini があれば優先） =====================
-Local $INI = @ScriptDir & "\secrets.ini"
+Local $INI         = @ScriptDir & "\secrets.ini"
 
 ; NEHOPS
 Local $NEHOPS_USER = IniRead($INI, "nehops", "user", "s035")
 Local $NEHOPS_PASS = IniRead($INI, "nehops", "pass", "0515")
 
-; WEB（secrets.ini 優先）
+; WEB（secrets.ini 優先。無ければここは空にしてエラーにする）
 Local $LOGIN_USER = IniRead($INI, "auth", "user", "takeichi@nagoyacrown.co.jp")
 Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "nCh@6633")
 
 ; ===================== セレクタ =====================
-; ログインフォーム（提示HTMLに合わせる）
+; ログイン（複数候補）
 Global Const $SEL_USER = "#username"
 Global Const $SEL_PASS = "#password"
 Global Const $SEL_BTN  = "form#loginForm button[type='submit']"
 
-; JSONアップロード（form#json_form / name="jsonfile"）
+; JSONアップロード（質問文のformを反映：name="jsonfile"）
 Global Const $SEL_JSON_FILE   = "input[type='file'][name='jsonfile'], input[name='jsonfile'], input[type='file']"
 Global Const $SEL_JSON_SUBMIT = "form#json_form button[type='submit'], #json_form button[type='submit'], button[type='submit'], input[type='submit']"
 
-; 成功判定（いずれか含まれていればOK）
-Global Const $UPLOAD_SUCCESS_TEXTS = "JSONデータアップロード完了|アップロード完了|アップロードしました|登録しました|完了"
+; 成功判定（rooms_jsonupload.php に表示される文言）
+Global Const $UPLOAD_SUCCESS_TEXT = "アップロードしました"
 
 ; ヘッドレス
 Global Const $HEADLESS_CHROME = True
+
+; ===== 終了処理を必ず走らせるためのグローバル =====
+Global $g_sSession = ""     ; WebDriver セッションID
+Global $g_WebStarted = False
+Global $g_NehopsStarted = False
+Global $g_NehopsClosed = False
+Global $g_WebClosed = False
+
+; ★プロセス終了時に必ず呼ばれる
+OnAutoItExitRegister("_ExitCleanup")
+
 
 ; ===================== 動作の安定化（低スペック向け） =====================
 Opt("WinTitleMatchMode", 2)      ; タイトル部分一致
@@ -63,15 +72,12 @@ Opt("SendKeyDownDelay", 10)
 Opt("WinWaitDelay", 250)
 Opt("MouseCoordMode", 1)         ; マウス座標：画面座標（ドラッグ固定座標のため）
 
-; ======================================================================
-; ★後始末を「必ず」実行するためのグローバル（重複定義を整理）
-; ======================================================================
-Global $g_WD_Session  = ""       ; WebDriver セッションID
-Global $g_WD_Started  = False    ; _WD_Startup済み
-Global $g_Nehops_Tried = False   ; NEHOPS起動を試した
-Global $g_CleanupRunning = False ; Cleanup多重実行防止
+; ===================== グローバル（後始末用） =====================
+Global $g_WD_Session = ""        ; WebDriver セッション
+Global $g_WD_Started = False     ; WebDriver 起動済み
+Global $g_Nehops_Tried = False   ; NEHOPS 起動を試した（終了処理の目安）
 
-; ★どんな終了（正常/エラー/Exit）でも必ず Cleanup を走らせる
+; どんな終了でも Cleanup を走らせる（エラーで Exit しても走る）
 OnAutoItExitRegister("CleanupOnExit")
 
 ; ======================================================================
@@ -114,7 +120,7 @@ EndFunc
 Func Die($title, $msg)
     _LogMsg("[ERROR] " & $title & " - " & $msg)
     MsgBox($MB_ICONERROR, $title, $msg)
-    Exit 1 ; ★Exit時も CleanupOnExit が必ず走る
+    Exit 1
 EndFunc
 
 
@@ -498,7 +504,6 @@ EndFunc
 
 ; ======================================================================
 ; WEBアップロード（ヘッドレス）：LOGIN_URL → SUCCESS_URL確認 → UP_URL → JSONアップロード → 成功文言確認
-; ★無限待ち防止のため、待ちは必ずタイムアウトする実装
 ; ======================================================================
 Func WebUploadJson($jsonPath)
     _LogMsg("[INFO] WebUploadJson begin: " & $jsonPath)
@@ -513,61 +518,38 @@ Func WebUploadJson($jsonPath)
         Return False
     EndIf
 
-        ; --- WebDriver起動 ---
-    ; 既に残っている chromedriver があると不安定になるので、先に終了（Chrome本体は殺さない）
-    If ProcessExists("chromedriver.exe") Then
-        ProcessClose("chromedriver.exe")
-        Sleep(500)
-    EndIf
-
+    ; --- WebDriver起動 ---
     _WD_Option('Driver', $CHROMEDRIVER)
     _WD_Option('Port', 9515)
+    _WD_Option('DriverParams', '--verbose --log-path="' & @ScriptDir & '\chromedriver.log"')
 
-    ; DriverParams は 1回だけ（上書き防止）
-    _WD_Option('DriverParams', '--silent --log-level=3 --log-path="' & @ScriptDir & '\chromedriver.log"')
-
-    $g_ChromeDriverPID = _WD_Startup()
-    _LogMsg("[INFO] _WD_Startup ret=" & $g_ChromeDriverPID)
-
-    If $g_ChromeDriverPID = 0 Then
-        _LogMsg("[ERROR] _WD_Startup 失敗（PID=0）")
-        Return False
-    EndIf
-
+    Local $r = _WD_Startup()
     $g_WD_Started = True
-    _HideChromeDriverConsole()
-
     _LogMsg("[INFO] _WD_Startup ret=" & $r)
 
-    ; --- Capabilities（ここを堅牢な形に固定） ---
     _WD_CapabilitiesStartup()
+    _WD_CapabilitiesAdd('alwaysMatch', 'chrome')
+    _WD_CapabilitiesAdd('w3c', True)
+    _WD_CapabilitiesAdd('args', '--window-size=1280,900')
 
-    ; ChromeDriver(109) で通りやすい “正しいW3C形式” を文字列JSONで渡す
-    Local $chromeOpts = '{"args":["--headless","--disable-gpu","--window-size=1280,900"]}'
-
-    _WD_CapabilitiesAdd("alwaysMatch", "browserName", "chrome")
-    _WD_CapabilitiesAdd("alwaysMatch", "goog:chromeOptions", $chromeOpts)
-
-    Local $caps = _WD_CapabilitiesGet()
-    _LogMsg("[INFO] caps=" & $caps)
-
-    $g_WD_Session = _WD_CreateSession($caps)
-    If @error Or $g_WD_Session = "" Then
-        _LogMsg("[ERROR] _WD_CreateSession 失敗 @error=" & @error & " @extended=" & @extended)
-        Return False
+    If $HEADLESS_CHROME Then
+        _WD_CapabilitiesAdd('args', '--headless')
+        _WD_CapabilitiesAdd('args', '--disable-gpu')
     EndIf
 
-    _LogMsg("[INFO] WD session created: " & $g_WD_Session)
-
-
+    Local $caps = _WD_CapabilitiesGet()
+    $g_WD_Session = _WD_CreateSession($caps)
+    If @error Or $g_WD_Session = "" Then
+        _LogMsg("[ERROR] _WD_CreateSession 失敗 @error=" & @error)
+        Return False
+    EndIf
+    _LogMsg("[INFO] WD session created")
 
     ; --- LOGIN_URLへ ---
-    _LogMsg("[INFO] WebLogin: open login")
     _WD_Navigate($g_WD_Session, $LOGIN_URL)
     _WD_LoadWait($g_WD_Session, 250, 30000)
 
     ; 要素待ち
-    _LogMsg("[INFO] WebLogin: wait elements")
     Local $eUser = WaitAnySelector($g_WD_Session, $SEL_USER, 25000)
     Local $ePass = WaitAnySelector($g_WD_Session, $SEL_PASS, 25000)
     Local $eBtn  = WaitAnySelector($g_WD_Session, $SEL_BTN , 25000)
@@ -577,14 +559,12 @@ Func WebUploadJson($jsonPath)
         Return False
     EndIf
 
-    _LogMsg("[INFO] WebLogin: fill/click")
     _WD_ElementAction($g_WD_Session, $eUser, 'value', $LOGIN_USER)
     _WD_ElementAction($g_WD_Session, $ePass, 'value', $LOGIN_PASS)
     _WD_ElementAction($g_WD_Session, $eBtn , 'click')
     _WD_LoadWait($g_WD_Session, 250, 30000)
 
-    ; SUCCESS_URL への遷移確認（タイムアウトあり）
-    _LogMsg("[INFO] WebLogin: wait success url")
+    ; SUCCESS_URL への遷移確認
     If Not WaitUrlContains($g_WD_Session, $SUCCESS_URL, 30000, 300) Then
         _LogMsg("[ERROR] ログイン後にSUCCESS_URLになりません: " & $SUCCESS_URL)
         Return False
@@ -592,27 +572,23 @@ Func WebUploadJson($jsonPath)
     _LogMsg("[INFO] Login OK → SUCCESS_URL")
 
     ; --- UP_URLへ ---
-    _LogMsg("[INFO] WebUpload: open up_url")
     _WD_Navigate($g_WD_Session, $UP_URL)
     _WD_LoadWait($g_WD_Session, 250, 30000)
 
     ; ファイル入力取得
-    _LogMsg("[INFO] WebUpload: find file input")
     Local $eFile = WaitAnySelector($g_WD_Session, $SEL_JSON_FILE, 25000)
     If Not $eFile Then
         _LogMsg("[ERROR] JSONファイル入力が見つかりません")
         Return False
     EndIf
 
-    ; ファイルパスを設定
-    _LogMsg("[INFO] WebUpload: set file path")
+    ; ファイルパスを設定（value→sendkeysの順で試す）
     If Not SetFileInput($g_WD_Session, $eFile, $jsonPath) Then
         _LogMsg("[ERROR] ファイル入力にパスを設定できませんでした: " & $jsonPath)
         Return False
     EndIf
 
     ; 送信ボタン取得＆クリック
-    _LogMsg("[INFO] WebUpload: click submit")
     Local $eSubmit = WaitAnySelector($g_WD_Session, $SEL_JSON_SUBMIT, 25000)
     If Not $eSubmit Then
         _LogMsg("[ERROR] JSON送信ボタンが見つかりません")
@@ -622,34 +598,14 @@ Func WebUploadJson($jsonPath)
     _WD_ElementAction($g_WD_Session, $eSubmit, 'click')
     _WD_LoadWait($g_WD_Session, 250, 30000)
 
-    ; 成功判定：URL遷移 or 本文内の成功文言
-    _LogMsg("[INFO] WebUpload: wait success (url or text)")
-
-    ; まず「現在URL」をログ（デバッグ用）
-    Local $curUrl = _WD_ExecuteScript($g_WD_Session, "return location.href;")
-    _LogMsg("[INFO] after submit url=" & $curUrl)
-
-    ; 1) rooms_jsonupload.php などに遷移するなら URL で先に成功扱い
-    ;    ※実際の遷移先に合わせて部分文字列を調整してください
-    If WaitUrlContains($g_WD_Session, "rooms_jsonupload.php", 15000, 300) Then
-        _LogMsg("[INFO] Upload OK (url contains rooms_jsonupload.php)")
-        Return True
+    ; 成功文言をページ本文から検出
+    If Not WaitBodyContainsText($g_WD_Session, $UPLOAD_SUCCESS_TEXT, 30000, 400) Then
+        _LogMsg("[ERROR] 成功文言が確認できません: " & $UPLOAD_SUCCESS_TEXT)
+        Return False
     EndIf
 
-    ; 2) URLで取れない場合は本文で成功ワード（複数）を確認
-    If WaitBodyContainsAnyText($g_WD_Session, $UPLOAD_SUCCESS_TEXTS, 30000, 400) Then
-        _LogMsg("[INFO] Upload OK (body contains one of: " & $UPLOAD_SUCCESS_TEXTS & ")")
-        Return True
-    EndIf
-
-    ; 失敗時：URLと本文の一部をログに出す（原因切り分け用）
-    Local $u = _WD_ExecuteScript($g_WD_Session, "return location.href;")
-    Local $body = _WD_ExecuteScript($g_WD_Session, "return document.body ? document.body.innerText : '';")
-    _LogMsg("[ERROR] 成功判定NG。url=" & $u)
-    _LogMsg("[ERROR] body head(400)=" & StringLeft(StringReplace($body, @CRLF, "\n"), 400))
-
-    Return False
-
+    _LogMsg("[INFO] Upload success text detected: " & $UPLOAD_SUCCESS_TEXT)
+    Return True
 EndFunc
 
 
@@ -672,27 +628,15 @@ Func WaitAnySelector($sSession, $sCSSList, $iTimeout = 15000, $iInterval = 250)
     Return 0
 EndFunc
 
-Func _GetUrlString($sSession)
-    Local $ret = _WD_ExecuteScript($sSession, "return location.href;")
-    ; ret が {"value":"..."} 形式で返る場合があるので吸収
-    If IsString($ret) Then
-        Local $m = StringRegExp($ret, '"value"\s*:\s*"([^"]+)"', 1)
-        If Not @error And IsArray($m) Then Return $m[0]
-        Return $ret
-    EndIf
-    Return ""
-EndFunc
-
 Func WaitUrlContains($sSession, $sNeedle, $iTimeout = 15000, $iInterval = 250)
     Local $t = TimerInit()
     While TimerDiff($t) < $iTimeout
-        Local $url = _GetUrlString($sSession)
-        If $url <> "" And StringInStr($url, $sNeedle, 0) > 0 Then Return True
+        Local $url = _WD_ExecuteScript($sSession, "return location.href;")
+        If StringInStr($url, $sNeedle, 0) > 0 Then Return True
         Sleep($iInterval)
     WEnd
     Return False
 EndFunc
-
 
 Func FileChosen($sSession, $eFile)
     Local $js = "var el=arguments[0]; return el && el.files && el.files.length>0;"
@@ -724,160 +668,92 @@ Func WaitBodyContainsText($sSession, $needle, $iTimeout = 20000, $iInterval = 30
     Return False
 EndFunc
 
-; ======================================================================
-; 本文に「複数候補のどれか」が含まれるのを待つ
-; $needles は "A|B|C" のように | 区切り
-; ======================================================================
-Func WaitBodyContainsAnyText($sSession, $needles, $iTimeout = 20000, $iInterval = 300)
-    Local $a = StringSplit($needles, "|", 2) ; 2=0-based 配列
-    Local $t = TimerInit()
-
-    While TimerDiff($t) < $iTimeout
-        Local $txt = _WD_ExecuteScript($sSession, "return document.body ? document.body.innerText : '';")
-        If IsString($txt) Then
-            For $i = 0 To UBound($a) - 1
-                Local $needle = StringStripWS($a[$i], 3)
-                If $needle <> "" Then
-                    If StringInStr($txt, $needle, 0) > 0 Then Return True
-                EndIf
-            Next
-        EndIf
-        Sleep($iInterval)
-    WEnd
-    Return False
-EndFunc
-
 
 ; ======================================================================
-; NEHOPS 終了（閉じられない時の最終手段も追加）
+; NEHOPS 終了
 ; ======================================================================
 Func CloseNehops()
+    ; 画面が無い/アクティブでない等で失敗することがあるので、安全に
     _LogMsg("[INFO] Closing NEHOPS (Alt+F4)")
     WinActivate("NEHOPS メニュー")
     Sleep(200)
 
     Send("!{F4}")
     Sleep(300)
+    ; 終了確認が出る想定：TAB→ENTER
     Send("{TAB}")
     Sleep(200)
     Send("{ENTER}")
-    Sleep(800)
-
-    ; まだ残っている場合はプロセスで終了（最終手段）
-    If ProcessExists("FWS90500_CL.exe") Then
-        _LogMsg("[WARN] NEHOPS が残っているため ProcessClose します")
-        ProcessClose("FWS90500_CL.exe")
-        Sleep(500)
-    EndIf
+    Sleep(400)
 EndFunc
 
 
 ; ======================================================================
-; どんな終了でも実行：WebDriver停止→chromedriver強制終了→NEHOPS終了
-; DeleteSession はハングすることがあるため「任意」にする
+; どんな終了でも実行：NEHOPS終了・WebDriverセッション削除・WebDriver停止
 ; ======================================================================
 Func CleanupOnExit()
     _LogMsg("[INFO] === Exit Cleanup Start ===")
 
-    ; ---- 1) WebDriver（ブラウザ）を確実に閉じる ----
-    ; DeleteSession が固まる環境があるので、先に Shutdown を優先
+    ; 1) WebDriver セッション削除 → Shutdown（ヘッドレスを確実に閉じる）
+    If $g_WD_Session <> "" Then
+        _LogMsg("[INFO] WD delete session")
+        _WD_DeleteSession($g_WD_Session)
+        $g_WD_Session = ""
+    EndIf
+
     If $g_WD_Started Then
-        _LogMsg("[INFO] WD shutdown (first)")
-        ; 例外が出ても止めない
+        _LogMsg("[INFO] WD shutdown")
         _WD_Shutdown()
         $g_WD_Started = False
     EndIf
 
-    ; DeleteSession は「ログ出して試す」だけ（ここで止まったら困るので基本やらない）
-    ; どうしてもやりたい場合のみ有効化してください
-    ;If $g_WD_Session <> "" Then
-    ;    _LogMsg("[INFO] WD delete session (optional): " & $g_WD_Session)
-    ;    _WD_DeleteSession($g_WD_Session)
-    ;    $g_WD_Session = ""
-    ;EndIf
-
-    ; chromedriver.exe が残ってしまうことがあるので念のため強制終了
-    _KillChromeDriver()
-
-    ; ---- 2) NEHOPS を閉じる（起動を試した場合のみ）----
+    ; 2) NEHOPS を閉じる（起動を試した場合のみ）
     If $g_Nehops_Tried Then
-        _LogMsg("[INFO] Closing NEHOPS (if exists)")
-        _CloseNehopsSafe()
+        ; ウィンドウが存在する時だけ終了処理
+        If WinExists("NEHOPS メニュー") Then
+            CloseNehops()
+        ElseIf WinExists("メニュー選択") Then
+            WinActivate("メニュー選択")
+            Send("!{F4}")
+        ElseIf WinExists("ログイン") Then
+            WinActivate("ログイン")
+            Send("!{F4}")
+        EndIf
     EndIf
 
     _LogMsg("[INFO] === Exit Cleanup End ===")
 EndFunc
 
-; chromedriver.exe を確実に落とす（残ると次回起動に悪影響）
-Func _KillChromeDriver()
-    ; 複数残る場合もあるのでタスク名で落とす
-    If ProcessExists("chromedriver.exe") Then
-        _LogMsg("[INFO] Kill chromedriver.exe")
-        ProcessClose("chromedriver.exe")
-        Sleep(500)
+Func _ExitCleanup()
+    ; Exit中にさらに落ちないように保護
+    Local $e = @error
+
+    _LogMsg("[INFO] === Exit Cleanup Start ===")
+
+    ; 1) ブラウザ（WebDriver）を先に閉じる（画面フォーカス等に影響しない）
+    If Not $g_WebClosed Then
+        _LogMsg("[INFO] Closing WebDriver")
+        _CloseWebDriverSafe()
+        $g_WebClosed = True
     EndIf
+
+    ; 2) NEHOPSを閉じる
+    If Not $g_NehopsClosed Then
+        _LogMsg("[INFO] Closing NEHOPS (Alt+F4)")
+        CloseNehops()
+        $g_NehopsClosed = True
+    EndIf
+
+    _LogMsg("[INFO] === Exit Cleanup End ===")
+
+    SetError($e)
 EndFunc
 
-; NEHOPSを安全に閉じる（どこに居てもAlt+F4で閉じる）
-Func _CloseNehopsSafe()
-    ; まず一番多い「NEHOPS メニュー」
-    If WinExists("NEHOPS メニュー") Then
-        WinActivate("NEHOPS メニュー")
-        Sleep(200)
-        Send("!{F4}")
-        Sleep(400)
-        ; 終了確認が出る想定
-        Send("{TAB}")
-        Sleep(200)
-        Send("{ENTER}")
-        Sleep(400)
-        Return
+Func _CloseWebDriverSafe()
+    ; 例外で止めない：全部握りつぶして進める
+    If $g_sSession <> "" Then
+        _WD_DeleteSession($g_sSession)
+        $g_sSession = ""
     EndIf
-
-    ; それ以外のウィンドウが残っている場合
-    If WinExists("メニュー選択") Then
-        WinActivate("メニュー選択")
-        Sleep(200)
-        Send("!{F4}")
-        Sleep(400)
-        Return
-    EndIf
-
-    If WinExists("ログイン") Then
-        WinActivate("ログイン")
-        Sleep(200)
-        Send("!{F4}")
-        Sleep(400)
-        Return
-    EndIf
-
-    ; 最終手段：プロセス名で落とす（exe名が分かる場合）
-    ; FWS90500_CL.exe がプロセス名ならこれで落とせます
-    If ProcessExists("FWS90500_CL.exe") Then
-        _LogMsg("[WARN] NEHOPS window not found -> kill process FWS90500_CL.exe")
-        ProcessClose("FWS90500_CL.exe")
-        Sleep(500)
-    EndIf
+    _WD_Shutdown()
 EndFunc
-
-Func _HideChromeDriverConsole()
-    Local $a = WinList("[CLASS:ConsoleWindowClass]")
-    For $i = 1 To $a[0][0]
-        Local $h = $a[$i][1]
-        If $h = 0 Then ContinueLoop
-        Local $pid = WinGetProcess($h)
-        If $pid = 0 Then ContinueLoop
-        If StringLower(ProcessGetName($pid)) = "chromedriver.exe" Then
-            WinSetState($h, "", @SW_HIDE)
-            _LogMsg("[INFO] chromedriver console hidden")
-        EndIf
-    Next
-EndFunc
-    ; 仕上げ：chromedriver.exe を確実に消す（黒い窓対策）
-    If $g_ChromeDriverPID <> 0 Then
-        _LogMsg("[INFO] chromedriver PID close: " & $g_ChromeDriverPID)
-        ProcessClose($g_ChromeDriverPID)
-        ProcessWaitClose($g_ChromeDriverPID, 5)
-        $g_ChromeDriverPID = 0
-    EndIf
-

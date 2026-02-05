@@ -57,27 +57,24 @@ if (is_uploaded_file($temp_file)) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content=" 5; url=../guestrooms/jsonupload.php">
+  <meta http-equiv="refresh" content=" 10; url=../guestrooms/jsonupload.php">
   <title>JSONデータアップロード完了（<?=$filename ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-  <link rel="stylesheet" href="../banquet/css/style.css">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 
 </head>
 <body>
-<?php include("../banquet/header.php"); ?>
+
 <main>
 <div class="wrapper">
 
 <?= $msg ?>
-<div><a href="../banquet/csvupload.php">戻る</a></div>
-
-
-  
+<div><a href="../guestrooms/jsonupload.php">戻る</a></div>
 </div>
-<?php include("../banquet/aside.php"); ?>
+
 </main>
-<?php include("../banquet/footer.php"); ?>
+
 
 </body>
 </html>
