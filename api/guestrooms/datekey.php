@@ -18,8 +18,8 @@ $sql = "SELECT * FROM `guestroom_indi_key` WHERE `date` = :ymd limit 1";
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':ymd', $ymd, PDO::PARAM_STR);
 $stmt->execute();
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
-
+$keycode=$result['keycode'];
 
 ?>
