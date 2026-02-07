@@ -117,7 +117,7 @@ EndFunc
 
 Func Die($title, $msg)
     _LogMsg("[ERROR] " & $title & " - " & $msg)
-    MsgBox($MB_ICONERROR, $title, $msg)
+;    MsgBox($MB_ICONERROR, $title, $msg)
     Exit 1
 EndFunc
 
