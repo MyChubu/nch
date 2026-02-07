@@ -29,9 +29,14 @@ $admin = $_SESSION['admin'];
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>客室管理</title>
 </head>
 <body>
-  
+  <div>
+    <div><a href="./roomindiqr.php">客室インジ QRコード</a></div>
+    <div>客室インジケータ表示</div>
+    <div><a href="./jsonupload.php">json アップロード</a></div>
+  </div>
+ 
 </body>
 </html>

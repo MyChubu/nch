@@ -111,7 +111,7 @@ $admin = $_SESSION['admin'];
   </div>
   <div class="menubox">
     <div><a href="./guestrooms/"><i class="fa-solid fa-bed"></i> 客室</a></div>
-    <div><a href="./guestrooms/roomindiqr.php"><i class="fa-solid fa-qrcode"></i> ルームインジ</a></div>
+    <div><a href="./guestrooms/roomindiqr.php" target="_blank"><i class="fa-solid fa-qrcode"></i> ルームインジ</a></div>
   </div>
   <div class="menubox">
     <div><a href="./user.php"><i class="fa-regular fa-circle-user"></i> ユーザー情報</a></div>
