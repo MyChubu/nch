@@ -33,7 +33,7 @@ $admin = $_SESSION['admin'];
 </head>
 <body>
   <div>
-    <div><a href="./roomindiqr.php">客室インジ QRコード</a></div>
+    <div><a href="./roomindiqr.php" target="_blank">客室インジ QRコード</a></div>
     <div>客室インジケータ表示</div>
     <div><a href="./jsonupload.php">json アップロード</a></div>
   </div>
