@@ -83,12 +83,31 @@ $url='https://sign.nagoyacrown.co.jp/rm/?key='.$keycode;
       font-size: 100px;
       font-weight: bold;
     }
+    .qr-code{
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .qr-code img{
+      width: 100%;
+      height: auto;
+    }
     .link-url a{
       font-size: 20px;
       text-decoration: none;
       color: #333;
       font-weight: bold;
     }
+    @media screen and (max-width: 600px) {
+      
+      .current-date {
+        font-size: 50px;
+      }
+      .date-links a {
+        min-width: 120px;
+        font-size: 14px;
+      }
+    }
+  
   </style>
 </head>
 <body>
@@ -97,6 +116,7 @@ $url='https://sign.nagoyacrown.co.jp/rm/?key='.$keycode;
     <a href="roomindiqr.php?date=<?= $tomorrow ?>">TOMORROW</a>
   </div>
   <div class="current-date"><?= $date ?></div>
+  <div>OPEN 09:00 - 16:00</div>
   <div class="qr-code">
     <img src="../functions/create_qrcode.php?data=<?=urlencode($url) ?>&size=20&margin=2" alt="QRコード">
   </div>

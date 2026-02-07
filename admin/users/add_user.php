@@ -1,4 +1,10 @@
 <?php
+// ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+?>
+<?php
 require_once('../../common/conf.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
@@ -69,7 +75,7 @@ if (empty($value['name']) || empty($value['mail']) || empty($value['pic_id'])) {
     $newPw .= $characters[mt_rand(0, strlen($characters) - 1)];
   }
   $hashedPassword = password_hash($newPw, PASSWORD_DEFAULT);
-  $sql = "INSERT INTO users (name, mail, pic_id, password, int_pw, status, added, modified) VALUES (:name, :mail, :pic_id, :hashedPassword, :newPw, :status, now(), now())";
+  $sql = "INSERT INTO users (`name`, `mail`, `pic_id`, `password`, `int_pw`, `status`, `group`, `sub_group`, `admin`, `order`,`memo`, `added`, `modified`) VALUES (:name, :mail, :pic_id, :hashedPassword, :newPw, :status, 9,0,0,0, '', now(), now())";
   $stmt = $dbh->prepare($sql);
   $stmt->bindParam(':name', $value['name'], PDO::PARAM_STR);
   $stmt->bindParam(':mail', $value['mail'], PDO::PARAM_STR);

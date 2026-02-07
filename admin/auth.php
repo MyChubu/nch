@@ -26,7 +26,7 @@ if ($user && password_verify($pass, $user['password'])) {
     $_SESSION['admin'] = $user['admin'];
     $_SESSION['pic_id'] = $user['pic_id'];
 
-    header('Location: ./banquet/');
+    header('Location: ./index.php');
 } else {
     header('Location: login.php?error=1');
 }
