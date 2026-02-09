@@ -37,10 +37,14 @@ $sql = "SELECT * FROM guestroom_indi_key WHERE date = :date LIMIT 1";
 $stmt = $dbh->prepare($sql);
 $stmt->bindValue(':date', $date, PDO::PARAM_STR);
 $stmt->execute();
-$room_data = $stmt->fetch(PDO::FETCH_ASSOC);
-$keycode = $room_data['keycode'];
+$count = $stmt->rowCount();
+if($count > 0){
+  $room_data = $stmt->fetch(PDO::FETCH_ASSOC);
+  $keycode = $room_data['keycode'];
 
-$url='https://sign.nagoyacrown.co.jp/rm/?key='.$keycode;
+  $url='https://sign.nagoyacrown.co.jp/rm/?key='.$keycode;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -117,9 +121,17 @@ $url='https://sign.nagoyacrown.co.jp/rm/?key='.$keycode;
   </div>
   <div class="current-date"><?= $date ?></div>
   <div>OPEN 09:00 - 16:00</div>
-  <div class="qr-code">
-    <img src="../functions/create_qrcode.php?data=<?=urlencode($url) ?>&size=20&margin=2" alt="QRコード">
-  </div>
-  <div class="link-url"><a href="<?= $url ?>"><?= $url ?></a></div>
+  <?php if($count < 1): ?>
+    <div>No QR Code Available</div>
+    <div>QRコードは利用できません</div>
+  <?php else: ?>
+    <div class="qr-code">
+      <img src="../functions/create_qrcode.php?data=<?=urlencode($url) ?>&size=20&margin=2" alt="QRコード">
+    </div>
+    <div class="link-url"><a href="<?= $url ?>"><?= $url ?></a></div>
+    <div>This QR code is only valid on<br><?= $date ?>.</div>
+    <div>このQRコードは<br><?= $date ?> のみ有効です</div>
+  <?php endif; ?>
+  
 </body>
 </html>

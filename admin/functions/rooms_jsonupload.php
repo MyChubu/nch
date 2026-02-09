@@ -40,11 +40,28 @@ $filename=JSON_DATA_PATH.$new_file_name;
 # is_uploaded_fileメソッドで、一時的にアップロードされたファイルが本当にアップロード処理されたかの確認
 if (is_uploaded_file($temp_file)) {
   if (move_uploaded_file($temp_file , $filename )) {
-    $sql='insert into jsons (filename, json_kind, added) values (?, ?, now())';
+    $sql='insert into jsons (filename, json_kind, status, added) values (?, ?, 1, now())';
     $stmt = $dbh->prepare($sql);
     $stmt->execute([$new_file_name, 1]);
 
     $msg = $new_file_name . "をアップロードしました。";
+  
+    # 古いファイルを削除する場合はここで削除する
+    $sql = "SELECT filename FROM jsons WHERE json_kind = 1 AND filename <> :filename ORDER BY added DESC";
+    $stmt = $dbh->prepare($sql);
+    $stmt->bindValue(':filename', $new_file_name, PDO::PARAM_STR);
+    $stmt->execute();
+    $old_files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach($old_files as $old_file){
+      $old_filename = JSON_DATA_PATH . $old_file['filename'];
+      if(file_exists($old_filename)){
+        unlink($old_filename);
+        $sql = "update jsons set status = 0 where filename = :filename";
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindValue(':filename', $old_file['filename'], PDO::PARAM_STR);
+        $stmt->execute();
+      }
+    }
   } else {
     $msg = "ファイルをアップロードできません。";
   }
