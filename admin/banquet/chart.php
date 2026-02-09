@@ -206,7 +206,7 @@ $category_total_counts = $chartdata['category_total_counts'];
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 <script type="text/javascript">
   const ctx = document.getElementById('myChart').getContext('2d');
   const labels = [<?= implode(',', array_map(function($m) { return '"' . $m . '"'; }, $months)) ?>];

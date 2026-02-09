@@ -327,7 +327,7 @@ $week_after = $dt_week_after->format('Y-m-d');
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 
 </body>
 </html>

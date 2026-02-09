@@ -118,7 +118,6 @@ $week = array('日', '月', '火', '水', '木', '金', '土');
   </div>
   <?php include("aside.php"); ?>
 </main>
-  <?php include("footer.php"); ?>
-
+  <?php include("../common/footer.php"); ?>
 </body>
 </html>

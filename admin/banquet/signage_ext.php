@@ -244,7 +244,7 @@ $def_event_name = str_replace('///', ' ', $row['event_name']);
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 <div id="success-dialog">更新しました</div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {

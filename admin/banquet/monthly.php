@@ -277,7 +277,7 @@ $stmt->closeCursor();
   <div class="no_event">データはありません。</div>
 <?php endif; ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 

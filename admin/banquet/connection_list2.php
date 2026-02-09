@@ -253,7 +253,7 @@ $subtotal_amount2 = $array['subtotal_amount2'];
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 
 </body>
 </html>

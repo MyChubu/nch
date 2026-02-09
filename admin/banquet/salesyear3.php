@@ -516,7 +516,7 @@ FROM(
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 
 </body>
 </html>

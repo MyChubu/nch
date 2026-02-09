@@ -374,7 +374,7 @@ $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
   <?php include("aside.php"); ?>
 </main>
-  <?php include("footer.php"); ?>
+  <?php include("../common/footer.php"); ?>
 
 </body>
 </html>

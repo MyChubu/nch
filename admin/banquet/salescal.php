@@ -283,6 +283,6 @@ $after_month = (new DateTime($first_day))->modify('+1 month')->format('Y-m');
     <p>※月を跨ぐ案件がある場合は、他の集計と合計値が異なることがあります。</p>
   </div>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 </body>
 </html>

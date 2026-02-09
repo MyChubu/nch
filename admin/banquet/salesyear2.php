@@ -327,7 +327,7 @@ foreach ($ymList as $ym) {
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 <script>
   const btn = document.getElementById('copybtn');
   const txt = <?= json_encode($csvtxt, JSON_UNESCAPED_UNICODE) ?>;

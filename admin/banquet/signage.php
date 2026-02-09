@@ -151,7 +151,7 @@ $week_after = (clone $currentDate)->modify('+7 day')->format('Y-m-d');
 </div>
 <?php include("aside.php"); ?>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 

@@ -86,6 +86,6 @@ if($s_count > 0) {
   </div>
 </div>
 </main>
-<?php include("footer.php"); ?>
+<?php include("../common/footer.php"); ?>
 </body>
 </html>

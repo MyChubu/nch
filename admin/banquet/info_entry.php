@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
   <?php include("aside.php"); ?>
 </main>
-  <?php include("footer.php"); ?>
+  <?php include("../common/footer.php"); ?>
 <script>
 function validateDateRange() {
   const startInput = document.getElementById('start');
