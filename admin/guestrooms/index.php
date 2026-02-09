@@ -30,13 +30,25 @@ $admin = $_SESSION['admin'];
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>客室管理</title>
+  <link rel="icon" type="image/jpeg" href="https://<?= $_SERVER['HTTP_HOST'] ?>/admin/images/nch_mark.jpg">
+  <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div>
-    <div><a href="./roomindiqr.php" target="_blank">客室インジ QRコード</a></div>
-    <div>客室インジケータ表示</div>
-    <div><a href="./jsonupload.php">json アップロード</a></div>
-  </div>
+  <?php include("header.php"); ?>
+  <main>
+    <div class="wrapper">
+      <div>
+        <div><a href="./roomindiqr.php" target="_blank">客室インジ QRコード</a></div>
+        <div>客室インジケータ表示</div>
+        <div><a href="./jsonupload.php">json アップロード</a></div>
+      </div>
+    </div>
+    <?php include("aside.php"); ?>
+  </main>
+  <?php include("../common/footer.php"); ?>
+
  
 </body>
 </html>
