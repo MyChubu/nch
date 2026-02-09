@@ -5,7 +5,9 @@
 #error_reporting(E_ALL);
 ?>
 <header class="header1">
-  <div class="logo"><img src="../images/nch_mark.jpg" alt="名古屋クラウンホテル" class="header_logo"></div>
+  <div class="logo">
+    <a href="../"><img src="../images/nch_mark.jpg" alt="名古屋クラウンホテル" class="header_logo"></a>
+  </div>
   <div class="gnavi__wrap">
     <ul class="gnavi__lists">
       <li class="gnavi__list">

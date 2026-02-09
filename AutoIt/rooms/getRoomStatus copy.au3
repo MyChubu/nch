@@ -22,8 +22,8 @@ Global Const $ROOMINDI_JSON_DIR = "C:\Users\PC008\Documents\roomindi\jsons"
 
 ; WebDriver / サイトURL
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
-Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/banquet/"
+Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
+Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
 Global Const $UP_URL     = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
 
 ; ===================== NEHOPS 認証（secrets.ini があれば優先） =====================

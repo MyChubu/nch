@@ -12,8 +12,8 @@ Global Const $CHARGE_DIR = "C:\Users\PC006\Documents\csv\charge\"
 
 ; WebDriver / サイトURL
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
-Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/banquet/"
+Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
+Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
 Global Const $SCHE_URL     = "https://nch.nagoyacrown.co.jp/admin/banquet/csvupload.php"
 Global Const $CHARGE_URL   = "https://nch.nagoyacrown.co.jp/admin/banquet/csv_charge_upload.php"
 
