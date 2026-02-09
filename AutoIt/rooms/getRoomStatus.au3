@@ -30,8 +30,8 @@ Global Const $ROOMINDI_JSON_DIR = "C:\Users\PC008\Documents\roomindi\jsons"
 
 ; ===================== WebDriver / サイトURL =====================
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
-Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/banquet/"
+Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
+Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
 Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
 
 ; ===================== 認証（secrets.ini があれば優先） =====================
@@ -466,6 +466,9 @@ Func ConvertRoomIndiTxtToJson($txtPath, $jsonPath = "")
         Local $fno = $aKeys[$k]
         Local $rooms = $dict.Item($fno)
 
+        ; ★ roomsの並び替え（末尾00を最後へ）
+        _SortRooms($rooms)
+
         If $k > 0 Then $json &= ","
         $json &= @LF & "    {"
         $json &= @LF & '      "number": "' & $fno & '",'
@@ -815,4 +818,49 @@ Func CleanupOnExit()
     EndIf
 
     _LogMsg("[INFO] === Exit Cleanup End ===")
+EndFunc
+
+; ==========================================
+; rooms配列を並び替え
+; ・数値昇順
+; ・末尾00の部屋は最後に回す
+; ==========================================
+Func _SortRooms(ByRef $rooms)
+
+    Local $i, $j
+    Local $tmp0, $tmp1
+
+    For $i = 0 To UBound($rooms, 1) - 2
+        For $j = $i + 1 To UBound($rooms, 1) - 1
+
+            Local $roomA = Number($rooms[$i][0])
+            Local $roomB = Number($rooms[$j][0])
+
+            Local $isA00 = (Mod($roomA, 100) = 0)
+            Local $isB00 = (Mod($roomB, 100) = 0)
+
+            ; ▼ 並び替え条件
+            ; ① 00は後ろへ
+            If $isA00 And Not $isB00 Then
+                ; swap
+            ElseIf Not $isA00 And $isB00 Then
+                ContinueLoop
+            Else
+                ; ② 通常は数値昇順
+                If $roomA <= $roomB Then ContinueLoop
+            EndIf
+
+            ; --- swap ---
+            $tmp0 = $rooms[$i][0]
+            $tmp1 = $rooms[$i][1]
+
+            $rooms[$i][0] = $rooms[$j][0]
+            $rooms[$i][1] = $rooms[$j][1]
+
+            $rooms[$j][0] = $tmp0
+            $rooms[$j][1] = $tmp1
+
+        Next
+    Next
+
 EndFunc
