@@ -28,7 +28,7 @@ if (empty($user_id) || empty($user_name)) {
 }
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
-$sql="select * from jsons where json_kind = 1 order by json_id desc limit 50";
+$sql="select * from jsons where json_kind = 1 order by json_id desc limit 40";
 $res = $dbh->query($sql);
 $count = $res->rowCount();
 $jsons=array();
@@ -38,11 +38,19 @@ if($count > 0){
     $filename = $value['filename'];
     $json_kind = $value['json_kind'];
     $added = $value['added'];
+    $status = $value['status'];
+    if($status == 1){
+      $status_name = '有効';
+    }else{
+      $status_name = '削除済';
+    }
     $jsons[] = array(
       'json_id' => $json_id,
       'filename' => $filename,
       'json_kind' => $json_kind,
-      'added' => $added
+      'added' => $added,
+      'status' => $status,
+      'status_name' => $status_name
     );
   }
 }
@@ -53,6 +61,9 @@ if($count > 0){
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="icon" type="image/jpeg" href="https://<?= $_SERVER['HTTP_HOST'] ?>/admin/images/nch_mark.jpg">
+  <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 </head>
 <body>
   <main>
@@ -73,6 +84,7 @@ if($count > 0){
               <tr>
                 <th>ファイル名</th>
                 <th>アップロード日時</th>
+                <th>ステータス</th>
               </tr>
             </thead>
             <tbody>
@@ -80,6 +92,10 @@ if($count > 0){
               <tr>
                 <td><?=$json['filename']?></td>
                 <td><?=$json['added']?></td>
+                <td>
+                  <?=$json['status'] == 1 ? '<i class="fa-solid fa-crown"></i>' : '<i class="fa-solid fa-ban"></i>'?>
+                  <?=$json['status_name']?>
+                </td>
               </tr>
               <?php endforeach; ?>
             </tbody>
