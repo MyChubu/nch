@@ -51,68 +51,8 @@ if($count > 0){
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROOM MAKE QR</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      text-align: center;
-      font-size: 20px;
-    }
-    div {
-      margin-bottom: 15px;
-    }
-    a {
-      text-decoration: none;
-      color: #007BFF;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .date-links {
-      display: flex;
-      justify-content: center;
-    }
-    .date-links a {
-      display: block;
-      margin: 0 10px;
-      font-weight: bold;
-      border 1px solid #333;
-      padding: 5px 10px;
-      min-width: 200px;
-      background-color: #f0f0f0;
-
-    }
-    .current-date {
-      font-size: 100px;
-      font-weight: bold;
-    }
-    .qr-code{
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .qr-code img{
-      width: 100%;
-      height: auto;
-    }
-    .link-url a{
-      font-size: 20px;
-      text-decoration: none;
-      color: #333;
-      font-weight: bold;
-    }
-    @media screen and (max-width: 600px) {
-      
-      .current-date {
-        font-size: 50px;
-      }
-      .date-links a {
-        min-width: 120px;
-        font-size: 14px;
-      }
-    }
-  
-  </style>
+  <title>ROOM SUMMARY QR CODE - <?= htmlspecialchars($date) ?></title>
+  <link rel="stylesheet" href="css/roomindiqr.css?<?= date('YmdHis') ?>">
 </head>
 <body>
   <div class="date-links">
