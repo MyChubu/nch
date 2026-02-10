@@ -64,8 +64,10 @@ if($count > 0){
   <link rel="icon" type="image/jpeg" href="https://<?= $_SERVER['HTTP_HOST'] ?>/admin/images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css?<?=date('YmdHis')?>">
 </head>
 <body>
+  <?php include("header.php"); ?>
   <main>
     <div class="wrapper">
       <div class="json_upload">
@@ -79,7 +81,7 @@ if($count > 0){
       <div class="json_list">
         <h2>アップロード済みJSONファイル一覧</h2>
         <?php if(sizeof($jsons) > 0): ?>
-          <table>
+          <table class="json_table">
             <thead>
               <tr>
                 <th>ファイル名</th>
@@ -105,6 +107,8 @@ if($count > 0){
         <?php endif; ?>
       </div>
     </div>
+    <?php include("aside.php"); ?>
   </main>
+  <?php include("../common/footer.php"); ?>
 </body>
 </html>

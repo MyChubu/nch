@@ -155,7 +155,7 @@ input[type="text"]{
   font-weight: 700;
   
 }
-#schedate_change button,#csv_form button{
+#schedate_change button,#json_form button{
   background-color: #4ade80;
   color: #FFF;
   border: none;
@@ -207,29 +207,29 @@ input[type="text"]{
   display: none;
 }
 
-.csv_upload{
+.json_upload{
   width: 100%;  
   text-align: center;
   margin-top: 30px;
 }
-.csv_upload_form{
+.json_upload_form{
   width: 70%;
   margin: 0 auto;
   border: 1px solid #CCC;
   border-radius: 5px;
   padding: 5px;
 }
-.csv_upload_form input[type="file"]{
+.json_upload_form input[type="file"]{
   width: 60%;
   background-color: #FFF;
   border: 1px solid #CCC;
   border-radius: 2px;
   padding: 2px;
 }
-.csv_list{
+.json_list{
   margin-top:30px;
 }
-table.csv_table{
+table.json_table{
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
