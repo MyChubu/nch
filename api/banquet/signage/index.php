@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 $date = date('Y-m-d');
 $now = date('Y-m-d H:i:s');
+$nowTime = date('H:i:s');
 $hour = date('H');
 if($hour >= 22){
   $date = (new DateTime())->modify('+1 day')->format('Y-m-d');
@@ -24,28 +25,52 @@ $hizuke = $dateObj->format('Y年m月d日');
 $week = array('日', '月', '火', '水', '木', '金', '土');
 $hizuke .= '（' . $week[(int)$dateObj->format('w')] . '曜日）';
 
-$dbh = new PDO(DSN, DB_USER, DB_PASS);
+$dbh = new PDO(DSN, DB_USER, DB_PASS, [
+  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+  PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+]);
 $sql = <<<SQL
 WITH
--- 例外表示（有効）を、sche_idごとに start→end で並べ、今より後に終わるものに順位を付ける
-ext_ranked AS (
+-- 例外 start/end を「必ず DATETIME」に正規化する
+-- 例: '15:00:00' なら TIMESTAMP(当日, '15:00:00')
+-- 例: '2026-02-10 15:00:00' ならそのまま
+ext_norm AS (
   SELECT
     e.sche_id,
-    e.start,
-    e.end,
+    CASE
+      WHEN CAST(e.start AS CHAR) REGEXP '^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$'
+        THEN TIMESTAMP(?, e.start)
+      ELSE e.start
+    END AS start_dt,
+    CASE
+      WHEN CAST(e.end AS CHAR) REGEXP '^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$'
+        THEN TIMESTAMP(?, e.end)
+      ELSE e.end
+    END AS end_dt,
     e.event_name,
-    e.subtitle,
-    ROW_NUMBER() OVER (PARTITION BY e.sche_id ORDER BY e.start ASC, e.end ASC) AS rn
+    e.subtitle
   FROM banquet_ext_sign e
   WHERE e.enable = 1
-    AND e.end > ?
 ),
--- 上のうち、sche_idごとに「採用する1件（rn=1）」だけ残す
+
+-- 今「有効な」例外だけを pick（start <= now < end）
+ext_pick_ranked AS (
+  SELECT
+    n.sche_id,
+    n.start_dt,
+    n.end_dt,
+    n.event_name,
+    n.subtitle,
+    ROW_NUMBER() OVER (PARTITION BY n.sche_id ORDER BY n.start_dt ASC, n.end_dt ASC) AS rn
+  FROM ext_norm n
+  WHERE n.end_dt > ?
+),
 ext_pick AS (
-  SELECT sche_id, start, end, event_name, subtitle
-  FROM ext_ranked
+  SELECT sche_id, start_dt, end_dt, event_name, subtitle
+  FROM ext_pick_ranked
   WHERE rn = 1
 ),
+
 -- reservation_idごとの最小start（予約単位で時系列にするキー）
 res_first AS (
   SELECT
@@ -64,11 +89,10 @@ SELECT
   s.branch,
   s.date,
 
-  -- ★例外があれば例外、なければ通常
-  COALESCE(ep.start, s.start)      AS view_start,
-  COALESCE(ep.end,   s.end)        AS view_end,
-  COALESCE(ep.event_name, s.event_name) AS view_event_name,
-  COALESCE(ep.subtitle, '') AS view_subtitle,
+  COALESCE(ep.start_dt, s.start)            AS view_start,
+  COALESCE(ep.end_dt,   s.end)              AS view_end,
+  COALESCE(ep.event_name, s.event_name)     AS view_event_name,
+  COALESCE(ep.subtitle, '')                 AS view_subtitle,
 
   s.room_id,
   r.name    AS room_name,
@@ -81,8 +105,10 @@ SELECT
 FROM banquet_schedules s
 JOIN res_first rf
   ON rf.reservation_id = s.reservation_id
+
 LEFT JOIN ext_pick ep
   ON ep.sche_id = s.banquet_schedule_id
+
 LEFT JOIN banquet_rooms r
   ON r.banquet_room_id = s.room_id
 
@@ -90,29 +116,56 @@ WHERE s.date = ?
   AND s.end > ?
   AND s.enable = ?
 
+  -- ★例外が「終了した」履歴があるなら、その後は通常終了が先でも出さない
+  AND NOT EXISTS (
+    SELECT 1
+    FROM ext_norm n2
+    WHERE n2.sche_id = s.banquet_schedule_id
+      AND n2.end_dt <= ?
+  )
+
 ORDER BY
-  rf.first_start ASC,        -- 予約単位で時系列（最小start）
-  s.reservation_id ASC,      -- 同時刻の安定化
-  view_start ASC,            -- 予約内は表示開始が早い順（例外反映後）
-  (r.size IS NULL) ASC,      -- size NULLは最後（任意）
-  r.size DESC,               -- view_start同じなら面積が大きい順
-  s.branch ASC               -- 最後に安定化（任意）
+  rf.first_start ASC,
+  s.reservation_id ASC,
+  view_start ASC,
+  (r.size IS NULL) ASC,
+  r.size DESC,
+  s.branch ASC
 SQL;
 
 
 
 
 
-$stmt = $dbh->prepare($sql);
-$stmt->execute([
-  $now,   // ext_ranked: e.end > ?
-  $date,  // res_first:  date = ?
-  $now,   // res_first:  end > ?
-  1,      // res_first:  enable = ?
-  $date,  // main:       s.date = ?
-  $now,   // main:       s.end > ?
-  1       // main:       s.enable = ?
-]);
+try {
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute([
+    $date, // ext_norm: TIMESTAMP(?, e.start)
+    $date, // ext_norm: TIMESTAMP(?, e.end)
+
+    $now,  // ext_pick_ranked: n.end_dt > ?
+
+    $date, // res_first: date = ?
+    $now,  // res_first: end > ?
+    1,     // res_first: enable = ?
+
+    $date, // main: s.date = ?
+    $now,  // main: s.end > ?
+    1,     // main: s.enable = ?
+
+    $now,  // NOT EXISTS: n2.end_dt <= ?
+  ]);
+
+} catch (PDOException $e) {
+  http_response_code(500);
+  echo json_encode([
+    'status' => 500,
+    'message' => 'SQL error',
+    'detail' => $e->getMessage(),
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
 
 $events = [];
 foreach ($stmt as $row) {
