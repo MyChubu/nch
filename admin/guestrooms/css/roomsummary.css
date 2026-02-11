@@ -1,0 +1,65 @@
+/* roomsummary.css */
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .header h1, .header p {
+    width: 300px;
+  }
+h2.floor-title {
+  margin-top: 5px;
+  margin-bottom: 3px;
+  font-size: 1.5em;
+  color: #222;
+}
+.floor-box {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 2px 2px;
+  margin-bottom: 3px;
+
+}
+.floor-box .room {
+  width: 37px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid #000;
+  border-radius: 3px;
+  font-size: 0.7em;
+  line-height: 1em;
+  padding: 1px 0;
+
+}
+
+.status_X {
+  background-color: #666666;
+  color: #aeaeae;
+}
+.status_O {
+  background-color: #ffaa00;
+  color: #fff;
+}
+.status_V {
+  background-color: #ffffff;
+  color: #000;
+}
+.status_VP {
+  background-color: #ff66ff;
+  color: #000;
+}
+
+.status_S {
+  background-color: #00ff66;
+  color: #000000;
+}
+.status_D {
+  background-color: #3366ff;
+  color: #fff;
+}

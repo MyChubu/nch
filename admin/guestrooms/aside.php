@@ -5,8 +5,9 @@
   </ul>
   <h3>ルームインジ</h3>
     <ul>
-      <li><i class="fa-solid fa-qrcode"></i><a href="./roomindiqr.php" target="_blank">ルームインジ</a></li>
-      <li><i class="fa-solid fa-arrow-up-from-bracket"></i><a href="jsonupload.php">jsonアップロード</a></li>
+      <li><i class="fa-solid fa-qrcode"></i><a href="./roomindiqr.php" target="_blank">ルームインジQR</a></li>
+      <li><i class="fa-brands fa-buromobelexperte"></i><a href="./roomsummary.php" target="_blank">管理者ルームインジ</a></li>
+      <li><i class="fa-solid fa-arrow-up-from-bracket"></i><a href="jsonupload.php">jsonアプロード</a></li>
     </ul>
 
   

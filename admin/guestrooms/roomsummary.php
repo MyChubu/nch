@@ -29,21 +29,23 @@ $admin = $_SESSION['admin'];
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>客室管理</title>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta http-equiv="refresh" content="300">
+  <title>客室インジケーション</title>
   <link rel="icon" type="image/jpeg" href="https://<?= $_SERVER['HTTP_HOST'] ?>/admin/images/nch_mark.jpg">
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/style.css?<?=date('YmdHis')?>">
+  <link rel="stylesheet" href="./css/style.css?<?=date('YmdHis')?>">
+  <script src="./js/getAdminRoomStatus.js?<?=date('YmdHis')?>"></script>
+  <link rel="stylesheet" href="./css/roomsummary.css?<?=date('YmdHis')?>">
 </head>
 <body>
   <?php include("header.php"); ?>
   <main>
     <div class="wrapper">
-      <div>
-        <div><a href="./roomindiqr.php" target="_blank">客室インジ QRコード</a></div>
-        <div><a href="./roomsummary.php">客室インジケータ表示</a></div>
-        <div><a href="./jsonupload.php">json アップロード</a></div>
-      </div>
+      <div>データは08:30から16:30まで15分間隔で更新されます。</div>
+      <div id="app">Loading...</div>
     </div>
     <?php include("aside.php"); ?>
   </main>
