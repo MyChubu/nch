@@ -66,7 +66,7 @@ $admin = $_SESSION['admin'];
       height:60px;
       justify-content: center;
       padding: 15px;
-      background-color: #007bff;
+      background-color: #0066ff;
       color: white;
       text-decoration: none;
       border-radius: 5px;
@@ -75,16 +75,16 @@ $admin = $_SESSION['admin'];
       font-size:20px;
     }
     .menubox a.banq{
-      background-color: #007bff;
+      background-color: #0066ff;
     }
     .menubox a.gstrm{
-      background-color: #28a745;
+      background-color: #009933;
     }
     .menubox a.user{
-      background-color: #797979;
+      background-color: #666666;
     }
     .menubox a.admin{
-      background-color: #202020;
+      background-color: #222222;
     }
     .greeting{
       font-size: 24px;
@@ -92,8 +92,8 @@ $admin = $_SESSION['admin'];
       font-weight: bold;
     }
     .messagebox{
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
+      background-color: #eee;
+      border: 1px solid #ddd;
       padding: 10px;
       margin-bottom: 20px;
       font-size: 16px;
