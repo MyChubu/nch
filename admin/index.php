@@ -74,6 +74,18 @@ $admin = $_SESSION['admin'];
       align-items: center;
       font-size:20px;
     }
+    .menubox a.banq{
+      background-color: #007bff;
+    }
+    .menubox a.gstrm{
+      background-color: #28a745;
+    }
+    .menubox a.user{
+      background-color: #797979;
+    }
+    .menubox a.admin{
+      background-color: #202020;
+    }
     .greeting{
       font-size: 24px;
       margin-bottom: 10px;
@@ -106,21 +118,21 @@ $admin = $_SESSION['admin'];
   <div class="messagebox">ログイン後の画面が変わりました。</div>
   <h1>MENU</h1>
   <div class="menubox">
-    <div><a href="./banquet/"><i class="fa-solid fa-champagne-glasses"></i> 会議・宴会</a></div>
-    <div><a href="./banquet/signage.php"><i class="fa-solid fa-display"></i> デジサイ</a></div>
+    <div><a href="./banquet/" class="banq"><i class="fa-solid fa-champagne-glasses"></i> 会議・宴会</a></div>
+    <div><a href="./banquet/signage.php" class="banq"><i class="fa-solid fa-display"></i> デジサイ</a></div>
   </div>
   <div class="menubox">
-    <div><a href="./guestrooms/"><i class="fa-solid fa-bed"></i> 客室</a></div>
-    <div><a href="./guestrooms/roomindiqr.php" target="_blank"><i class="fa-solid fa-qrcode"></i> ルームインジ</a></div>
+    <div><a href="./guestrooms/" class="gstrm"><i class="fa-solid fa-bed"></i> 客室</a></div>
+    <div><a href="./guestrooms/roomindiqr.php" class="gstrm" target="_blank"><i class="fa-solid fa-qrcode"></i> ルームインジ</a></div>
   </div>
   <div class="menubox">
-    <div><a href="./user.php"><i class="fa-regular fa-circle-user"></i> ユーザー情報</a></div>
-    <div><a href="./password.php"><i class="fa-solid fa-lock"></i> パスワード変更</a></div>
-    <div><a href="./logout.php"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</a></div>
+    <div><a href="./user.php" class="user"><i class="fa-regular fa-circle-user"></i> ユーザー情報</a></div>
+    <div><a href="./password.php" class="user"><i class="fa-solid fa-lock"></i> パスワード変更</a></div>
+    <div><a href="./logout.php" class="user"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</a></div>
   </div>
   <?php if($admin == 1): ?>
   <div class="menubox">
-    <div><a href="./users/"><i class="fa-solid fa-user-plus"></i> ユーザー管理</a></div>
+    <div><a href="./users/" class="admin"><i class="fa-solid fa-user-plus"></i> ユーザー管理</a></div>
   </div>
   <?php endif; ?>
   
