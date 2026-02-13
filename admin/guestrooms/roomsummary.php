@@ -44,7 +44,10 @@ $admin = $_SESSION['admin'];
   <?php include("header.php"); ?>
   <main>
     <div class="wrapper">
-      <div>データは08:30から16:30まで15分間隔で更新されます。</div>
+      <div>
+        <p>データは08:30から16:30まで15分間隔で更新されます。</p>
+        <p>※スタッフ用の表示は09:00から16:00まで。</p>
+      </div>
       <div id="app">Loading...</div>
     </div>
     <?php include("aside.php"); ?>
