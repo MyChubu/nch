@@ -1,6 +1,9 @@
 <?php
 require_once('../common/conf.php');
-
+include_once('./functions/accesslog.php');
+session_name('_NCH_ADMIN');
+session_start();
+accesslog();
 ?>
 <!DOCTYPE html>
 <html lang="ja">

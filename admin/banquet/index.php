@@ -1,8 +1,11 @@
 <?php
 require_once('../../common/conf.php');
+include_once('../functions/accesslog.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
 session_start();
+accesslog();
+
 $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
 $user_name = $_SESSION['name'];
 
@@ -22,6 +25,7 @@ if (empty($user_id) || empty($user_name)) {
 }
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
+
 
 require_once('functions/admin_banquet.php');
 require_once('functions/admin_banquet_chart.php');
