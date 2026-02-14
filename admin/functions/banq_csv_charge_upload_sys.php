@@ -26,44 +26,26 @@ if (empty($user_id) || empty($user_name)) {
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
 
-
-
+$new_file_name = "charge_".date("YmdHis").".csv";
 if(defined('DATA_DIR')==false){
   define('DATA_DIR', $_SERVER['DOCUMENT_ROOT'].'/data/');
 }
-if(defined('JSON_DATA_PATH')==false){
-  define('JSON_DATA_PATH', DATA_DIR.'json/');
+if(defined('CSV_DATA_PATH')==false){
+  define('CSV_DATA_PATH', DATA_DIR.'csv/');
 }
-$temp_file = $_FILES['jsonfile']['tmp_name']; # 一時ファイル名
-$true_file = $_FILES['jsonfile']['name']; # 本来のファイル名
-$new_file_name = "rooms_".date("YmdHis").".json";
-$filename=JSON_DATA_PATH.$new_file_name;
+
+$temp_file = $_FILES['csvfile']['tmp_name']; # 一時ファイル名
+$true_file = $_FILES['csvfile']['name']; # 本来のファイル名
+$filename=CSV_DATA_PATH.$new_file_name;
 
 # is_uploaded_fileメソッドで、一時的にアップロードされたファイルが本当にアップロード処理されたかの確認
 if (is_uploaded_file($temp_file)) {
   if (move_uploaded_file($temp_file , $filename )) {
-    $sql='insert into jsons (filename, json_kind, status, added) values (?, ?, 1, now())';
+    $sql='insert into csvs (filename, csv_kind, status, added, modified) values (?, ?, ?, now(), now())';
     $stmt = $dbh->prepare($sql);
-    $stmt->execute([$new_file_name, 1]);
+    $stmt->execute([$new_file_name, 3, 2]);
 
     $msg = $new_file_name . "をアップロードしました。";
-  
-    # 古いファイルを削除する場合はここで削除する
-    $sql = "SELECT filename FROM jsons WHERE json_kind = 1 AND filename <> :filename ORDER BY added DESC";
-    $stmt = $dbh->prepare($sql);
-    $stmt->bindValue(':filename', $new_file_name, PDO::PARAM_STR);
-    $stmt->execute();
-    $old_files = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach($old_files as $old_file){
-      $old_filename = JSON_DATA_PATH . $old_file['filename'];
-      if(file_exists($old_filename)){
-        unlink($old_filename);
-        $sql = "update jsons set status = 0 where filename = :filename";
-        $stmt = $dbh->prepare($sql);
-        $stmt->bindValue(':filename', $old_file['filename'], PDO::PARAM_STR);
-        $stmt->execute();
-      }
-    }
   } else {
     $msg = "ファイルをアップロードできません。";
   }
@@ -76,24 +58,27 @@ if (is_uploaded_file($temp_file)) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content=" 10; url=../guestrooms/jsonupload.php">
-  <title>JSONデータアップロード完了（<?=$filename ?>）</title>
+  <meta http-equiv="refresh" content=" 5; url=../banquet/csv_charge_upload_sys.php">
+  <title>CSVデータアップロード完了（<?=$filename ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
-
+  <link rel="stylesheet" href="../banquet/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous">
 
 </head>
 <body>
-
+<?php include("../banquet/header.php"); ?>
 <main>
 <div class="wrapper">
 
 <?= $msg ?>
-<div><a href="../guestrooms/jsonupload.php">戻る</a></div>
+<div><a href="../banquet/csv_charge_upload_sys.php">戻る</a></div>
+
+
+  
 </div>
-
+<?php include("../banquet/aside.php"); ?>
 </main>
-
+<?php include("../common/footer.php"); ?>
 
 </body>
 </html>

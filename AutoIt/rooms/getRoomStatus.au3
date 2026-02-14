@@ -32,7 +32,7 @@ Global Const $ROOMINDI_JSON_DIR = "C:\Users\PC008\Documents\roomindi\jsons"
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
 Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload.php"
+Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload_sys.php"
 
 ; ===================== 認証（secrets.ini があれば優先） =====================
 Local $INI = @ScriptDir & "\secrets.ini"
@@ -42,8 +42,8 @@ Local $NEHOPS_USER = IniRead($INI, "nehops", "user", "s035")
 Local $NEHOPS_PASS = IniRead($INI, "nehops", "pass", "0515")
 
 ; WEB（secrets.ini 優先）
-Local $LOGIN_USER = IniRead($INI, "auth", "user", "takeichi@nagoyacrown.co.jp")
-Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "nCh@6633")
+Local $LOGIN_USER = IniRead($INI, "auth", "user", "websystem@nagoyacrown.co.jp")
+Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "q4So-^1@")
 
 ; ===================== セレクタ =====================
 ; ログインフォーム（提示HTMLに合わせる）
@@ -56,7 +56,7 @@ Global Const $SEL_JSON_FILE   = "input[type='file'][name='jsonfile'], input[name
 Global Const $SEL_JSON_SUBMIT = "form#json_form button[type='submit'], #json_form button[type='submit'], button[type='submit'], input[type='submit']"
 
 ; 成功判定（URLが最強、文言は保険）
-Global Const $UPLOAD_SUCCESS_URL_CONTAINS = "/admin/functions/rooms_jsonupload.php"
+Global Const $UPLOAD_SUCCESS_URL_CONTAINS = "/admin/functions/rooms_jsonupload_sys.php"
 Global Const $UPLOAD_SUCCESS_TEXT_1 = "JSONデータアップロード完了"
 Global Const $UPLOAD_SUCCESS_TEXT_2 = "アップロードしました"
 
@@ -621,7 +621,7 @@ Func WebUploadJson($jsonPath)
     _LogMsg("[INFO] after submit url=" & $url)
 
     If StringInStr($url, $UPLOAD_SUCCESS_URL_CONTAINS, 0) > 0 Then
-        _LogMsg("[INFO] Upload OK (url contains rooms_jsonupload.php)")
+        _LogMsg("[INFO] Upload OK (url contains rooms_jsonupload_sys.php)")
         Return True
     EndIf
 

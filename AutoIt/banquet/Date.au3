@@ -14,8 +14,8 @@ Global Const $CHARGE_DIR = "C:\Users\PC006\Documents\csv\charge\"
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
 Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $SCHE_URL     = "https://nch.nagoyacrown.co.jp/admin/banquet/csvupload.php"
-Global Const $CHARGE_URL   = "https://nch.nagoyacrown.co.jp/admin/banquet/csv_charge_upload.php"
+Global Const $SCHE_URL     = "https://nch.nagoyacrown.co.jp/admin/banquet/csvupload_sys.php"
+Global Const $CHARGE_URL   = "https://nch.nagoyacrown.co.jp/admin/banquet/csv_charge_upload_sys.php"
 
 ; セレクタ（必要に応じて調整）
 Global Const $SEL_USER   = "#login_id, input[name='login_id'], input[name='username'], #username"
@@ -37,8 +37,8 @@ Global $_WD_DEBUG               = $_WD_DEBUG_None
 Local $INI        = @ScriptDir & "\secrets.ini"
 Local $LOGIN_USER = IniRead($INI, "auth", "user", "")
 Local $LOGIN_PASS = IniRead($INI, "auth", "pass", "")
-If $LOGIN_USER = "" Then $LOGIN_USER = "takeichi@nagoyacrown.co.jp" ; ←必要なら変更
-If $LOGIN_PASS = "" Then $LOGIN_PASS = "nCh@6633"                   ; ←必要なら変更
+If $LOGIN_USER = "" Then $LOGIN_USER = "websystem@nagoyacrown.co.jp" ; ←必要なら変更
+If $LOGIN_PASS = "" Then $LOGIN_PASS = "q4So-^1@"                   ; ←必要なら変更
 
 Local $NEHOPS_USER = IniRead($INI, "nehops", "user", "")
 Local $NEHOPS_PASS = IniRead($INI, "nehops", "pass", "")

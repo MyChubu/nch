@@ -30,32 +30,7 @@ if (empty($user_id) || empty($user_name)) {
 }
 $user_mail = $_SESSION['mail'];
 $admin = $_SESSION['admin'];
-$sql="select * from jsons where json_kind = 1 order by json_id desc limit 40";
-$res = $dbh->query($sql);
-$count = $res->rowCount();
-$jsons=array();
-if($count > 0){
-  foreach ($res as $value) {
-    $json_id=$value['json_id'];
-    $filename = $value['filename'];
-    $json_kind = $value['json_kind'];
-    $added = $value['added'];
-    $status = $value['status'];
-    if($status == 1){
-      $status_name = '有効';
-    }else{
-      $status_name = '削除済';
-    }
-    $jsons[] = array(
-      'json_id' => $json_id,
-      'filename' => $filename,
-      'json_kind' => $json_kind,
-      'added' => $added,
-      'status' => $status,
-      'status_name' => $status_name
-    );
-  }
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -77,42 +52,13 @@ if($count > 0){
     <div class="wrapper">
       <div class="json_upload">
         <div class="json_upload_form">
-          <form action="../functions/rooms_jsonupload.php" method="post" enctype="multipart/form-data"  id="json_form">
+          <form action="../functions/rooms_jsonupload_sys.php" method="post" enctype="multipart/form-data"  id="json_form">
             <input type="file" name="jsonfile" id="">
             <button type="submit">JSONアップロード</button>
           </form>
         </div>
       </div>
-      <div class="json_list">
-        <h2>アップロード済みJSONファイル一覧</h2>
-        <?php if(sizeof($jsons) > 0): ?>
-          <table class="json_table">
-            <thead>
-              <tr>
-                <th>ファイル名</th>
-                <th>アップロード日時</th>
-                <th>ステータス</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach($jsons as $json): ?>
-              <tr>
-                <td><?=$json['filename']?></td>
-                <td><?=$json['added']?></td>
-                <td>
-                  <?=$json['status'] == 1 ? '<i class="fa-solid fa-crown"></i>' : '<i class="fa-solid fa-ban"></i>'?>
-                  <?=$json['status_name']?>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        <?php else: ?>
-          <p>アップロードされたJSONファイルはありません。</p>
-        <?php endif; ?>
-      </div>
     </div>
-    <?php include("aside.php"); ?>
   </main>
   <?php include("../common/footer.php"); ?>
 </body>

@@ -76,7 +76,7 @@ if (is_uploaded_file($temp_file)) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content=" 10; url=../guestrooms/jsonupload.php">
+  <meta http-equiv="refresh" content=" 10; url=../guestrooms/jsonupload_sys.php">
   <title>JSONデータアップロード完了（<?=$filename ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
 
@@ -89,7 +89,7 @@ if (is_uploaded_file($temp_file)) {
 <div class="wrapper">
 
 <?= $msg ?>
-<div><a href="../guestrooms/jsonupload.php">戻る</a></div>
+<div><a href="../guestrooms/jsonupload_sys.php">戻る</a></div>
 </div>
 
 </main>
