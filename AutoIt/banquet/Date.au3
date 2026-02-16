@@ -14,8 +14,8 @@ Global Const $CHARGE_DIR = "C:\Users\PC006\Documents\csv\charge\"
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
 Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $SCHE_URL     = "https://nch.nagoyacrown.co.jp/admin/banquet/csvupload_sys.php"
-Global Const $CHARGE_URL   = "https://nch.nagoyacrown.co.jp/admin/banquet/csv_charge_upload_sys.php"
+Global Const $SCHE_URL     = "https://nch.nagoyacrown.co.jp/admin/banquet/sys_csvupload.php"
+Global Const $CHARGE_URL   = "https://nch.nagoyacrown.co.jp/admin/banquet/sys_csv_charge_upload.php"
 
 ; セレクタ（必要に応じて調整）
 Global Const $SEL_USER   = "#login_id, input[name='login_id'], input[name='username'], #username"

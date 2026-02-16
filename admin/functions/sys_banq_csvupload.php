@@ -58,7 +58,7 @@ if (is_uploaded_file($temp_file)) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content=" 5; url=../banquet/csvupload.php">
+  <meta http-equiv="refresh" content=" 5; url=../banquet/sys_csvupload.php">
   <title>CSVデータアップロード完了（<?=$filename ?>）</title>
   <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
   <link rel="stylesheet" href="../banquet/css/style.css">
@@ -71,7 +71,7 @@ if (is_uploaded_file($temp_file)) {
 <div class="wrapper">
 
 <?= $msg ?>
-<div><a href="../banquet/csvupload_sys.php">戻る</a></div>
+<div><a href="../banquet/sys_csvupload.php">戻る</a></div>
 
 
   

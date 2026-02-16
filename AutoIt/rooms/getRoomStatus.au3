@@ -32,7 +32,7 @@ Global Const $ROOMINDI_JSON_DIR = "C:\Users\PC008\Documents\roomindi\jsons"
 Global Const $CHROMEDRIVER = "C:\Tools\chromedriver_109\chromedriver.exe" ; Chrome 109 用
 Global Const $LOGIN_URL    = "https://nch.nagoyacrown.co.jp/admin/login.php"
 Global Const $SUCCESS_URL  = "https://nch.nagoyacrown.co.jp/admin/"
-Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/jsonupload_sys.php"
+Global Const $UP_URL       = "https://nch.nagoyacrown.co.jp/admin/guestrooms/sys_jsonupload.php"
 
 ; ===================== 認証（secrets.ini があれば優先） =====================
 Local $INI = @ScriptDir & "\secrets.ini"
@@ -621,7 +621,7 @@ Func WebUploadJson($jsonPath)
     _LogMsg("[INFO] after submit url=" & $url)
 
     If StringInStr($url, $UPLOAD_SUCCESS_URL_CONTAINS, 0) > 0 Then
-        _LogMsg("[INFO] Upload OK (url contains rooms_jsonupload_sys.php)")
+        _LogMsg("[INFO] Upload OK (url contains sys_rooms_jsonupload.php)")
         Return True
     EndIf
 

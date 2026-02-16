@@ -44,7 +44,7 @@ $admin = $_SESSION['admin'];
   <div class="wrapper">
     <div class="csv_upload">
       <div class="csv_upload_form">
-        <form action="../functions/banq_csv_charge_upload_sys.php" method="post" enctype="multipart/form-data"  id="csv_form">
+        <form action="../functions/sys_banq_csv_charge_upload.php" method="post" enctype="multipart/form-data"  id="csv_form">
           <input type="file" name="csvfile" id="">
           <button type="submit">料金CSVアップロード</button>
         </form>
