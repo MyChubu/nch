@@ -1,16 +1,18 @@
 <?php
 // ▼ 開発中のみ有効なエラー出力（本番ではコメントアウト推奨）
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 ?>
 <?php
 require_once('../../common/conf.php');
+include_once('../functions/accesslog.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
 session_start();
 $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
 $user_name = $_SESSION['name'];
+accesslog();
 
 if (empty($user_id) || empty($user_name)) {
   header('Location: ../login.php?error=2');

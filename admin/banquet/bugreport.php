@@ -7,12 +7,13 @@
 <?php
 require_once('../../common/conf.php');
 require_once('functions/admin_banquet.php');
+include_once('../functions/accesslog.php');
 $dbh = new PDO(DSN, DB_USER, DB_PASS);
 session_name('_NCH_ADMIN');
 session_start();
 $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : '';
 $user_name = $_SESSION['name'];
-
+accesslog();
 if (empty($user_id) || empty($user_name)) {
   header('Location: ../login.php?error=2');
   exit;
