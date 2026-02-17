@@ -13,6 +13,7 @@ function accesslog(){
   //取得項目
   $date = date('Y-m-d H:i:s'); //アクセス日時
   $response = http_response_code(); //ステータスコード
+  $ses_id = session_id(); //セッションID
   $user_name = $_SESSION['name'] ?? 'GUEST'; //ユーザー名
   $page = $_SERVER['PHP_SELF']; //アクセスしたページ
   $ip = $_SERVER['REMOTE_ADDR']; //IPアドレス
@@ -21,7 +22,7 @@ function accesslog(){
   $uri = $_SERVER['REQUEST_URI']; //リクエストURI
   $requestMethod = $_SERVER['REQUEST_METHOD']; //リクエストメソッド
   //ログの書き込み
-  $log = "{$date}\t{$response}\t{$user_name}\t{$page}\t{$ip}\t{$user_agent}\t{$referer}\t{$uri}\t{$requestMethod}\n";
+  $log = "{$date}\t{$response}\t{$ses_id}\t{$user_name}\t{$page}\t{$ip}\t{$user_agent}\t{$referer}\t{$uri}\t{$requestMethod}\n";
   file_put_contents($filename, $log, FILE_APPEND | LOCK_EX);
 }
 ?>
