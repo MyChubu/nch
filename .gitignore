@@ -1,4 +1,7 @@
 ._*
 admin/logs/
 data/logs/
+data/csv/
+data/json/
+data/images/qrcode/
 nonsync/
